@@ -1,0 +1,13 @@
+[package]
+name = "guru"
+version = "0.1.0"
+authors = ["aspera-non-spernit <g.s.d>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = "0.4.9"
+nn = "0.1.6"
+serde = "1.0.101"
+serde_json = "1.0.41"
