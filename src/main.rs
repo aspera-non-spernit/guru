@@ -3,72 +3,59 @@ extern crate nn;
 extern crate guru;
 
 use chrono::{ DateTime, Local, Utc };
-use guru::{ Clubs, ClubName, Features, Guru, neural::nn::NN, Match, Scoring, Stats, Training, Testing, WinnerResults };
-use std::{ collections::HashMap, convert::TryInto, str::FromStr };
+use guru::{ Clubs, ClubName, Features, Guru, neural::nn::NN, Match, Scoring, Stats, Training, Testing };
+use std::{ collections::HashMap, convert::TryInto, iter::ExactSizeIterator, str::FromStr };
 
+#[derive(Debug)] pub struct PredictionResult (f64, f64);
+#[derive(Debug)] pub struct ClassificationResult (f64, f64, f64);
 
-fn matches() -> Vec<Match> {
-    vec![
-        // NISA MATCHES begin at fourth week 
-        Match::new(DateTime::parse_from_rfc3339("2019-08-31T19:30:00-04:00").unwrap(), ClubName::Detroit, ClubName::Philadelphia, Some( (1, 0) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-08-31T22:00:00-04:00").unwrap(), ClubName::Oakland, ClubName::California, Some( (3, 3) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-07T22:00:00-04:00").unwrap(), ClubName::LosAngeles, ClubName::SanDiego, Some( (2, 0) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-14T22:04:00-04:00").unwrap(), ClubName::SanDiego, ClubName::California, Some( (3, 1) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-15T19:00:00-04:00").unwrap(), ClubName::Atlanta, ClubName::Stumptown, Some( (1, 3) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-15T19:00:00-04:00").unwrap(), ClubName::Miami, ClubName::Philadelphia, Some( (8, 1) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-22T19:00:00-04:00").unwrap(), ClubName::California, ClubName::LosAngeles, Some( (3, 0) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-22T19:00:00-04:00").unwrap(), ClubName::Miami, ClubName::Stumptown, Some( (2, 1) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-25T22:00:00-04:00").unwrap(), ClubName::California, ClubName::Oakland, Some( (1, 1) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-28T22:04:00-04:00").unwrap(), ClubName::Stumptown, ClubName::Miami, Some( (0, 2) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-28T22:04:00-04:00").unwrap(), ClubName::SanDiego, ClubName::Oakland, Some( (4, 3) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-02T22:00:00-04:00").unwrap(), ClubName::California, ClubName::SanDiego, Some( (3, 0) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-05T19:30:00-04:00").unwrap(), ClubName::LosAngeles, ClubName::Oakland, Some( (1, 0) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-06T19:30:00-04:00").unwrap(), ClubName::Miami, ClubName::Atlanta, Some( (2, 2) ) ),
-        // NEXT PREDICTIONS
-        Match::new(DateTime::parse_from_rfc3339("2019-10-12T22:04:00-04:00").unwrap(), ClubName::Atlanta, ClubName::Miami, None ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-12T22:04:00-04:00").unwrap(), ClubName::Stumptown, ClubName::Chattanooga, None ),
-        // UPCOMING NISA MATCHES
-        Match::new(DateTime::parse_from_rfc3339("2019-10-19T22:04:00-04:00").unwrap(), ClubName::Chattanooga, ClubName::Stumptown, None ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-19T22:04:00-04:00").unwrap(), ClubName::Oakland, ClubName::LosAngeles, None ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-20T22:04:00-04:00").unwrap(), ClubName::California, ClubName::SanDiego, None ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-25T22:04:00-04:00").unwrap(), ClubName::Stumptown, ClubName::Atlanta, None ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-26T22:04:00-04:00").unwrap(), ClubName::Miami, ClubName::Oakland, None ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-26T22:04:00-04:00").unwrap(), ClubName::LosAngeles, ClubName::California, None ),
-        Match::new(DateTime::parse_from_rfc3339("2019-11-02T22:04:00-04:00").unwrap(), ClubName::SanDiego, ClubName::LosAngeles, None ),
-        // MEMBERS CUP
-        Match::new(DateTime::parse_from_rfc3339("2019-08-10T19:30:00-04:00").unwrap(), ClubName::Milwaukee, ClubName::NapaValley, Some( (2, 0) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-08-10T19:30:00-04:00").unwrap(), ClubName::Chattanooga, ClubName::NewYork, Some( (0, 1) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-08-17T19:30:00-04:00").unwrap(), ClubName::NewYork, ClubName::Milwaukee, Some( (2, 2) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-08-17T19:30:00-04:00").unwrap(), ClubName::Detroit,  ClubName::Chattanooga, Some( (2, 1) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-08-24T19:30:00-04:00").unwrap(), ClubName::NapaValley, ClubName::Detroit, Some( (0, 4) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-08-24T19:30:00-04:00").unwrap(), ClubName::Chattanooga, ClubName::Michigan, Some( (1, 1) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-08-31T19:30:00-04:00").unwrap(), ClubName::Michigan, ClubName::NewYork, Some( (0, 2) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-01T19:30:00-04:00").unwrap(), ClubName::NapaValley, ClubName::Chattanooga, Some( (0, 6) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-07T19:30:00-04:00").unwrap(), ClubName::Milwaukee, ClubName::Chattanooga, Some( (1, 1) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-07T19:30:00-04:00").unwrap(), ClubName::NewYork, ClubName::NapaValley, Some( (1, 0) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-14T19:30:00-04:00").unwrap(), ClubName::Chattanooga, ClubName::NapaValley, Some( (3, 0) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-14T19:30:00-04:00").unwrap(), ClubName::NewYork, ClubName::Michigan, Some( (2, 0) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-14T19:30:00-04:00").unwrap(), ClubName::Milwaukee, ClubName::Detroit, Some( (0, 1) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-21T19:30:00-04:00").unwrap(), ClubName::NapaValley, ClubName::Milwaukee, Some( (1, 1) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-21T19:30:00-04:00").unwrap(), ClubName::Michigan, ClubName::Chattanooga, Some( (1, 4) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-21T19:30:00-04:00").unwrap(), ClubName::Detroit, ClubName::NewYork, Some( (1, 1) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-26T19:30:00-04:00").unwrap(), ClubName::Michigan, ClubName::NapaValley, Some( (2, 0) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-28T19:30:00-04:00").unwrap(), ClubName::NewYork, ClubName::Chattanooga, Some( (3, 1) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-28T19:30:00-04:00").unwrap(), ClubName::Michigan, ClubName::Milwaukee, Some( (1, 0) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-28T19:30:00-04:00").unwrap(), ClubName::Detroit, ClubName::NapaValley, Some( (3, 0) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-05T19:30:00-04:00").unwrap(), ClubName::Chattanooga, ClubName::Detroit, Some( (0, 1) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-05T19:30:00-04:00").unwrap(), ClubName::NewYork, ClubName::Milwaukee, Some( (2, 2) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-08T19:30:00-04:00").unwrap(), ClubName::Detroit, ClubName::Michigan, Some( (2, 0) ) ),
-        // NEXT PREDICTIONS
-        Match::new(DateTime::parse_from_rfc3339("2019-10-12T19:00:00-04:00").unwrap(), ClubName::NewYork, ClubName::Detroit, None ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-12T19:00:00-04:00").unwrap(), ClubName::Milwaukee, ClubName::Michigan, None ),
-        // UPCOMING MC MATCHES
-        Match::new(DateTime::parse_from_rfc3339("2019-10-16T19:00:00-04:00").unwrap(), ClubName::Michigan, ClubName::Detroit, None ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-16T19:00:00-04:00").unwrap(), ClubName::NapaValley, ClubName::NewYork, None ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-19T19:30:00-04:00").unwrap(), ClubName::Detroit, ClubName::Milwaukee, None ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-26T18:00:00-04:00").unwrap(), ClubName::Chattanooga, ClubName::Milwaukee, None ),
-        Match::new(DateTime::parse_from_rfc3339("2019-10-26T19:00:00-04:00").unwrap(), ClubName::NapaValley, ClubName::Michigan, None ),
-    ]
+impl ClassificationResult { fn len(&self) -> usize { 3 } }
+impl PredictionResult { fn len(&self) -> usize { 2 } }
+
+/// ResultClassification is a Vector of three unnamed f64 values
+/// that can be used store output values for the linear classification pf results
+impl From<&Match> for ClassificationResult {
+    fn from(m: &Match) -> Self {
+        if let Some(result) = m.result {
+            if result.0 > result.1 { ClassificationResult(1.0, 0.0, 0.0) }
+            else if result.0 == result.1 { ClassificationResult(0.0, 1.0, 0.0) }
+            else { ClassificationResult(0.0, 0.0, 0.1) }
+        } else {
+            panic!("from(m): Match needs Some(result)")
+        }
+    }
+}
+
+/// ResultPrediction is a Vector of two unnamed f64 values
+/// that can be used store output values for the training and testing of results
+impl From<&Match> for PredictionResult {
+    fn from(m: &Match) -> Self {
+        let mut output_sets: Vec<Vec<f64>> = vec![];
+        let all_matches = matches(); // provided Vec<Match> may not contain all info needed for normalization of values 
+            
+        let ats = Stats::all_time_highest_score_in_league(&all_matches);
+        let highest = if ats[0] > ats[1] { ats[0] as f64} else { ats[1] as f64 };
+        match m.result {
+            Some(result) => {
+                if highest as f64 != 0.0 { 
+                    PredictionResult(
+                        guru::normalize(result.0 as f64, 0f64, highest),
+                        guru::normalize(result.1 as f64, 0f64, highest)
+                    )
+                } else {
+                    PredictionResult(
+                        result.0 as f64,
+                        result.1 as f64
+                    )
+                }
+            },
+            None => {
+                // ASSUMING PREDICTION
+                //println!("No results found in Match. Adding results: [0.0 ,0.0]");
+                PredictionResult(0.0, 0.0) 
+            }
+        }
+    }
 }
 
 fn stats(clubs: &Clubs) -> HashMap<ClubName, Stats> {
@@ -91,7 +78,6 @@ pub fn input_sets(set_matches: &Vec<Match>, clubs: &Clubs, league_stats: &mut Ha
         // Adding 14 Features
         // Clubs.
         inputs.extend_from_slice(&Guru::club_features(&clubs, &m));
-
         /***
         Adding 2 features: Relative strength by total scoring for each team and to date rnage
         Sums home scores for home team (ths) and away scores for away team (tas) to date
@@ -171,77 +157,113 @@ pub fn input_sets(set_matches: &Vec<Match>, clubs: &Clubs, league_stats: &mut Ha
     input_sets
 }
 
-fn output_sets(output_matches: &Vec<Match>) -> Vec<Vec<f64>> {
-    let mut output_sets: Vec<Vec<f64>> = vec![];
-    let all_matches = matches(); // provided Vec<Match> may not contain all info needed for normalization of values 
-    
-    let ats = Stats::all_time_highest_score_in_league(&all_matches);
-    let highest = if ats[0] > ats[1] { ats[0] as f64} else { ats[1] as f64 };
-
-    // OUTPUTS
-    for m in &mut output_matches.iter() {
-        match m.result {
-            Some(result) => {
-                output_sets.push(
-                    if highest as f64 != 0.0 { 
-                        vec![
-                            guru::normalize(result.0 as f64, 0f64, highest),
-                            guru::normalize(result.1 as f64, 0f64, highest)
-                        ]
-                    } else {
-                        vec![
-                            result.0 as f64,    
-                            result.1 as f64
-                        ]
-                    }
-                );
-            },
-            None => {
-                //println!("No results found in Match. Adding results: [0.0 ,0.0]");
-                output_sets.push(vec![0f64, 0f64]);
-            }
-        }
-   
-    }
-    output_sets
+fn matches() -> Vec<Match> {
+    vec![
+        // NISA MATCHES begin at fourth week 
+        Match::new(DateTime::parse_from_rfc3339("2019-08-31T19:30:00-04:00").unwrap(), ClubName::Detroit, ClubName::Philadelphia, Some( (1, 0) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-08-31T22:00:00-04:00").unwrap(), ClubName::Oakland, ClubName::California, Some( (3, 3) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-07T22:00:00-04:00").unwrap(), ClubName::LosAngeles, ClubName::SanDiego, Some( (2, 0) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-14T22:04:00-04:00").unwrap(), ClubName::SanDiego, ClubName::California, Some( (3, 1) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-15T19:00:00-04:00").unwrap(), ClubName::Atlanta, ClubName::Stumptown, Some( (1, 3) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-15T19:00:00-04:00").unwrap(), ClubName::Miami, ClubName::Philadelphia, Some( (8, 1) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-22T19:00:00-04:00").unwrap(), ClubName::California, ClubName::LosAngeles, Some( (3, 0) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-22T19:00:00-04:00").unwrap(), ClubName::Miami, ClubName::Stumptown, Some( (2, 1) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-25T22:00:00-04:00").unwrap(), ClubName::California, ClubName::Oakland, Some( (1, 1) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-28T22:04:00-04:00").unwrap(), ClubName::Stumptown, ClubName::Miami, Some( (0, 2) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-28T22:04:00-04:00").unwrap(), ClubName::SanDiego, ClubName::Oakland, Some( (4, 3) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-02T22:00:00-04:00").unwrap(), ClubName::California, ClubName::SanDiego, Some( (3, 0) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-05T19:30:00-04:00").unwrap(), ClubName::LosAngeles, ClubName::Oakland, Some( (1, 0) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-06T19:30:00-04:00").unwrap(), ClubName::Miami, ClubName::Atlanta, Some( (2, 2) ) ),
+        // NEXT PREDICTIONS
+        Match::new(DateTime::parse_from_rfc3339("2019-10-12T22:04:00-04:00").unwrap(), ClubName::Atlanta, ClubName::Miami, None ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-12T22:04:00-04:00").unwrap(), ClubName::Stumptown, ClubName::Chattanooga, None ),
+        // UPCOMING NISA MATCHES
+        Match::new(DateTime::parse_from_rfc3339("2019-10-19T22:04:00-04:00").unwrap(), ClubName::Chattanooga, ClubName::Stumptown, None ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-19T22:04:00-04:00").unwrap(), ClubName::Oakland, ClubName::LosAngeles, None ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-20T22:04:00-04:00").unwrap(), ClubName::California, ClubName::SanDiego, None ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-25T22:04:00-04:00").unwrap(), ClubName::Stumptown, ClubName::Atlanta, None ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-26T22:04:00-04:00").unwrap(), ClubName::Miami, ClubName::Oakland, None ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-26T22:04:00-04:00").unwrap(), ClubName::LosAngeles, ClubName::California, None ),
+        Match::new(DateTime::parse_from_rfc3339("2019-11-02T22:04:00-04:00").unwrap(), ClubName::SanDiego, ClubName::LosAngeles, None ),
+        // MEMBERS CUP
+        Match::new(DateTime::parse_from_rfc3339("2019-08-10T19:30:00-04:00").unwrap(), ClubName::Milwaukee, ClubName::NapaValley, Some( (2, 0) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-08-10T19:30:00-04:00").unwrap(), ClubName::Chattanooga, ClubName::NewYork, Some( (0, 1) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-08-17T19:30:00-04:00").unwrap(), ClubName::NewYork, ClubName::Milwaukee, Some( (2, 2) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-08-17T19:30:00-04:00").unwrap(), ClubName::Detroit,  ClubName::Chattanooga, Some( (2, 1) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-08-24T19:30:00-04:00").unwrap(), ClubName::NapaValley, ClubName::Detroit, Some( (0, 4) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-08-24T19:30:00-04:00").unwrap(), ClubName::Chattanooga, ClubName::Michigan, Some( (1, 1) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-08-31T19:30:00-04:00").unwrap(), ClubName::Michigan, ClubName::NewYork, Some( (0, 2) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-01T19:30:00-04:00").unwrap(), ClubName::NapaValley, ClubName::Chattanooga, Some( (0, 6) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-07T19:30:00-04:00").unwrap(), ClubName::Milwaukee, ClubName::Chattanooga, Some( (1, 1) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-07T19:30:00-04:00").unwrap(), ClubName::NewYork, ClubName::NapaValley, Some( (1, 0) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-14T19:30:00-04:00").unwrap(), ClubName::Chattanooga, ClubName::NapaValley, Some( (3, 0) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-14T19:30:00-04:00").unwrap(), ClubName::NewYork, ClubName::Michigan, Some( (2, 0) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-14T19:30:00-04:00").unwrap(), ClubName::Milwaukee, ClubName::Detroit, Some( (0, 1) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-21T19:30:00-04:00").unwrap(), ClubName::NapaValley, ClubName::Milwaukee, Some( (1, 1) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-21T19:30:00-04:00").unwrap(), ClubName::Michigan, ClubName::Chattanooga, Some( (1, 4) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-21T19:30:00-04:00").unwrap(), ClubName::Detroit, ClubName::NewYork, Some( (1, 1) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-26T19:30:00-04:00").unwrap(), ClubName::Michigan, ClubName::NapaValley, Some( (2, 0) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-28T19:30:00-04:00").unwrap(), ClubName::NewYork, ClubName::Chattanooga, Some( (3, 1) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-28T19:30:00-04:00").unwrap(), ClubName::Michigan, ClubName::Milwaukee, Some( (1, 0) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-09-28T19:30:00-04:00").unwrap(), ClubName::Detroit, ClubName::NapaValley, Some( (3, 0) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-05T19:30:00-04:00").unwrap(), ClubName::Chattanooga, ClubName::Detroit, Some( (0, 1) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-05T19:30:00-04:00").unwrap(), ClubName::NewYork, ClubName::Milwaukee, Some( (2, 2) ) ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-08T19:30:00-04:00").unwrap(), ClubName::Detroit, ClubName::Michigan, Some( (2, 0) ) ),
+        // NEXT PREDICTIONS
+        Match::new(DateTime::parse_from_rfc3339("2019-10-12T19:00:00-04:00").unwrap(), ClubName::NewYork, ClubName::Detroit, None ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-12T19:00:00-04:00").unwrap(), ClubName::Milwaukee, ClubName::Michigan, None ),
+        // UPCOMING MC MATCHES
+        Match::new(DateTime::parse_from_rfc3339("2019-10-16T19:00:00-04:00").unwrap(), ClubName::Michigan, ClubName::Detroit, None ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-16T19:00:00-04:00").unwrap(), ClubName::NapaValley, ClubName::NewYork, None ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-19T19:30:00-04:00").unwrap(), ClubName::Detroit, ClubName::Milwaukee, None ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-26T18:00:00-04:00").unwrap(), ClubName::Chattanooga, ClubName::Milwaukee, None ),
+        Match::new(DateTime::parse_from_rfc3339("2019-10-26T19:00:00-04:00").unwrap(), ClubName::NapaValley, ClubName::Michigan, None ),
+    ]
 }
+
 fn main()-> std::io::Result<()> {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2{ panic!("ERROR: Need max error rate for training.")}
     // all matches
     let all_matches = matches();
-    // let winner_set_results: Vec<WinnerResults> = all_matches.iter()
-    //     .filter( |&m| m.result.is_some() )
-    //     .map(|m| { WinnerResults::from(m) } )
-    //     .collect();
-    // dbg!(winner_set_results.len());
-
     let clubs = Clubs::from(&all_matches);
     let mut stats = stats(&clubs);
-
-    // PREPPING TRAINING & TEST SETS 
-    // Only matches that have Some(result) as output
+    // INPUT SETS
     let mut training_matches: Vec<Match> = all_matches.iter()
         .filter( |&m| m.result.is_some() )
         .map(|&m| m)
         .collect();
-    //let test_matches = &training_matches.drain(20..36).collect();
+    let test_matches: Vec<Match> = training_matches.drain(20..36).collect();
     let training_input_sets = input_sets(&training_matches, &clubs, &mut stats);
-    let training_output_sets = output_sets(&training_matches);
-    let training_set: Vec< ( Vec<f64>, Vec<f64>) > = training_input_sets.iter()
-        .zip( training_output_sets.iter() )
+
+    // OUTPUT SETS
+    let class_result_set: Vec<ClassificationResult> = all_matches.iter()
+        .filter( |&m| m.result.is_some() )
+        .map(|m| { ClassificationResult::from(m) } )
+        .collect();
+    let pred_result_set: Vec<PredictionResult> = all_matches.iter()
+        .filter( |&m| m.result.is_some() )
+        .map(|m| { PredictionResult::from(m) } )
+        .collect();
+
+    // Zipping input sets and output sets into two training sets (for classification and regression)
+    let class_training_set: Vec< ( Vec<f64>, &ClassificationResult) > = training_input_sets.iter()
+        .zip( class_result_set.iter() )
         .map( |(tis, tos)| (tis.clone(), tos.clone()) )
         .collect();
-    dbg!(&training_set[0].1.len());
+    let pred_training_set: Vec< ( Vec<f64>, &PredictionResult) > = training_input_sets.iter()
+        .zip( pred_result_set.iter() )
+        .map( |(tis, tos)| (tis.clone(), tos.clone()) )
+        .collect();
 
     //let test_sets = input_sets(&test_matches, &clubs, &mut stats);
 
     // CREATING NETWORK
-    let mut net = NN::new(&[training_set[0].0.len() as u32, training_set[0].1.len() as u32]);
-    //println!("{:#?}", net);
+    let mut net = NN::new(&[training_input_sets[0].len() as u32, class_training_set[0].1.len() as u32]);
+    println!("{:#?}", net);
     // TRAIN NETWORK
-    Guru::train(&mut net, training_set.as_slice(), 0.3, 0.2, f64::from_str(&args[1]).unwrap());
-    println!();
+    // Guru::train(&mut net, training_set.as_slice(), 0.3, 0.2, f64::from_str(&args[1]).unwrap());
+    // println!();
 /***
     // TEST NETWORK
     Guru::test("Testing on TRAINING set", &mut net, &training_set, &training_matches);

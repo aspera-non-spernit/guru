@@ -34,7 +34,7 @@ pub struct Match  {
 }
 #[derive(Debug, Eq, Hash, PartialEq)] pub enum Scoring { Home, Away }
 #[derive(Clone, Debug, Eq, Hash, PartialEq)] pub struct Stats { pub home_scores: Vec<u8>, pub away_scores: Vec<u8>, pub games_played: [u8; 2] }
-#[derive(Debug)] pub struct WinnerResults (f64, f64, f64);
+
 pub trait Features {
     /// Returns a normalized vector in size of the league (ie 14 clubs in league, len 14).
     /// Each club represents a position in the vector. The Value of the Home Team
@@ -94,6 +94,9 @@ impl From<&Vec<Match>> for Clubs {
 }
 
 impl Features for Guru {
+    // fn new(all_matches: &Match) -> Self {
+    //     Guru { all_matches }
+    // }
     fn club_features(clubs: &Clubs, m: &Match) -> Vec<f64>  {
         // CLUBS: HOME_FACTOR AWAY_FACTOR
         let num_of_clubs: u32 = clubs.data.len().try_into().unwrap();
@@ -341,17 +344,5 @@ impl Stats {
             }
         };
         total
-    }
-}
-
-impl From<&Match> for WinnerResults {
-    fn from(m: &Match) -> Self {
-        if let Some(result) = m.result {
-            if result.0 > result.1 { WinnerResults(1.0, 0.0, 0.0) }
-            else if result.0 == result.1 { WinnerResults(0.0, 1.0, 0.0) }
-            else { WinnerResults(0.0, 0.0, 0.1) }
-        } else {
-            panic!("from(m): Match needs Some(result)")
-        }
     }
 }
