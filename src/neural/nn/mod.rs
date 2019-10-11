@@ -465,6 +465,10 @@ fn sigmoid(y: f64) -> f64 {
     1f64 / (1f64 + (-y).exp())
 }
 
+fn relu(y: f64) -> f64 {
+    if y <= 0.0 { 0.0 } else { 1.0 }
+}
+
 
 // takes two arrays and enumerates the iterator produced by zipping each of
 // their iterators together

@@ -3,9 +3,7 @@ extern crate nn;
 extern crate guru;
 
 use chrono::{ DateTime, Local, Utc };
-
-
-use guru::{ Clubs, ClubName, Features, Guru, neural::nn::NN, Match, Scoring, Stats, Training, Testing };
+use guru::{ Clubs, ClubName, Features, Guru, neural::nn::NN, Match, Scoring, Stats, Training, Testing, WinnerResults };
 use std::{ collections::HashMap, convert::TryInto, str::FromStr };
 
 
@@ -205,6 +203,12 @@ fn main()-> std::io::Result<()> {
     if args.len() < 2{ panic!("ERROR: Need max error rate for training.")}
     // all matches
     let all_matches = matches();
+    let winner_set_results: Vec<WinnerResults> = all_matches.iter()
+        .filter( |&m| m.result.is_some() )
+        .map(|m| { WinnerResults::from(m) } )
+        .collect();
+    dbg!(winner_set_results.len());
+
     let clubs = Clubs::from(&all_matches);
     let mut stats = stats(&clubs);
 
