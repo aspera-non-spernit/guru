@@ -1,16 +1,14 @@
+#[forbid(unsafe_code)]
 extern crate chrono;
 extern crate nn;
 extern crate guru;
 
-use chrono::{ DateTime, Local, Utc };
+use chrono::{ DateTime };
 use guru::{ Clubs, ClubName, Features, Guru, neural::nn::NN, Match, Scoring, Stats, Training, Testing };
-use std::{ collections::HashMap, convert::TryInto, iter::ExactSizeIterator, str::FromStr };
+use std::{ collections::HashMap, str::FromStr };
 
 #[derive(Debug)] pub struct PredictionResult (f64, f64);
 #[derive(Debug)] pub struct ClassificationResult (f64, f64, f64);
-
-impl ClassificationResult { fn len(&self) -> usize { 3 } }
-impl PredictionResult { fn len(&self) -> usize { 2 } }
 
 /// ResultClassification is a Vector of three unnamed f64 values
 /// that can be used store output values for the linear classification pf results
@@ -19,7 +17,7 @@ impl From<&Match> for ClassificationResult {
         if let Some(result) = m.result {
             if result.0 > result.1 { ClassificationResult(1.0, 0.0, 0.0) }
             else if result.0 == result.1 { ClassificationResult(0.0, 1.0, 0.0) }
-            else { ClassificationResult(0.0, 0.0, 0.1) }
+            else { ClassificationResult(0.0, 0.0, 1.0) }
         } else {
             panic!("from(m): Match needs Some(result)")
         }
@@ -30,9 +28,7 @@ impl From<&Match> for ClassificationResult {
 /// that can be used store output values for the training and testing of results
 impl From<&Match> for PredictionResult {
     fn from(m: &Match) -> Self {
-        let mut output_sets: Vec<Vec<f64>> = vec![];
         let all_matches = matches(); // provided Vec<Match> may not contain all info needed for normalization of values 
-            
         let ats = Stats::all_time_highest_score_in_league(&all_matches);
         let highest = if ats[0] > ats[1] { ats[0] as f64} else { ats[1] as f64 };
         match m.result {
@@ -67,7 +63,7 @@ fn stats(clubs: &Clubs) -> HashMap<ClubName, Stats> {
 }
 /// Creates a Vec of tuples.
 /// Each tuple represents a training set, where inputs are at 0
-/// and outputs at 1                                                                                       Vec<(Vec<f64>, Vec<f64>)>
+/// and outputs at 1
 pub fn input_sets(set_matches: &Vec<Match>, clubs: &Clubs, league_stats: &mut HashMap<ClubName, Stats>) -> Vec<Vec<f64>> {
     // vec of input values f64
     // returned
@@ -121,11 +117,8 @@ pub fn input_sets(set_matches: &Vec<Match>, clubs: &Clubs, league_stats: &mut Ha
         let h_tas: f64 = Stats::total_scoring_by_club_to_date(&league_stats.get(&m.home).unwrap(), Scoring::Home).into();
         let a_ths: f64 = Stats::total_scoring_by_club_to_date(&league_stats.get(&m.away).unwrap(), Scoring::Away).into();
         let a_tas: f64 = Stats::total_scoring_by_club_to_date(&league_stats.get(&m.away).unwrap(), Scoring::Away).into();
-        // println!("home rel {:?}", (h_ths / h_tas) as f64);
-        // println!("away rel {:?}", (a_ths / a_tas) as f64);
-
+    
         // LEAGUE STATS
-
         /***  
         Adding 2 features
         Adds the highest scoring of home team at home and away team away to date
@@ -165,7 +158,7 @@ fn matches() -> Vec<Match> {
         Match::new(DateTime::parse_from_rfc3339("2019-09-07T22:00:00-04:00").unwrap(), ClubName::LosAngeles, ClubName::SanDiego, Some( (2, 0) ) ),
         Match::new(DateTime::parse_from_rfc3339("2019-09-14T22:04:00-04:00").unwrap(), ClubName::SanDiego, ClubName::California, Some( (3, 1) ) ),
         Match::new(DateTime::parse_from_rfc3339("2019-09-15T19:00:00-04:00").unwrap(), ClubName::Atlanta, ClubName::Stumptown, Some( (1, 3) ) ),
-        Match::new(DateTime::parse_from_rfc3339("2019-09-15T19:00:00-04:00").unwrap(), ClubName::Miami, ClubName::Philadelphia, Some( (8, 1) ) ),
+        // Match::new(DateTime::parse_from_rfc3339("2019-09-15T19:00:00-04:00").unwrap(), ClubName::Miami, ClubName::Philadelphia, Some( (8, 1) ) ),
         Match::new(DateTime::parse_from_rfc3339("2019-09-22T19:00:00-04:00").unwrap(), ClubName::California, ClubName::LosAngeles, Some( (3, 0) ) ),
         Match::new(DateTime::parse_from_rfc3339("2019-09-22T19:00:00-04:00").unwrap(), ClubName::Miami, ClubName::Stumptown, Some( (2, 1) ) ),
         Match::new(DateTime::parse_from_rfc3339("2019-09-25T22:00:00-04:00").unwrap(), ClubName::California, ClubName::Oakland, Some( (1, 1) ) ),
@@ -228,61 +221,102 @@ fn main()-> std::io::Result<()> {
     let all_matches = matches();
     let clubs = Clubs::from(&all_matches);
     let mut stats = stats(&clubs);
-    // INPUT SETS
+    let guru = Guru::new(all_matches.clone());
+
+    // splitting all matches into training and test matches for validation 
     let mut training_matches: Vec<Match> = all_matches.iter()
         .filter( |&m| m.result.is_some() )
         .map(|&m| m)
         .collect();
-    let test_matches: Vec<Match> = training_matches.drain(20..36).collect();
+        //(training_matches.len() as f32 * 0.66).round()
+    let test_matches: Vec<Match> = training_matches.drain(21..training_matches.len()).collect();
+    // Create sets for the input nodes
+    // Can be used for both networks
     let training_input_sets = input_sets(&training_matches, &clubs, &mut stats);
+    let test_input_sets = input_sets(&test_matches, &clubs, &mut stats);
 
     // OUTPUT SETS
-    let class_result_set: Vec<ClassificationResult> = all_matches.iter()
-        .filter( |&m| m.result.is_some() )
-        .map(|m| { ClassificationResult::from(m) } )
-        .collect();
+    // let class_result_set: Vec<ClassificationResult> = all_matches.iter()
+    //     .filter( |&m| m.result.is_some() )
+    //     .map(|m| { ClassificationResult::from(m) } )
+    //     .collect();
     let pred_result_set: Vec<PredictionResult> = all_matches.iter()
         .filter( |&m| m.result.is_some() )
         .map(|m| { PredictionResult::from(m) } )
         .collect();
-
+  
     // Zipping input sets and output sets into two training sets (for classification and regression)
-    let class_training_set: Vec< ( Vec<f64>, &ClassificationResult) > = training_input_sets.iter()
-        .zip( class_result_set.iter() )
-        .map( |(tis, tos)| (tis.clone(), tos.clone()) )
-        .collect();
-    let pred_training_set: Vec< ( Vec<f64>, &PredictionResult) > = training_input_sets.iter()
+    // let class_training_set: Vec< ( Vec<f64>,  Vec<f64>) > = training_input_sets.iter()
+    //     .zip( class_result_set.iter() )
+    //     .map( |(tis, crs)| (tis.clone(), vec![crs.0, crs.1, crs.2]) )
+    //     .collect();
+    let pred_training_set: Vec< ( Vec<f64>, Vec<f64>) > = training_input_sets.iter()
         .zip( pred_result_set.iter() )
-        .map( |(tis, tos)| (tis.clone(), tos.clone()) )
+        .map( |(tis, prs)| (tis.clone(), vec![prs.0, prs.1]) )
         .collect();
 
-    //let test_sets = input_sets(&test_matches, &clubs, &mut stats);
+    // validation
+    // let class_test_set: Vec< ( Vec<f64>, Vec<f64>) > = test_input_sets.iter()
+    //     .zip( pred_result_set.iter() )
+    //     .map( |(tis, prs)| (tis.clone(), vec![prs.0, prs.1]) )
+    //     .collect();
+    let pred_test_set: Vec< ( Vec<f64>, Vec<f64>) > = test_input_sets.iter()
+        .zip( pred_result_set.iter() )
+        .map( |(tis, prs)| (tis.clone(), vec![prs.0, prs.1]) )
+        .collect();
 
-    // CREATING NETWORK
-    let mut net = NN::new(&[training_input_sets[0].len() as u32, class_training_set[0].1.len() as u32]);
-    println!("{:#?}", net);
-    // TRAIN NETWORK
-    // Guru::train(&mut net, training_set.as_slice(), 0.3, 0.2, f64::from_str(&args[1]).unwrap());
-    // println!();
-/***
-    // TEST NETWORK
-    Guru::test("Testing on TRAINING set", &mut net, &training_set, &training_matches);
+    // CREATING NETWORKS
+    //let mut class_net = NN::new(&[training_input_sets[0].len() as u32, class_training_set[0].1.len() as u32]);
+    // let mut class_net = NN::new(&[
+    //         training_input_sets[0].len() as u32,
+    //         pred_training_set[0].1.len() as u32
+    //     ]
+    // );
+    let _hidden_size = (training_input_sets[0].len() as f32 * 0.66 ).round() as u32;
+    let mut pred_net = NN::new(&[
+            training_input_sets[0].len() as u32,
+            19,
+            pred_training_set[0].1.len() as u32
+        ]
+    );
+
+    // TRAIN NETWORKS
+    //Guru::train("Classification", &mut class_net, &class_training_set.as_slice(), 0.3, 0.2, f64::from_str(&args[1]).unwrap());
+    guru.train("Prediction", &mut pred_net, &pred_training_set, 0.3, 0.2, f64::from_str(&args[1]).unwrap());
+    println!();
+
+    // TESTING NETWORKS
+    // Classification Network
+    //guru::class_test("Testing Classification Network on TRAINING set", &mut class_net, &class_training_set, &all_matches);
     println!();
     println!();
-    Guru::test("Testing on TEST set", &mut net, &test_set, &test_matches);
+    // Prediction Network
+    let mut test_results = guru.test("Testing Prediction Network on Training Set", &mut pred_net, &pred_training_set, &training_matches);
+    println!();
+    println!("Result {}", test_results[0].to_string());
+    println!();
+    println!("Winner {}", test_results[1].to_string());  
+    println!();
+    println!();
+    println!();
+    test_results = guru.test("Testing on Test Set", &mut pred_net, &pred_test_set, &test_matches);
+    println!();
+    println!("Result {}", test_results[0].to_string());
+    println!();
+    println!("Winner {}", test_results[1].to_string());  
+    println!();
     println!();
     println!();
 
-    // PREDICTION 
-    let prediction_matches: Vec<Match> = all_matches.iter()
+    // Predict the future and become rich
+    let prediction_matches = &all_matches.iter()
         .filter( |&m| m.result.is_none() )
-        .map(|&m| m)
+        .map(|&m| m )
         .collect();
-    prediction_matches.to_vec().sort_by(|a, b| b.date.cmp(&a.date));
-    let prediction_set = sets(&prediction_matches, &clubs, &mut stats);
-    Guru::test("PREDICTION", &mut net, &prediction_set, &prediction_matches);
-
-**/
+   // dbg!(&prediction_matches);
+    let prediction_set: Vec<(Vec<f64>, Vec<f64>)> = input_sets(&prediction_matches, &clubs, &mut stats).iter()
+        .map(|m| (m.clone(), vec![]) )
+        .collect();
+    test_results = guru.test("Predicting future matches..", &mut pred_net, &prediction_set, &prediction_matches);
     Ok(())
-
 }
