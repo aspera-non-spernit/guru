@@ -1,11 +1,12 @@
 #[forbid(unsafe_code)]
 extern crate chrono;
-extern crate nn;
 extern crate serde;
 extern crate serde_json;
 
+pub mod neural;
+
 use chrono::{ DateTime, FixedOffset };
-use nn::{ NN, HaltCondition };
+use neural::nn::{ NN, HaltCondition };
 use std::{ collections::{ HashMap, HashSet }, convert::TryInto, fmt };
 
 const AWAY_FACTOR: f64 = 1.0;

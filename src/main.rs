@@ -5,7 +5,7 @@ extern crate guru;
 use chrono::{ DateTime, Local, Utc };
 
 
-use guru::{ Clubs, ClubName, Features, Guru, Match, Scoring, Stats, Training, Testing };
+use guru::{ Clubs, ClubName, Features, Guru, neural::nn::NN, Match, Scoring, Stats, Training, Testing };
 use std::{ collections::HashMap, convert::TryInto, str::FromStr };
 
 
@@ -220,7 +220,7 @@ fn main()-> std::io::Result<()> {
 
     // CREATING NETWORK
     let input_nodes: u32 = *(&training_set[0].0.len().try_into().unwrap());
-    let mut net = nn::NN::new(&[input_nodes, 19, 2]);
+    let mut net = NN::new(&[input_nodes, 19, 2]);
     // TRAIN NETWORK
     Guru::train(&mut net, &training_set, 0.3, 0.2, f64::from_str(&args[1]).unwrap());
     println!();
