@@ -80,15 +80,17 @@ fn stats(clubs: &Clubs) -> HashMap<ClubName, Stats> {
 }
 /// Creates a Vec of tuples.
 /// Each tuple represents a training set, where inputs are at 0
-/// and outputs at 1
-pub fn sets(set_matches: &Vec<Match>, clubs: &Clubs, league_stats: &mut HashMap<ClubName, Stats>) -> Vec<(Vec<f64>, Vec<f64>)> {
-    // Vector of two tuples
-    let mut set = vec![];
-
+/// and outputs at 1                                                                                       Vec<(Vec<f64>, Vec<f64>)>
+pub fn input_sets(set_matches: &Vec<Match>, clubs: &Clubs, league_stats: &mut HashMap<ClubName, Stats>) -> Vec<Vec<f64>> {
+    // vec of input values f64
+    // returned
+    let mut input_sets = vec![];
     for m in &mut set_matches.iter() {
+        let mut inputs = vec![];
+
         // Adding 14 Features
-        // Clubs. 
-        let mut inputs = Guru::club_features(&clubs, &m);
+        // Clubs.
+        inputs.extend_from_slice(&Guru::club_features(&clubs, &m));
 
         /***
         Adding 2 features: Relative strength by total scoring for each team and to date rnage
@@ -156,37 +158,7 @@ pub fn sets(set_matches: &Vec<Match>, clubs: &Clubs, league_stats: &mut HashMap<
         earlisest match = 0
         **/
         inputs.push(Guru::game_day(&m.date, &matches()));
-        
-        // OUTPUTS
-        match m.result {
-            Some(result) => {
-                set.push(
-                    (
-                        inputs,
-                        if highest as f64 != 0.0 { 
-                            vec![
-                                guru::normalize(result.0 as f64, 0f64, highest),
-                                guru::normalize(result.1 as f64, 0f64, highest)
-                            ]
-                        } else {
-                            vec![
-                                result.0 as f64,    
-                                result.1 as f64
-                            ]
-                        }
-                    )
-                );
-            },
-            None => {
-                //println!("No results found in Match. Adding results: [0.0 ,0.0]");
-                set.push(
-                    (
-                        inputs,
-                        vec![0f64, 0f64]
-                    )
-                );
-            }
-        }               
+              
         //Keep track of games played so the avg_score is based on previous matches and not the overall club avg.
         if let Some(s) = league_stats.get_mut(&m.home) {
             s.games_played = [s.games_played[0] + 1, s.games_played[1]];  
@@ -194,20 +166,55 @@ pub fn sets(set_matches: &Vec<Match>, clubs: &Clubs, league_stats: &mut HashMap<
         if let Some(s) = league_stats.get_mut(&m.away) {
             s.games_played = [s.games_played[0], s.games_played[1] + 1];
         };
+        input_sets.push(inputs);
     }
-    set
+    input_sets
 }
 
+fn output_sets(output_matches: &Vec<Match>) -> Vec<Vec<f64>> {
+    let mut output_sets: Vec<Vec<f64>> = vec![];
+    let all_matches = matches(); // provided Vec<Match> may not contain all info needed for normalization of values 
+    
+    let ats = Stats::all_time_highest_score_in_league(&all_matches);
+    let highest = if ats[0] > ats[1] { ats[0] as f64} else { ats[1] as f64 };
+
+    // OUTPUTS
+    for m in &mut output_matches.iter() {
+        match m.result {
+            Some(result) => {
+                output_sets.push(
+                    if highest as f64 != 0.0 { 
+                        vec![
+                            guru::normalize(result.0 as f64, 0f64, highest),
+                            guru::normalize(result.1 as f64, 0f64, highest)
+                        ]
+                    } else {
+                        vec![
+                            result.0 as f64,    
+                            result.1 as f64
+                        ]
+                    }
+                );
+            },
+            None => {
+                //println!("No results found in Match. Adding results: [0.0 ,0.0]");
+                output_sets.push(vec![0f64, 0f64]);
+            }
+        }
+   
+    }
+    output_sets
+}
 fn main()-> std::io::Result<()> {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2{ panic!("ERROR: Need max error rate for training.")}
     // all matches
     let all_matches = matches();
-    let winner_set_results: Vec<WinnerResults> = all_matches.iter()
-        .filter( |&m| m.result.is_some() )
-        .map(|m| { WinnerResults::from(m) } )
-        .collect();
-    dbg!(winner_set_results.len());
+    // let winner_set_results: Vec<WinnerResults> = all_matches.iter()
+    //     .filter( |&m| m.result.is_some() )
+    //     .map(|m| { WinnerResults::from(m) } )
+    //     .collect();
+    // dbg!(winner_set_results.len());
 
     let clubs = Clubs::from(&all_matches);
     let mut stats = stats(&clubs);
@@ -218,17 +225,24 @@ fn main()-> std::io::Result<()> {
         .filter( |&m| m.result.is_some() )
         .map(|&m| m)
         .collect();
-    let test_matches = &training_matches.drain(20..36).collect();
-    let training_set = sets(&training_matches, &clubs, &mut stats);  
-    let test_set = sets(&test_matches, &clubs, &mut stats);
+    //let test_matches = &training_matches.drain(20..36).collect();
+    let training_input_sets = input_sets(&training_matches, &clubs, &mut stats);
+    let training_output_sets = output_sets(&training_matches);
+    let training_set: Vec< ( Vec<f64>, Vec<f64>) > = training_input_sets.iter()
+        .zip( training_output_sets.iter() )
+        .map( |(tis, tos)| (tis.clone(), tos.clone()) )
+        .collect();
+    dbg!(&training_set[0].1.len());
+
+    //let test_sets = input_sets(&test_matches, &clubs, &mut stats);
 
     // CREATING NETWORK
-    let input_nodes: u32 = *(&training_set[0].0.len().try_into().unwrap());
-    let mut net = NN::new(&[input_nodes, 19, 2]);
+    let mut net = NN::new(&[training_set[0].0.len() as u32, training_set[0].1.len() as u32]);
+    //println!("{:#?}", net);
     // TRAIN NETWORK
-    Guru::train(&mut net, &training_set, 0.3, 0.2, f64::from_str(&args[1]).unwrap());
+    Guru::train(&mut net, training_set.as_slice(), 0.3, 0.2, f64::from_str(&args[1]).unwrap());
     println!();
-
+/***
     // TEST NETWORK
     Guru::test("Testing on TRAINING set", &mut net, &training_set, &training_matches);
     println!();
@@ -236,6 +250,7 @@ fn main()-> std::io::Result<()> {
     Guru::test("Testing on TEST set", &mut net, &test_set, &test_matches);
     println!();
     println!();
+
     // PREDICTION 
     let prediction_matches: Vec<Match> = all_matches.iter()
         .filter( |&m| m.result.is_none() )
@@ -244,5 +259,8 @@ fn main()-> std::io::Result<()> {
     prediction_matches.to_vec().sort_by(|a, b| b.date.cmp(&a.date));
     let prediction_set = sets(&prediction_matches, &clubs, &mut stats);
     Guru::test("PREDICTION", &mut net, &prediction_set, &prediction_matches);
+
+**/
     Ok(())
+
 }
