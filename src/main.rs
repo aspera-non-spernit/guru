@@ -33,6 +33,7 @@ impl From<&Match> for ClassificationResult {
 
 /// ResultPrediction is a Vector of two unnamed f64 values
 /// that can be used store output values for the training and testing of results
+// TODO: From<([match, all_matches])>
 impl From<&Match> for PredictionResult {
     fn from(m: &Match) -> Self {
         let all_matches = load_matches().unwrap(); // provided Vec<Match> may not contain all info needed for normalization of values 
