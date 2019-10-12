@@ -34,12 +34,10 @@ impl From<&Match> for ClassificationResult {
 /// ResultPrediction is a Vector of two unnamed f64 values
 /// that can be used store output values for the training and testing of results
 // TODO: From<([match, all_matches])>
-impl From<&Match> for PredictionResult {
-    fn from(m: &Match) -> Self {
-        let all_matches = load_matches().unwrap(); // provided Vec<Match> may not contain all info needed for normalization of values 
-        let ats = Stats::all_time_highest_score_in_league(&all_matches);
-        let highest = if ats[0] > ats[1] { f64::from(ats[0]) } else { f64::from(ats[1]) };
-        match m.result {
+impl From< ( &Match, &[u8; 2] ) > for PredictionResult {
+    fn from(f: ( &Match, &[u8; 2] ) ) -> Self {
+        let highest = if f.1[0] > f.1[1] { f64::from(f.1[0]) } else { f64::from(f.1[1]) };
+        match f.0.result {
             Some(result) => {
                 if highest as f64 != 0.0 { 
                     PredictionResult(
@@ -203,9 +201,11 @@ fn main()-> std::io::Result<()> {
     //     .filter( |&m| m.result.is_some() )
     //     .map(|m| { ClassificationResult::from(m) } )
     //     .collect();
+    
+    let ats = Stats::all_time_highest_score_in_league(&all_matches);
     let pred_result_set: Vec<PredictionResult> = all_matches.iter()
         .filter( |&m| m.result.is_some() )
-        .map(|m| { PredictionResult::from(m) } )
+        .map(|m| { PredictionResult::from( (m, &ats) ) } )
         .collect();
   
     // Zipping input sets and output sets into two training sets (for classification and regression)
