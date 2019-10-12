@@ -129,8 +129,8 @@ impl <'a>Testing for Guru<'a> {
         let mut win_stats = NetworkStats::default();
         for i in 0..test_set.len() {
             let res = net.run( &test_set[i].0);
-            let phr = (res[0] * *highest as f64).round() as u8; // denormalized home result
-            let par = (res[1] * *highest as f64).round() as u8; // denormalized away result
+            let phr = (res[0] * f64::from(*highest).round()) as u8; // denormalized home result
+            let par = (res[1] * f64::from(*highest).round()) as u8; // denormalized away result
             // assuming test else prediction 
             if matches[i].result.is_some() {
                 println!("{:?} : {:?} on {:?}", matches[i].home, matches[i].away, matches[i].date);
@@ -176,6 +176,7 @@ impl NetworkStats {
         else { self.negative += 1 }
     }
 }
+
 impl Default for NetworkStats {
     fn default() -> Self {
         NetworkStats::new(0, 0, 0)
@@ -214,6 +215,7 @@ impl Stats {
         }
         score
     }
+
     /// Returns the number of game days in a Vec<Matches>
     pub fn game_days(matches: &[Match]) -> usize { matches.iter().fold(0, |i, _m| i + 1 ) }
 
@@ -232,6 +234,7 @@ impl Stats {
         }
         Stats { home_scores, away_scores, games_played: [0, 0] }
     }
+
     /// Returns the alltime highest scoring of a club home or away
     /// (highest scoring for club at hone, highest scoring for club away)
     pub fn highest_alltime_scores_by_club(stats: &Stats) -> (u8, u8) {
@@ -245,6 +248,7 @@ impl Stats {
         }
         (home, away)
     }
+    
     /// Returns the highest scoring for the home team at home and the away team away to date
     /// (highest scoring for the home team, highest scoring for the away team)
     /// Only considers matches already played (match_count);
@@ -256,27 +260,25 @@ impl Stats {
             } else {
                 highest_scores[0] =  0;
             }
+        // collapsed else h.club.games_played... > h_club.home_scores.len() 
+        } else if let Some(hh) = h_club.home_scores.iter().max() {  
+            highest_scores[0] = *hh;
         } else {
-            if let Some(hh) = h_club.home_scores.iter().max(){  
-                highest_scores[0] = *hh;
-            } else {
-                highest_scores[0] =  0;
-            }
+            highest_scores[0] =  0;
         }
-         if a_club.games_played[0] < a_club.home_scores.len() as u8 {
+
+        if a_club.games_played[0] < a_club.home_scores.len() as u8 {
             if let Some(ha) = a_club.away_scores[..a_club.games_played[1] as usize].iter().max() {
                 highest_scores[1] = *ha;
             } else {
                 highest_scores[1] =  0;
             }
-         } else {
-             if let Some(ha) = h_club.home_scores.iter().max() {
-                highest_scores[1] = *ha;
-            } else {
-                highest_scores[1] =  0;
-            }
-         }
-        
+            // collapsed else h.club.games_played... > h_club.home_scores.len() 
+        } else if let Some(ha) = h_club.home_scores.iter().max() {
+            highest_scores[1] = *ha;
+        } else {
+            highest_scores[1] =  0;
+        }
         highest_scores
     }
     /// Sums and returns the scoring for home or away matches for given 
@@ -288,12 +290,11 @@ impl Stats {
             } else {
                 stats.home_scores.iter().sum()
             }
-        } else { 
-            if stats.games_played[1] < stats.away_scores.len() as u8 {
-                stats.away_scores[..stats.games_played[1] as usize].iter().sum()
-            } else {
-                stats.away_scores.iter().sum()
-            }
+        // collapsed else Scoring::Away
+        } else if stats.games_played[1] < stats.away_scores.len() as u8 {
+            stats.away_scores[..stats.games_played[1] as usize].iter().sum()
+        } else {
+            stats.away_scores.iter().sum()
         };
         total
     }

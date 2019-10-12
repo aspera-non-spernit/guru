@@ -256,7 +256,7 @@ impl NN {
     /// `Trainer` struct is called.
     pub fn train<'b>(&'b mut self, examples: &'b [(Vec<f64>, Vec<f64>)]) -> Trainer {
         Trainer {
-            examples: examples,
+            examples,
             rate: DEFAULT_LEARNING_RATE,
             momentum: DEFAULT_MOMENTUM,
             log_interval: None,

@@ -19,7 +19,6 @@ pub struct Match  {
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub enum Scoring { Home, Away }
 
-
 impl Club { pub fn new(name: ClubName) -> Self { Club { name } } }
 
 impl fmt::Display for ClubName {
@@ -32,11 +31,11 @@ impl Clubs {
     /// Returns the index 
     pub fn get_index(self, club_name: &ClubName) -> u32 {
         let mut i = 0;
+       
         for c in self.data { 
-            match c.0.name == *club_name {
-                true => { i = c.1.clone(); }
-                false => { 0; }
-            }
+            if c.0.name == *club_name {
+                i = c.1;
+            } else {  }  // Error should not happen at the moment. Club not in list
         }
         i
     }

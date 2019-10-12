@@ -69,6 +69,7 @@ fn stats(clubs: &Clubs) -> HashMap<ClubName, Stats> {
     }
     leaguge_stats
 }
+
 /// Creates a Vec of tuples.
 /// Each tuple represents a training set, where inputs are at 0
 /// and outputs at 1
@@ -82,6 +83,7 @@ pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Cl
         // Adding 14 Features
         // Clubs.
         inputs.extend_from_slice(&Guru::club_features(&clubs, &m));
+
         /***
         Adding 2 features: Relative strength by total scoring for each team and to date rnage
         Sums home scores for home team (ths) and away scores for away team (tas) to date
@@ -108,6 +110,7 @@ pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Cl
             &league_stats.get(&m.home).unwrap(),
             &league_stats.get(&m.away).unwrap()
         );
+
         /***
         Adding 2 features
         Finds the highest scoring for both home team at home and away team away to date
