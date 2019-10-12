@@ -1,5 +1,4 @@
 #![forbid(unsafe_code)]
-extern crate nn;
 extern crate guru;
 
 use guru::{
