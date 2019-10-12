@@ -1,4 +1,3 @@
-#![feature(proc_macro_hygiene, decl_macro)]
 use chrono::{ DateTime, FixedOffset };
 use serde::{ de, Deserialize, Deserializer, Serialize, Serializer };
 use std::{ collections::{ HashMap }, fmt };
