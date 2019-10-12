@@ -1,6 +1,6 @@
 /***
-Cloned from https://github.com/jackm321/RustNN on October 11, 2019
-Latest commit 26aff11 on May 8, 2015 
+Modified version, cloned from https://github.com/jackm321/RustNN
+on October 11, 2019 - Latest commit 26aff11 on May 8, 2015 
 **/
 
 //! An easy to use neural network library written in Rust.

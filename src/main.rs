@@ -229,7 +229,7 @@ fn main()-> std::io::Result<()> {
         .collect();
 
     // CREATING NETWORKS
-    //let mut class_net = NN::new(&[training_input_sets[0].len() as u32, class_training_set[0].1.len() as u32]);
+    // let mut class_net = NN::new(&[training_input_sets[0].len() as u32, class_training_set[0].1.len() as u32]);
     // let mut class_net = NN::new(&[
     //         training_input_sets[0].len() as u32,
     //         pred_training_set[0].1.len() as u32
