@@ -29,11 +29,10 @@ impl fmt::Display for ClubName {
 
 impl Clubs {
     /// Returns the index 
-    pub fn get_index(self, club_name: &ClubName) -> u32 {
+    pub fn get_index(self, club_name: ClubName) -> u32 {
         let mut i = 0;
-       
         for c in self.data { 
-            if c.0.name == *club_name {
+            if c.0.name == club_name {
                 i = c.1;
             } else {  }  // Error should not happen at the moment. Club not in list
         }

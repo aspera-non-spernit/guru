@@ -224,7 +224,7 @@ impl NN {
             let mut layer: Vec<Vec<f64>> = Vec::new();
             for _ in 0..layer_size {
                 let mut node: Vec<f64> = Vec::new();
-                for _ in 0..prev_layer_size+1 {
+                for _ in 0..=prev_layer_size {
                     let random_weight: f64 = rng.gen_range(-0.5f64, 0.5f64);
                     node.push(random_weight);
                 }
@@ -268,12 +268,12 @@ impl NN {
 
     /// Encodes the network as a JSON string.
     pub fn to_json(&self) -> String {
-        json::encode(self).ok().expect("encoding JSON failed")
+        json::encode(self).expect("encoding JSON failed")
     }
 
     /// Builds a new network from a JSON string.
     pub fn from_json(encoded: &str) -> NN {
-        let network: NN = json::decode(encoded).ok().expect("decoding JSON failed");
+        let network: NN = json::decode(encoded).expect("decoding JSON failed");
         network
     }
 
@@ -358,12 +358,12 @@ impl NN {
     }
 
     // updates all weights in the network
-    fn update_weights(&mut self, network_weight_updates: &Vec<Vec<Vec<f64>>>, prev_deltas: &mut Vec<Vec<Vec<f64>>>, rate: f64, momentum: f64) {
+    fn update_weights(&mut self, network_weight_updates: &[Vec<Vec<f64>>], prev_deltas: &mut Vec<Vec<Vec<f64>>>, rate: f64, momentum: f64) {
         for layer_index in 0..self.layers.len() {
-            let mut layer = &mut self.layers[layer_index];
+            let layer = &mut self.layers[layer_index];
             let layer_weight_updates = &network_weight_updates[layer_index];
             for node_index in 0..layer.len() {
-                let mut node = &mut layer[node_index];
+                let node = &mut layer[node_index];
                 let node_weight_updates = &layer_weight_updates[node_index];
                 for weight_index in 0..node.len() {
                     let weight_update = node_weight_updates[weight_index];
@@ -378,7 +378,7 @@ impl NN {
     }
 
     // calculates all weight updates by backpropagation
-    fn calculate_weight_updates(&self, results: &Vec<Vec<f64>>, targets: &[f64]) -> Vec<Vec<Vec<f64>>> {
+    fn calculate_weight_updates(&self, results: &[Vec<f64>], targets: &[f64]) -> Vec<Vec<Vec<f64>>> {
         let mut network_errors:Vec<Vec<f64>> = Vec::new();
         let mut network_weight_updates = Vec::new();
         let layers = &self.layers;
@@ -392,28 +392,25 @@ impl NN {
 
             for (node_index, (node, &result)) in iter_zip_enum(layer_nodes, layer_results) {
                 let mut node_weight_updates = Vec::new();
-                let mut node_error;
-
                 // calculate error for this node
-                if layer_index == layers.len() - 1 {
-                    node_error = result * (1f64 - result) * (targets[node_index] - result);
+                let node_error = if layer_index == layers.len() - 1 {
+                    result * (1f64 - result) * (targets[node_index] - result)
                 } else {
                     let mut sum = 0f64;
                     let next_layer_errors = &network_errors[network_errors.len() - 1];
                     for (next_node, &next_node_error_data) in next_layer_nodes.unwrap().iter().zip((next_layer_errors).iter()) {
                         sum += next_node[node_index+1] * next_node_error_data; // +1 because the 0th weight is the threshold
                     }
-                    node_error = result * (1f64 - result) * sum;
-                }
+                    result * (1f64 - result) * sum
+                };
 
                 // calculate weight updates for this node
                 for weight_index in 0..node.len() {
-                    let mut prev_layer_result;
-                    if weight_index == 0 {
-                        prev_layer_result = 1f64; // threshold
+                    let prev_layer_result = if weight_index == 0 {
+                        1f64
                     } else {
-                        prev_layer_result = prev_layer_results[weight_index-1];
-                    }
+                       prev_layer_results[weight_index-1]
+                    };
                     let weight_update = node_error * prev_layer_result;
                     node_weight_updates.push(weight_update);
                 }
@@ -444,12 +441,11 @@ impl NN {
             }
             network_level.push(layer_level);
         }
-
         network_level
     }
 }
 
-fn modified_dotprod(node: &Vec<f64>, values: &Vec<f64>) -> f64 {
+fn modified_dotprod(node: &[f64], values: &[f64]) -> f64 {
     let mut it = node.iter();
     let mut total = *it.next().unwrap(); // start with the threshold weight
     for (weight, value) in it.zip(values.iter()) {
@@ -470,8 +466,8 @@ fn iter_zip_enum<'s, 't, S: 's, T: 't>(s: &'s [S], t: &'t [T]) ->
 }
 
 // calculates MSE of output layer
-fn calculate_error(results: &Vec<Vec<f64>>, targets: &[f64]) -> f64 {
-    let ref last_results = results[results.len()-1];
+fn calculate_error(results: &[Vec<f64>], targets: &[f64]) -> f64 {
+    let last_results = &results[results.len()-1];
     let mut total:f64 = 0f64;
     for (&result, &target) in last_results.iter().zip(targets.iter()) {
         total += (target - result).powi(2);

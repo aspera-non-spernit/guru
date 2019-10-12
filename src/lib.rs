@@ -60,8 +60,8 @@ impl <'a>Features for Guru<'a> {
         // CLUBS: HOME_FACTOR AWAY_FACTOR
         let num_of_clubs: u32 = clubs.data.len().try_into().unwrap();
         let mut inputs = vec![];
-        let home_index = clubs.clone().get_index(&m.home);
-        let away_index = clubs.clone().get_index(&m.away);
+        let home_index = clubs.clone().get_index(m.home);
+        let away_index = clubs.clone().get_index(m.away);
         for i in 0..num_of_clubs {
             if i == home_index {
                 inputs.push(normalize(1.0, 0.0, 1.0 + AWAY_FACTOR));
