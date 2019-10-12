@@ -19,9 +19,21 @@ Predict future sports matches.
       0
     ]
   },
-  //... more matches here
+  .. more matches here with Some(result)
+  .. and matches with None aka null
+  {
+    "date": "2019-10-26T22:04:00-04:00",
+    "home": "LosAngeles",
+    "away": "California",
+    "result": null
+  },
 ]
 ```
+
+Matches in the file that have a result provided are used for the training
+of the network. 
+
+Matches with no result (must be "null") will be predicted. 
 
 #### 2) Run guru with error rate as single parameter
 
