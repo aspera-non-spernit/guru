@@ -1,37 +1,22 @@
 #[forbid(unsafe_code)]
 extern crate chrono;
-extern crate serde;
-extern crate serde_json;
 
+pub mod models;
 pub mod neural;
 
 use chrono::{ DateTime, FixedOffset };
+use models::{ Club, ClubName, Clubs, Match, Scoring };
 use neural::nn::{ NN, HaltCondition };
-use std::{ collections::{ HashMap, HashSet }, convert::TryInto, fmt };
+use std::{ collections::{ HashMap, HashSet }, convert::{ TryInto }, fmt };
 
 const AWAY_FACTOR: f64 = 1.0;
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)] pub struct Club { pub name: ClubName }
-
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum ClubName { Atlanta, California, Chattanooga, Detroit, LosAngeles, Miami, Michigan, Milwaukee, Oakland, NewYork, NapaValley, Philadelphia, SanDiego, Stumptown }
-
-#[derive(Clone, Debug)] pub struct Clubs { pub data: HashMap<Club, u32> }
-
-#[derive(Clone, Copy, Debug)]
-pub struct Match  {
-    pub date: chrono::DateTime<FixedOffset>,
-    pub home: ClubName,
-    pub away: ClubName,
-    pub result: Option<(u8, u8)>
-}
 #[derive(Clone, Debug)] pub struct Guru { data_set: Vec<Match> }
 #[derive(Debug)] pub struct NetworkStats {
-    tested: usize,
-    positive: usize,
-    negative: usize
+    pub tested: usize,
+    pub positive: usize,
+    pub negative: usize
 }
-#[derive(Debug, Eq, Hash, PartialEq)] pub enum Scoring { Home, Away }
 #[derive(Clone, Debug, Eq, Hash, PartialEq)] pub struct Stats { pub home_scores: Vec<u8>, pub away_scores: Vec<u8>, pub games_played: [u8; 2] }
 
 pub trait Features {
@@ -47,32 +32,14 @@ pub trait Features {
     fn game_day(m: &DateTime<FixedOffset>, schedule: &Vec<Match>) -> f64;
     fn goal_diff(h_stats: &mut Stats) -> f64;
 }
-pub trait Testing { fn test(&self, header: &str, net: &mut NN, test_set: &[(Vec<f64>, Vec<f64>)], matches: &Vec<Match>) -> [NetworkStats; 2]; }
+pub trait Testing {
+    fn test(&self, header: &str, net: &mut NN, test_set: &[(Vec<f64>, Vec<f64>)], matches: &Vec<Match>)-> [NetworkStats; 2]; }
 pub trait Training {
     fn train(&self, header: &str, net: &mut NN, training_set: &[(Vec<f64>, Vec<f64>)], momentum: f64, rate: f64, halt_error: f64);
 }
 
-impl Club { pub fn new(name: ClubName) -> Self { Club { name } } }
 
-impl fmt::Display for ClubName {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
 
-impl Clubs {
-    /// Returns the index 
-    pub fn get_index(self, club_name: &ClubName) -> u32 {
-        let mut i = 0;
-        for c in self.data { 
-            match c.0.name == *club_name {
-                true => { i = c.1.clone(); }
-                false => { 0; }
-            }
-        }
-        i
-    }
-}
 
 
 impl From<&Vec<Match>> for Clubs {
@@ -191,13 +158,6 @@ impl Testing for Guru {
         [res_stats, win_stats]       
     }
 }
-
-impl Match {
-    pub fn new(date: DateTime<FixedOffset>, home: ClubName, away: ClubName, result: Option<(u8, u8)>) -> Self {
-        Match { date, home, away, result }
-    }
-}
-
 /// Holds Training Results for the Network
 impl NetworkStats {
     pub fn new() -> Self {
@@ -228,9 +188,7 @@ pub fn normalize(v: f64, min: f64, max: f64) -> f64 {
     if (max - min) == 0.0 {  (v - min)  } else { (v - min) / (max - min) }
 }
 
-struct NoResultsProvided(&str);
 impl Stats {
-    type Error = NoResultsProvided;
     /// Returns highest scoring in the league for at home and away
     /// (all time highest scoring at home, all time highes scoring away)
     pub fn all_time_highest_score_in_league(matches: &Vec<Match>) -> [u8; 2] {
@@ -241,7 +199,7 @@ impl Stats {
                     if result.0 > score[0] { score[0] = result.0; }
                     else if result.1 > score[1] { score[1] = result.1;  }
                 },
-                None => { panic!("The results provided need Some(Resul)") }
+                None => {  }//TODO Result<Stats, NoResultsProvided>
             }
         }
         score
@@ -262,7 +220,7 @@ impl Stats {
                         away_scores.push(result.1);
                     }
                 },
-                None => { panic!("The results provided need Some(Resul)") }
+                None => {}
             }
         }
         Stats { home_scores, away_scores, games_played: [0, 0] }

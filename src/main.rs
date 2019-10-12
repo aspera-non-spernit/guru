@@ -1,10 +1,16 @@
 #[forbid(unsafe_code)]
 extern crate chrono;
-extern crate nn;
 extern crate guru;
 
 use chrono::{ DateTime };
-use guru::{ Clubs, ClubName, Features, Guru, neural::nn::NN, Match, Scoring, Stats, Training, Testing };
+use guru::{
+    Features, Guru,
+    models::{ Clubs, ClubName, Match, Scoring },
+    neural::nn::NN,
+    Stats,
+    Training,
+    Testing
+};
 use std::{ collections::HashMap, str::FromStr };
 
 #[derive(Debug)] pub struct PredictionResult (f64, f64);
@@ -110,15 +116,32 @@ pub fn input_sets(set_matches: &Vec<Match>, clubs: &Clubs, league_stats: &mut Ha
 
         /**
         Adding 2 features
-        Calculates the relative strenghs of a team at home or away
-        Normalizes both
+        Calculates the relative strength of a team at home vs away
+        Examples:
+            The Home team scored to date and at home 7 goals, 6 goals away. Home Strength 1.6667
+            The Away team scored to date and at home 4 goals, and 1 goal away. Away Strength 0.25
+            The relative normalized strengths between to teams: Home 0.82353 + Away 0.17647 = 1.0
+            If teams played a second match home - away flipped and assuming no goals shot in first match:
+            The former Home team scored to date and at home 7 goals, 6 goals away. Away Strength 0.8571
+            The former Away team scored to date and home 4 goals, and 1 goal away. Home Strength 4.0
+            The relative normalized strengths between to teams: former Home 0,1765 + Away 0,8235 = 1.0
+
         **/
         let h_ths: f64 = Stats::total_scoring_by_club_to_date(&league_stats.get(&m.home).unwrap(), Scoring::Home).into();
-        let h_tas: f64 = Stats::total_scoring_by_club_to_date(&league_stats.get(&m.home).unwrap(), Scoring::Home).into();
-        let a_ths: f64 = Stats::total_scoring_by_club_to_date(&league_stats.get(&m.away).unwrap(), Scoring::Away).into();
+        let h_tas: f64 = Stats::total_scoring_by_club_to_date(&league_stats.get(&m.home).unwrap(), Scoring::Away).into();
+        let a_ths: f64 = Stats::total_scoring_by_club_to_date(&league_stats.get(&m.away).unwrap(), Scoring::Home).into();
         let a_tas: f64 = Stats::total_scoring_by_club_to_date(&league_stats.get(&m.away).unwrap(), Scoring::Away).into();
-    
-        // LEAGUE STATS
+        let h_rel = if h_tas != 0f64 { h_ths / h_tas } else { h_ths };
+        let a_rel = if a_ths != 0f64 { a_tas / a_ths } else { a_tas };
+        
+        // println!("h {:?} {:?} {:?}", h_ths, h_tas, h_rel);
+        // println!("a {:?} {:?} {:?}", a_ths, a_tas, a_rel);
+        //println!("Home {:?} : {:?} Away",  guru::normalize(h_rel as f64, 0f64, (h_rel + a_rel) as f64),  guru::normalize(a_rel as f64, 0f64, (h_rel + a_rel) as f64));
+        inputs.push( guru::normalize(h_rel as f64, 0f64, (h_rel + a_rel) as f64) );
+        inputs.push( guru::normalize(a_rel as f64, 0f64, (h_rel + a_rel) as f64) );
+        
+
+        // h_ths STATS
         /***  
         Adding 2 features
         Adds the highest scoring of home team at home and away team away to date
@@ -229,7 +252,7 @@ fn main()-> std::io::Result<()> {
         .map(|&m| m)
         .collect();
         //(training_matches.len() as f32 * 0.66).round()
-    let test_matches: Vec<Match> = training_matches.drain(21..training_matches.len()).collect();
+    let test_matches: Vec<Match> = training_matches.drain(30..training_matches.len()).collect();
     // Create sets for the input nodes
     // Can be used for both networks
     let training_input_sets = input_sets(&training_matches, &clubs, &mut stats);
@@ -272,10 +295,11 @@ fn main()-> std::io::Result<()> {
     //         pred_training_set[0].1.len() as u32
     //     ]
     // );
+
     let _hidden_size = (training_input_sets[0].len() as f32 * 0.66 ).round() as u32;
     let mut pred_net = NN::new(&[
             training_input_sets[0].len() as u32,
-            19,
+            15, 9,
             pred_training_set[0].1.len() as u32
         ]
     );
@@ -304,10 +328,8 @@ fn main()-> std::io::Result<()> {
     println!("Result {}", test_results[0].to_string());
     println!();
     println!("Winner {}", test_results[1].to_string());  
-    println!();
-    println!();
-    println!();
-
+    println!("--------------------------");
+   
     // Predict the future and become rich
     let prediction_matches = &all_matches.iter()
         .filter( |&m| m.result.is_none() )
@@ -317,6 +339,6 @@ fn main()-> std::io::Result<()> {
     let prediction_set: Vec<(Vec<f64>, Vec<f64>)> = input_sets(&prediction_matches, &clubs, &mut stats).iter()
         .map(|m| (m.clone(), vec![]) )
         .collect();
-    test_results = guru.test("Predicting future matches..", &mut pred_net, &prediction_set, &prediction_matches);
+    guru.test("Predicting future matches..", &mut pred_net, &prediction_set, &prediction_matches);
     Ok(())
 }

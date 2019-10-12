@@ -188,7 +188,7 @@ impl<'a,'b> Trainer<'a,'b>  {
 /// Neural network
 #[derive(Debug, Clone, RustcDecodable, RustcEncodable)]
 pub struct NN {
-    layers: Vec<Vec<Vec<f64>>>,
+    pub layers: Vec<Vec<Vec<f64>>>,
     num_inputs: u32,
 }
 
@@ -390,7 +390,6 @@ impl NN {
             let mut layer_errors = Vec::new();
             let mut layer_weight_updates = Vec::new();
 
-
             for (node_index, (node, &result)) in iter_zip_enum(layer_nodes, layer_results) {
                 let mut node_weight_updates = Vec::new();
                 let mut node_error;
@@ -418,11 +417,9 @@ impl NN {
                     let weight_update = node_error * prev_layer_result;
                     node_weight_updates.push(weight_update);
                 }
-
                 layer_errors.push(node_error);
                 layer_weight_updates.push(node_weight_updates);
             }
-
             network_errors.push(layer_errors);
             network_weight_updates.push(layer_weight_updates);
             next_layer_nodes = Some(&layer_nodes);
@@ -466,7 +463,8 @@ fn sigmoid(y: f64) -> f64 {
 }
 
 fn relu(y: f64) -> f64 {
-    if y <= 0.0 { 0.0 } else { 1.0 }
+    dbg!(&y);
+    if y <= 0.0 { 0.0 } else { y }
 }
 
 
