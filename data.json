@@ -1,0 +1,422 @@
+[
+  {
+    "date": "2019-08-31T19:30:00-04:00",
+    "home": "Detroit",
+    "away": "Philadelphia",
+    "result": [
+      1,
+      0
+    ]
+  },
+  {
+    "date": "2019-08-31T22:00:00-04:00",
+    "home": "Oakland",
+    "away": "California",
+    "result": [
+      3,
+      3
+    ]
+  },
+  {
+    "date": "2019-09-07T22:00:00-04:00",
+    "home": "LosAngeles",
+    "away": "SanDiego",
+    "result": [
+      2,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-14T22:04:00-04:00",
+    "home": "SanDiego",
+    "away": "California",
+    "result": [
+      3,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-15T19:00:00-04:00",
+    "home": "Atlanta",
+    "away": "Stumptown",
+    "result": [
+      1,
+      3
+    ]
+  },
+  {
+    "date": "2019-09-22T19:00:00-04:00",
+    "home": "California",
+    "away": "LosAngeles",
+    "result": [
+      3,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-22T19:00:00-04:00",
+    "home": "Miami",
+    "away": "Stumptown",
+    "result": [
+      2,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-25T22:00:00-04:00",
+    "home": "California",
+    "away": "Oakland",
+    "result": [
+      1,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-28T22:04:00-04:00",
+    "home": "Stumptown",
+    "away": "Miami",
+    "result": [
+      0,
+      2
+    ]
+  },
+  {
+    "date": "2019-09-28T22:04:00-04:00",
+    "home": "SanDiego",
+    "away": "Oakland",
+    "result": [
+      4,
+      3
+    ]
+  },
+  {
+    "date": "2019-10-02T22:00:00-04:00",
+    "home": "California",
+    "away": "SanDiego",
+    "result": [
+      3,
+      0
+    ]
+  },
+  {
+    "date": "2019-10-05T19:30:00-04:00",
+    "home": "LosAngeles",
+    "away": "Oakland",
+    "result": [
+      1,
+      0
+    ]
+  },
+  {
+    "date": "2019-10-06T19:30:00-04:00",
+    "home": "Miami",
+    "away": "Atlanta",
+    "result": [
+      2,
+      2
+    ]
+  },
+  {
+    "date": "2019-10-12T22:04:00-04:00",
+    "home": "Atlanta",
+    "away": "Miami",
+    "result": null
+  },
+  {
+    "date": "2019-10-12T22:04:00-04:00",
+    "home": "Stumptown",
+    "away": "Chattanooga",
+    "result": null
+  },
+  {
+    "date": "2019-10-19T22:04:00-04:00",
+    "home": "Chattanooga",
+    "away": "Stumptown",
+    "result": null
+  },
+  {
+    "date": "2019-10-19T22:04:00-04:00",
+    "home": "Oakland",
+    "away": "LosAngeles",
+    "result": null
+  },
+  {
+    "date": "2019-10-20T22:04:00-04:00",
+    "home": "California",
+    "away": "SanDiego",
+    "result": null
+  },
+  {
+    "date": "2019-10-25T22:04:00-04:00",
+    "home": "Stumptown",
+    "away": "Atlanta",
+    "result": null
+  },
+  {
+    "date": "2019-10-26T22:04:00-04:00",
+    "home": "Miami",
+    "away": "Oakland",
+    "result": null
+  },
+  {
+    "date": "2019-10-26T22:04:00-04:00",
+    "home": "LosAngeles",
+    "away": "California",
+    "result": null
+  },
+  {
+    "date": "2019-11-02T22:04:00-04:00",
+    "home": "SanDiego",
+    "away": "LosAngeles",
+    "result": null
+  },
+  {
+    "date": "2019-08-10T19:30:00-04:00",
+    "home": "Milwaukee",
+    "away": "NapaValley",
+    "result": [
+      2,
+      0
+    ]
+  },
+  {
+    "date": "2019-08-10T19:30:00-04:00",
+    "home": "Chattanooga",
+    "away": "NewYork",
+    "result": [
+      0,
+      1
+    ]
+  },
+  {
+    "date": "2019-08-17T19:30:00-04:00",
+    "home": "NewYork",
+    "away": "Milwaukee",
+    "result": [
+      2,
+      2
+    ]
+  },
+  {
+    "date": "2019-08-17T19:30:00-04:00",
+    "home": "Detroit",
+    "away": "Chattanooga",
+    "result": [
+      2,
+      1
+    ]
+  },
+  {
+    "date": "2019-08-24T19:30:00-04:00",
+    "home": "NapaValley",
+    "away": "Detroit",
+    "result": [
+      0,
+      4
+    ]
+  },
+  {
+    "date": "2019-08-24T19:30:00-04:00",
+    "home": "Chattanooga",
+    "away": "Michigan",
+    "result": [
+      1,
+      1
+    ]
+  },
+  {
+    "date": "2019-08-31T19:30:00-04:00",
+    "home": "Michigan",
+    "away": "NewYork",
+    "result": [
+      0,
+      2
+    ]
+  },
+  {
+    "date": "2019-09-01T19:30:00-04:00",
+    "home": "NapaValley",
+    "away": "Chattanooga",
+    "result": [
+      0,
+      6
+    ]
+  },
+  {
+    "date": "2019-09-07T19:30:00-04:00",
+    "home": "Milwaukee",
+    "away": "Chattanooga",
+    "result": [
+      1,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-07T19:30:00-04:00",
+    "home": "NewYork",
+    "away": "NapaValley",
+    "result": [
+      1,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-14T19:30:00-04:00",
+    "home": "Chattanooga",
+    "away": "NapaValley",
+    "result": [
+      3,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-14T19:30:00-04:00",
+    "home": "NewYork",
+    "away": "Michigan",
+    "result": [
+      2,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-14T19:30:00-04:00",
+    "home": "Milwaukee",
+    "away": "Detroit",
+    "result": [
+      0,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-21T19:30:00-04:00",
+    "home": "NapaValley",
+    "away": "Milwaukee",
+    "result": [
+      1,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-21T19:30:00-04:00",
+    "home": "Michigan",
+    "away": "Chattanooga",
+    "result": [
+      1,
+      4
+    ]
+  },
+  {
+    "date": "2019-09-21T19:30:00-04:00",
+    "home": "Detroit",
+    "away": "NewYork",
+    "result": [
+      1,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-26T19:30:00-04:00",
+    "home": "Michigan",
+    "away": "NapaValley",
+    "result": [
+      2,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-28T19:30:00-04:00",
+    "home": "NewYork",
+    "away": "Chattanooga",
+    "result": [
+      3,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-28T19:30:00-04:00",
+    "home": "Michigan",
+    "away": "Milwaukee",
+    "result": [
+      1,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-28T19:30:00-04:00",
+    "home": "Detroit",
+    "away": "NapaValley",
+    "result": [
+      3,
+      0
+    ]
+  },
+  {
+    "date": "2019-10-05T19:30:00-04:00",
+    "home": "Chattanooga",
+    "away": "Detroit",
+    "result": [
+      0,
+      1
+    ]
+  },
+  {
+    "date": "2019-10-05T19:30:00-04:00",
+    "home": "NewYork",
+    "away": "Milwaukee",
+    "result": [
+      2,
+      2
+    ]
+  },
+  {
+    "date": "2019-10-08T19:30:00-04:00",
+    "home": "Detroit",
+    "away": "Michigan",
+    "result": [
+      2,
+      0
+    ]
+  },
+  {
+    "date": "2019-10-12T19:00:00-04:00",
+    "home": "NewYork",
+    "away": "Detroit",
+    "result": null
+  },
+  {
+    "date": "2019-10-12T19:00:00-04:00",
+    "home": "Milwaukee",
+    "away": "Michigan",
+    "result": null
+  },
+  {
+    "date": "2019-10-16T19:00:00-04:00",
+    "home": "Michigan",
+    "away": "Detroit",
+    "result": null
+  },
+  {
+    "date": "2019-10-16T19:00:00-04:00",
+    "home": "NapaValley",
+    "away": "NewYork",
+    "result": null
+  },
+  {
+    "date": "2019-10-19T19:30:00-04:00",
+    "home": "Detroit",
+    "away": "Milwaukee",
+    "result": null
+  },
+  {
+    "date": "2019-10-26T18:00:00-04:00",
+    "home": "Chattanooga",
+    "away": "Milwaukee",
+    "result": null
+  },
+  {
+    "date": "2019-10-26T19:00:00-04:00",
+    "home": "NapaValley",
+    "away": "Michigan",
+    "result": null
+  }
+]

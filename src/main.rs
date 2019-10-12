@@ -10,6 +10,7 @@ use guru::{
     Guru, 
     neural::nn::NN, 
     Stats,
+    utils::load_matches,
     Training,
     Testing
 };
@@ -36,7 +37,7 @@ impl From<&Match> for ClassificationResult {
 /// that can be used store output values for the training and testing of results
 impl From<&Match> for PredictionResult {
     fn from(m: &Match) -> Self {
-        let all_matches = matches(); // provided Vec<Match> may not contain all info needed for normalization of values 
+        let all_matches = load_matches().unwrap(); // provided Vec<Match> may not contain all info needed for normalization of values 
         let ats = Stats::all_time_highest_score_in_league(&all_matches);
         let highest = if ats[0] > ats[1] { f64::from(ats[0]) } else { f64::from(ats[1]) };
         match m.result {
@@ -65,7 +66,7 @@ impl From<&Match> for PredictionResult {
 fn stats(clubs: &Clubs) -> HashMap<ClubName, Stats> {
     let mut leaguge_stats = HashMap::new();
     for c in &clubs.data {
-        leaguge_stats.insert(c.0.name, Stats::gen_stats(c.0.name, &matches() ) );
+        leaguge_stats.insert(c.0.name, Stats::gen_stats(c.0.name, &load_matches().unwrap() ) );
     }
     leaguge_stats
 }
@@ -151,7 +152,7 @@ pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Cl
         Adds the highest scoring of home team at home and away team away to date
         as relative strength to highest scoring of the league
         **/
-        let ats = Stats::all_time_highest_score_in_league(&matches());
+        let ats = Stats::all_time_highest_score_in_league(&load_matches().unwrap());
         let highest = if ats[0] > ats[1] { f64::from(ats[0]) } else { f64::from(ats[1]) };
         inputs.push( guru::normalize(f64::from(hs[0]), 0f64, highest as f64) );
         inputs.push( guru::normalize( f64::from(hs[1]), 0f64, highest as f64) );
@@ -163,7 +164,7 @@ pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Cl
         Most recent match = 1
         earlisest match = 0
         **/
-        inputs.push(Guru::game_day(&m.date, &matches()));
+        inputs.push(Guru::game_day(&m.date, &load_matches().unwrap()));
               
         //Keep track of games played so the avg_score is based on previous matches and not the overall club avg.
         if let Some(s) = league_stats.get_mut(&m.home) {
@@ -245,7 +246,7 @@ fn main()-> std::io::Result<()> {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2{ panic!("ERROR: Need max error rate for training.")}
     // all matches
-    let all_matches = matches();
+    let all_matches = load_matches()?;
     let clubs: Clubs = Clubs::from(all_matches.as_slice());
     let mut stats = stats(&clubs);
     let guru = Guru::new(&all_matches);
