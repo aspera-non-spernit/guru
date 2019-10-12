@@ -82,18 +82,27 @@ impl <'a>Features for Guru<'a> {
         normalize(match_date.timestamp() as f64, *min as f64, *max as f64)
     }
   
+    /*** Returns the goal difference between
+    goals shot at home for the home team at home
+    and the away team away 
+    Takes all played matches into accout
+    Example:
+        Home Team played 4 matches at home, score 3, 0, 2, 1 = 6
+        Away Team played 2 matches away, scored 1, 1 = 2
+        Goal difference 3.0
+    **/
     fn goal_diff(stats: &mut Stats) -> f64 {
         let h = stats.home_scores
             .drain(0..stats.games_played[0] as usize)
             .collect::<Vec<u8>>()
             .iter()
             .sum::<u8>();
-        let a = stats.home_scores
+        let a = stats.away_scores
             .drain(0..stats.games_played[1] as usize)
             .collect::<Vec<u8>>()
             .iter()
             .sum::<u8>();
-        0.0
+        if a != 0 { f64::from(h / a) } else { f64::from(h) }
     }
 }
 
@@ -123,7 +132,7 @@ impl <'a>Testing for Guru<'a> {
             let phr = (res[0] * *highest as f64).round() as u8; // denormalized home result
             let par = (res[1] * *highest as f64).round() as u8; // denormalized away result
             // assuming test else prediction 
-            if let Some(result) = matches[i].result {
+            if matches[i].result.is_some() {
                 println!("{:?} : {:?} on {:?}", matches[i].home, matches[i].away, matches[i].date);
                 println!("Expected: {:?} : {:?}", matches[i].result.unwrap().0,  matches[i].result.unwrap().1);
                 println!("Predicted:  {:?} : {:?}", phr, par);
