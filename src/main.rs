@@ -61,10 +61,10 @@ impl From<&Match> for PredictionResult {
     }
 }
 
-fn stats(clubs: &Clubs) -> HashMap<ClubName, Stats> {
+fn stats(clubs: &Clubs, matches: &[Match]) -> HashMap<ClubName, Stats> {
     let mut leaguge_stats = HashMap::new();
     for c in &clubs.data {
-        leaguge_stats.insert(c.0.name, Stats::gen_stats(c.0.name, &load_matches().unwrap() ) );
+        leaguge_stats.insert(c.0.name, Stats::gen_stats(c.0.name, matches ) );
     }
     leaguge_stats
 }
@@ -72,7 +72,7 @@ fn stats(clubs: &Clubs) -> HashMap<ClubName, Stats> {
 /// Creates a Vec of tuples.
 /// Each tuple represents a training set, where inputs are at 0
 /// and outputs at 1
-pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Clubs, league_stats: &mut HashMap<ClubName, Stats, S>) -> Vec<Vec<f64>> {
+pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Clubs, league_stats: &mut HashMap<ClubName, Stats, S>, all_matches: &[Match]) -> Vec<Vec<f64>> {
     // vec of input values f64
     // returned
     let mut input_sets = vec![];
@@ -150,7 +150,7 @@ pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Cl
         Adds the highest scoring of home team at home and away team away to date
         as relative strength to highest scoring of the league
         **/
-        let ats = Stats::all_time_highest_score_in_league(&load_matches().unwrap());
+        let ats = Stats::all_time_highest_score_in_league(all_matches);
         let highest = if ats[0] > ats[1] { f64::from(ats[0]) } else { f64::from(ats[1]) };
         inputs.push( guru::normalize(f64::from(hs[0]), 0f64, highest as f64) );
         inputs.push( guru::normalize( f64::from(hs[1]), 0f64, highest as f64) );
@@ -162,7 +162,7 @@ pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Cl
         Most recent match = 1
         earlisest match = 0
         **/
-        inputs.push(Guru::game_day(&m.date, &load_matches().unwrap()));
+        inputs.push(Guru::game_day(&m.date, all_matches));
               
         //Keep track of games played so the avg_score is based on previous matches and not the overall club avg.
         if let Some(s) = league_stats.get_mut(&m.home) {
@@ -182,7 +182,7 @@ fn main()-> std::io::Result<()> {
     // all matches
     let all_matches = load_matches()?;
     let clubs: Clubs = Clubs::from(all_matches.as_slice());
-    let mut stats = stats(&clubs);
+    let mut stats = stats(&clubs, &all_matches);
     let guru = Guru::new(&all_matches);
 
     // splitting all matches into training and test matches for validation 
@@ -194,8 +194,8 @@ fn main()-> std::io::Result<()> {
     let test_matches: Vec<Match> = training_matches.to_vec().drain(30..training_matches.len()).collect();
     // Create sets for the input nodes
     // Can be used for both networks
-    let training_input_sets = input_sets(&training_matches, &clubs, &mut stats);
-    let test_input_sets = input_sets(&test_matches, &clubs, &mut stats);
+    let training_input_sets = input_sets(&training_matches, &clubs, &mut stats, &all_matches);
+    let test_input_sets = input_sets(&test_matches, &clubs, &mut stats, &all_matches);
 
     // OUTPUT SETS
     // let class_result_set: Vec<ClassificationResult> = all_matches.iter()
@@ -275,7 +275,7 @@ fn main()-> std::io::Result<()> {
         .copied()
         .collect();
    // dbg!(&prediction_matches);
-    let prediction_set: Vec<(Vec<f64>, Vec<f64>)> = input_sets(&prediction_matches, &clubs, &mut stats).iter()
+    let prediction_set: Vec<(Vec<f64>, Vec<f64>)> = input_sets(&prediction_matches, &clubs, &mut stats, &all_matches).iter()
         .map(|m| (m.clone(), vec![]) )
         .collect();
     guru.test("Predicting future matches..", &mut pred_net, &prediction_set, &prediction_matches);
