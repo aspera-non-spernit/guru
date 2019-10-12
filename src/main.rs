@@ -1,9 +1,7 @@
 #![forbid(unsafe_code)]
-extern crate chrono;
 extern crate nn;
 extern crate guru;
 
-use chrono::{ DateTime };
 use guru::{
     models::{ Clubs, ClubName, Match, Scoring },
     Features,
