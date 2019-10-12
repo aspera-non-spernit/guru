@@ -1,4 +1,4 @@
-#[forbid(unsafe_code)]
+#![forbid(unsafe_code)]
 extern crate chrono;
 
 pub mod models;
@@ -11,7 +11,7 @@ use std::{ collections::{ HashMap, HashSet }, convert::{ TryInto }, fmt };
 
 const AWAY_FACTOR: f64 = 1.0;
 
-#[derive(Clone, Debug)] pub struct Guru { data_set: Vec<Match> }
+#[derive(Clone, Debug)] pub struct Guru<'a> { data_set: &'a[Match] }
 #[derive(Debug)] pub struct NetworkStats {
     pub tested: usize,
     pub positive: usize,
@@ -29,21 +29,17 @@ pub trait Features {
     /// Returns the game day as normalized value in relation to all game days,
     /// where for the normalization min is the first game day of the "season" and max
     /// the last day of the season
-    fn game_day(m: &DateTime<FixedOffset>, schedule: &Vec<Match>) -> f64;
+    fn game_day(m: &DateTime<FixedOffset>, schedule: &[Match]) -> f64;
     fn goal_diff(h_stats: &mut Stats) -> f64;
 }
 pub trait Testing {
-    fn test(&self, header: &str, net: &mut NN, test_set: &[(Vec<f64>, Vec<f64>)], matches: &Vec<Match>)-> [NetworkStats; 2]; }
+    fn test(&self, header: &str, net: &mut NN, test_set: &[(Vec<f64>, Vec<f64>)], matches: &[Match])-> [NetworkStats; 2]; }
 pub trait Training {
     fn train(&self, header: &str, net: &mut NN, training_set: &[(Vec<f64>, Vec<f64>)], momentum: f64, rate: f64, halt_error: f64);
 }
 
-
-
-
-
-impl From<&Vec<Match>> for Clubs {
-    fn from(matches: &Vec<Match>) -> Self {
+impl From<&[Match]> for Clubs {
+    fn from(matches: &[Match]) -> Self {
         let mut tmp_clubs = HashSet::new();
         let mut data: HashMap<Club, u32> = HashMap::new();
         for m in matches {
@@ -57,9 +53,9 @@ impl From<&Vec<Match>> for Clubs {
     }
 }
 
-impl Guru {  pub fn new(data_set: Vec<Match>) -> Self { Guru { data_set } } }
+impl <'a>Guru<'a> {  pub fn new(data_set: &'a[Match]) -> Self { Guru { data_set } } }
 
-impl Features for Guru {
+impl <'a>Features for Guru<'a> {
     fn club_features(clubs: &Clubs, m: &Match) -> Vec<f64>  {
         // CLUBS: HOME_FACTOR AWAY_FACTOR
         let num_of_clubs: u32 = clubs.data.len().try_into().unwrap();
@@ -78,7 +74,7 @@ impl Features for Guru {
         inputs
     }
 
-    fn game_day(match_date: &DateTime<FixedOffset>, schedule: &Vec<Match>) -> f64 {
+    fn game_day(match_date: &DateTime<FixedOffset>, schedule: &[Match]) -> f64 {
         let mut gd: Vec<i64> = schedule.iter().map(|m| m.date.timestamp() ).collect();
         gd.dedup();
         let min = gd.iter().min().unwrap();
@@ -100,7 +96,8 @@ impl Features for Guru {
         0.0
     }
 }
-impl Training for Guru {   
+
+impl <'a>Training for Guru<'a> {   
     fn train(&self, header: &str, net: &mut NN, training_set: &[(Vec<f64>, Vec<f64>)], momentum: f64, rate: f64, halt_error: f64) {
         println!("Training {:?} Network...", &header);
         if momentum > 1.0 || rate > 1.0 { panic!("invoking train(): Values for momentum and rate must be <= 1.0") }
@@ -113,14 +110,14 @@ impl Training for Guru {
     }
 }
 
-impl Testing for Guru {
+impl <'a>Testing for Guru<'a> {
     // TODO separate Display
-    fn test(&self, header: &str, net: &mut NN, test_set: &[(Vec<f64>, Vec<f64>)], matches: &Vec<Match>) -> [NetworkStats; 2] { 
+    fn test(&self, header: &str, net: &mut NN, test_set: &[(Vec<f64>, Vec<f64>)], matches: &[Match]) -> [NetworkStats; 2] { 
         println!("{:?}", header);
         let ats = Stats::all_time_highest_score_in_league(&self.data_set);
         let highest = ats.iter().max().unwrap();
-        let mut res_stats = NetworkStats::new();
-        let mut win_stats = NetworkStats::new();
+        let mut res_stats = NetworkStats::default();
+        let mut win_stats = NetworkStats::default();
         for i in 0..test_set.len() {
             let res = net.run( &test_set[i].0);
             let phr = (res[0] * *highest as f64).round() as u8; // denormalized home result
@@ -158,17 +155,21 @@ impl Testing for Guru {
         [res_stats, win_stats]       
     }
 }
+
 /// Holds Training Results for the Network
 impl NetworkStats {
-    pub fn new() -> Self {
-        NetworkStats { 
-            tested: 0, positive: 0, negative: 0
-        }
+    pub fn new(tested: usize, positive: usize, negative: usize) -> Self {
+        NetworkStats { tested, positive, negative }
     }
     pub fn update(&mut self, positive: bool) {
         self.tested += 1;
         if positive {  self.positive += 1}
         else { self.negative += 1 }
+    }
+}
+impl Default for NetworkStats {
+    fn default() -> Self {
+        NetworkStats::new(0, 0, 0)
     }
 }
 
@@ -191,36 +192,33 @@ pub fn normalize(v: f64, min: f64, max: f64) -> f64 {
 impl Stats {
     /// Returns highest scoring in the league for at home and away
     /// (all time highest scoring at home, all time highes scoring away)
-    pub fn all_time_highest_score_in_league(matches: &Vec<Match>) -> [u8; 2] {
+    pub fn all_time_highest_score_in_league(matches: &[Match]) -> [u8; 2] {
         let mut score: [u8; 2] = [0, 0];
         for m in matches {
-            match m.result {
-                Some(result) => {
-                    if result.0 > score[0] { score[0] = result.0; }
-                    else if result.1 > score[1] { score[1] = result.1;  }
-                },
-                None => {  }//TODO Result<Stats, NoResultsProvided>
+            if let Some(result) = m.result {
+                if result.0 > score[0] {
+                    score[0] = result.0;
+                } else if result.1 > score[1] {
+                    score[1] = result.1;
+               }
             }
         }
         score
     }
     /// Returns the number of game days in a Vec<Matches>
-    pub fn game_days(matches: &Vec<Match>) -> usize { matches.iter().fold(0, |i, _m| i + 1 ) }
+    pub fn game_days(matches: &[Match]) -> usize { matches.iter().fold(0, |i, _m| i + 1 ) }
 
     /// Creates ```Stats``` for a ```ClubName``` calculated from a Vec<Match>
-    pub fn gen_stats(club: &ClubName, matches: &Vec<Match>) -> Stats {
+    pub fn gen_stats(club: ClubName, matches: &[Match]) -> Stats {
         let mut home_scores = vec![];
         let mut away_scores = vec![];
         for m in matches {
-            match m.result {
-                Some(result)=> {
-                    if &m.home == club {
-                        home_scores.push(result.0);
-                    } else if &m.away == club {
-                        away_scores.push(result.1);
-                    }
-                },
-                None => {}
+            if let Some(result) = m.result {
+                if m.home == club {
+                    home_scores.push(result.0);
+                } else if m.away == club {
+                    away_scores.push(result.1);
+                }
             }
         }
         Stats { home_scores, away_scores, games_played: [0, 0] }

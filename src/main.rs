@@ -1,12 +1,14 @@
-#[forbid(unsafe_code)]
+#![forbid(unsafe_code)]
 extern crate chrono;
+extern crate nn;
 extern crate guru;
 
 use chrono::{ DateTime };
 use guru::{
-    Features, Guru,
     models::{ Clubs, ClubName, Match, Scoring },
-    neural::nn::NN,
+    Features,
+    Guru, 
+    neural::nn::NN, 
     Stats,
     Training,
     Testing
@@ -36,18 +38,18 @@ impl From<&Match> for PredictionResult {
     fn from(m: &Match) -> Self {
         let all_matches = matches(); // provided Vec<Match> may not contain all info needed for normalization of values 
         let ats = Stats::all_time_highest_score_in_league(&all_matches);
-        let highest = if ats[0] > ats[1] { ats[0] as f64} else { ats[1] as f64 };
+        let highest = if ats[0] > ats[1] { f64::from(ats[0]) } else { f64::from(ats[1]) };
         match m.result {
             Some(result) => {
                 if highest as f64 != 0.0 { 
                     PredictionResult(
-                        guru::normalize(result.0 as f64, 0f64, highest),
-                        guru::normalize(result.1 as f64, 0f64, highest)
+                        guru::normalize(f64::from(result.0), 0f64, highest),
+                        guru::normalize(f64::from(result.1), 0f64, highest)
                     )
                 } else {
                     PredictionResult(
-                        result.0 as f64,
-                        result.1 as f64
+                        f64::from(result.0),
+                        f64::from(result.1)
                     )
                 }
             },
@@ -63,14 +65,14 @@ impl From<&Match> for PredictionResult {
 fn stats(clubs: &Clubs) -> HashMap<ClubName, Stats> {
     let mut leaguge_stats = HashMap::new();
     for c in &clubs.data {
-        leaguge_stats.insert( c.0.name.clone(), Stats::gen_stats(&c.0.name, &matches() ) );
+        leaguge_stats.insert(c.0.name, Stats::gen_stats(c.0.name, &matches() ) );
     }
     leaguge_stats
 }
 /// Creates a Vec of tuples.
 /// Each tuple represents a training set, where inputs are at 0
 /// and outputs at 1
-pub fn input_sets(set_matches: &Vec<Match>, clubs: &Clubs, league_stats: &mut HashMap<ClubName, Stats>) -> Vec<Vec<f64>> {
+pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Clubs, league_stats: &mut HashMap<ClubName, Stats, S>) -> Vec<Vec<f64>> {
     // vec of input values f64
     // returned
     let mut input_sets = vec![];
@@ -111,10 +113,10 @@ pub fn input_sets(set_matches: &Vec<Match>, clubs: &Clubs, league_stats: &mut Ha
         Finds the highest scoring for both home team at home and away team away to date
         Normalizes with min: 0 max: sum(hsh, hsa)
         **/
-        inputs.push( guru::normalize(hs[0] as f64, 0f64, (hs[0] + hs[1]) as f64) );
-        inputs.push( guru::normalize(hs[1] as f64, 0f64, (hs[0] + hs[1]) as f64) );
+        inputs.push( guru::normalize(f64::from(hs[0]), 0f64, f64::from(hs[0] + hs[1]) ) );
+        inputs.push( guru::normalize(f64::from(hs[1]), 0f64, f64::from(hs[0] + hs[1]) ) );
 
-        /**
+        /***
         Adding 2 features
         Calculates the relative strength of a team at home vs away
         Examples:
@@ -125,7 +127,6 @@ pub fn input_sets(set_matches: &Vec<Match>, clubs: &Clubs, league_stats: &mut Ha
             The former Home team scored to date and at home 7 goals, 6 goals away. Away Strength 0.8571
             The former Away team scored to date and home 4 goals, and 1 goal away. Home Strength 4.0
             The relative normalized strengths between to teams: former Home 0,1765 + Away 0,8235 = 1.0
-
         **/
         let h_ths: f64 = Stats::total_scoring_by_club_to_date(&league_stats.get(&m.home).unwrap(), Scoring::Home).into();
         let h_tas: f64 = Stats::total_scoring_by_club_to_date(&league_stats.get(&m.home).unwrap(), Scoring::Away).into();
@@ -148,9 +149,9 @@ pub fn input_sets(set_matches: &Vec<Match>, clubs: &Clubs, league_stats: &mut Ha
         as relative strength to highest scoring of the league
         **/
         let ats = Stats::all_time_highest_score_in_league(&matches());
-        let highest = if ats[0] > ats[1] { ats[0] as f64} else { ats[1] as f64 };
-        inputs.push( guru::normalize(hs[0] as f64, 0f64, highest as f64) );
-        inputs.push( guru::normalize(hs[1] as f64, 0f64, highest as f64) );
+        let highest = if ats[0] > ats[1] { f64::from(ats[0]) } else { f64::from(ats[1]) };
+        inputs.push( guru::normalize(f64::from(hs[0]), 0f64, highest as f64) );
+        inputs.push( guru::normalize( f64::from(hs[1]), 0f64, highest as f64) );
 
         /***
         Adding 1 feature 1 
@@ -242,17 +243,17 @@ fn main()-> std::io::Result<()> {
     if args.len() < 2{ panic!("ERROR: Need max error rate for training.")}
     // all matches
     let all_matches = matches();
-    let clubs = Clubs::from(&all_matches);
+    let clubs: Clubs = Clubs::from(all_matches.as_slice());
     let mut stats = stats(&clubs);
-    let guru = Guru::new(all_matches.clone());
+    let guru = Guru::new(&all_matches);
 
     // splitting all matches into training and test matches for validation 
-    let mut training_matches: Vec<Match> = all_matches.iter()
+    let training_matches: Vec<Match> = all_matches.iter()
         .filter( |&m| m.result.is_some() )
-        .map(|&m| m)
+        .copied()
         .collect();
-        //(training_matches.len() as f32 * 0.66).round()
-    let test_matches: Vec<Match> = training_matches.drain(30..training_matches.len()).collect();
+    
+    let test_matches: Vec<Match> = training_matches.to_vec().drain(30..training_matches.len()).collect();
     // Create sets for the input nodes
     // Can be used for both networks
     let training_input_sets = input_sets(&training_matches, &clubs, &mut stats);
@@ -331,9 +332,9 @@ fn main()-> std::io::Result<()> {
     println!("--------------------------");
    
     // Predict the future and become rich
-    let prediction_matches = &all_matches.iter()
+    let prediction_matches: Vec<Match> = all_matches.iter()
         .filter( |&m| m.result.is_none() )
-        .map(|&m| m )
+        .copied()
         .collect();
    // dbg!(&prediction_matches);
     let prediction_set: Vec<(Vec<f64>, Vec<f64>)> = input_sets(&prediction_matches, &clubs, &mut stats).iter()

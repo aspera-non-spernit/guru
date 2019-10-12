@@ -236,7 +236,7 @@ impl NN {
             prev_layer_size = layer_size;
         }
         layers.shrink_to_fit();
-        NN { layers: layers, num_inputs: first_layer_size }
+        NN { layers, num_inputs: first_layer_size }
     }
 
     /// Runs the network on an input and returns a vector of the results.
@@ -461,12 +461,6 @@ fn modified_dotprod(node: &Vec<f64>, values: &Vec<f64>) -> f64 {
 fn sigmoid(y: f64) -> f64 {
     1f64 / (1f64 + (-y).exp())
 }
-
-fn relu(y: f64) -> f64 {
-    dbg!(&y);
-    if y <= 0.0 { 0.0 } else { y }
-}
-
 
 // takes two arrays and enumerates the iterator produced by zipping each of
 // their iterators together
