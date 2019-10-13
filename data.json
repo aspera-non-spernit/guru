@@ -1,8 +1,8 @@
 [
   {
     "date": "2019-08-31T19:30:00-04:00",
-    "home": "Detroit",
-    "away": "Philadelphia",
+    "home": "Detroit City FC",
+    "away": "Philadelphia Fury",
     "result": [
       1,
       0
@@ -10,8 +10,8 @@
   },
   {
     "date": "2019-08-31T22:00:00-04:00",
-    "home": "Oakland",
-    "away": "California",
+    "home": "Oakland Roots SC",
+    "away": "California United Strikers",
     "result": [
       3,
       3
@@ -19,8 +19,8 @@
   },
   {
     "date": "2019-09-07T22:00:00-04:00",
-    "home": "LosAngeles",
-    "away": "SanDiego",
+    "home": "Los Angeles Force",
+    "away": "1904 San Diego FC",
     "result": [
       2,
       0
@@ -28,8 +28,8 @@
   },
   {
     "date": "2019-09-14T22:04:00-04:00",
-    "home": "SanDiego",
-    "away": "California",
+    "home": "1904 San Diego FC",
+    "away": "California United Strikers",
     "result": [
       3,
       1
@@ -37,8 +37,17 @@
   },
   {
     "date": "2019-09-15T19:00:00-04:00",
-    "home": "Atlanta",
-    "away": "Stumptown",
+    "home": "Miami FC",
+    "away": "Philadelphia Fury",
+    "result": [
+      1,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-15T19:00:00-04:00",
+    "home": "Atlanta SC",
+    "away": "Stumptown Athletic",
     "result": [
       1,
       3
@@ -46,8 +55,8 @@
   },
   {
     "date": "2019-09-22T19:00:00-04:00",
-    "home": "California",
-    "away": "LosAngeles",
+    "home": "California United Strikers",
+    "away": "Los Angeles Force",
     "result": [
       3,
       0
@@ -55,8 +64,8 @@
   },
   {
     "date": "2019-09-22T19:00:00-04:00",
-    "home": "Miami",
-    "away": "Stumptown",
+    "home": "Miami FC",
+    "away": "Stumptown Athletic",
     "result": [
       2,
       1
@@ -64,8 +73,8 @@
   },
   {
     "date": "2019-09-25T22:00:00-04:00",
-    "home": "California",
-    "away": "Oakland",
+    "home": "California United Strikers",
+    "away": "Oakland Roots SC",
     "result": [
       1,
       1
@@ -73,8 +82,8 @@
   },
   {
     "date": "2019-09-28T22:04:00-04:00",
-    "home": "Stumptown",
-    "away": "Miami",
+    "home": "Stumptown Athletic",
+    "away": "Miami FC",
     "result": [
       0,
       2
@@ -82,8 +91,8 @@
   },
   {
     "date": "2019-09-28T22:04:00-04:00",
-    "home": "SanDiego",
-    "away": "Oakland",
+    "home": "1904 San Diego FC",
+    "away": "Oakland Roots SC",
     "result": [
       4,
       3
@@ -91,8 +100,8 @@
   },
   {
     "date": "2019-10-02T22:00:00-04:00",
-    "home": "California",
-    "away": "SanDiego",
+    "home": "California United Strikers",
+    "away": "1904 San Diego FC",
     "result": [
       3,
       0
@@ -100,8 +109,8 @@
   },
   {
     "date": "2019-10-05T19:30:00-04:00",
-    "home": "LosAngeles",
-    "away": "Oakland",
+    "home": "Los Angeles Force",
+    "away": "Oakland Roots SC",
     "result": [
       1,
       0
@@ -109,8 +118,8 @@
   },
   {
     "date": "2019-10-06T19:30:00-04:00",
-    "home": "Miami",
-    "away": "Atlanta",
+    "home": "Miami FC",
+    "away": "Atlanta SC",
     "result": [
       2,
       2
@@ -118,61 +127,67 @@
   },
   {
     "date": "2019-10-12T22:04:00-04:00",
-    "home": "Atlanta",
-    "away": "Miami",
-    "result": null
+    "home": "Atlanta SC",
+    "away": "Miami FC",
+    "result": [
+      1,
+      2
+    ]
   },
   {
     "date": "2019-10-12T22:04:00-04:00",
-    "home": "Stumptown",
-    "away": "Chattanooga",
+    "home": "Stumptown Athletic",
+    "away": "Chattanooga FC",
+    "result": [
+      2,
+      2
+    ]
+  },
+  {
+    "date": "2019-10-19T22:04:00-04:00",
+    "home": "Chattanooga FC",
+    "away": "Stumptown Athletic",
     "result": null
   },
   {
     "date": "2019-10-19T22:04:00-04:00",
-    "home": "Chattanooga",
-    "away": "Stumptown",
-    "result": null
-  },
-  {
-    "date": "2019-10-19T22:04:00-04:00",
-    "home": "Oakland",
-    "away": "LosAngeles",
+    "home": "Oakland Roots SC",
+    "away": "Los Angeles Force",
     "result": null
   },
   {
     "date": "2019-10-20T22:04:00-04:00",
-    "home": "California",
-    "away": "SanDiego",
+    "home": "California United Strikers",
+    "away": "1904 San Diego FC",
     "result": null
   },
   {
     "date": "2019-10-25T22:04:00-04:00",
-    "home": "Stumptown",
-    "away": "Atlanta",
+    "home": "Stumptown Athletic",
+    "away": "Atlanta SC",
     "result": null
   },
   {
     "date": "2019-10-26T22:04:00-04:00",
-    "home": "Miami",
-    "away": "Oakland",
+    "home": "Miami FC",
+    "away": "Oakland Roots SC",
     "result": null
   },
   {
     "date": "2019-10-26T22:04:00-04:00",
-    "home": "LosAngeles",
-    "away": "California",
+    "home": "Los Angeles Force",
+    "away": "California United Strikers",
     "result": null
   },
   {
     "date": "2019-11-02T22:04:00-04:00",
-    "home": "SanDiego",
-    "away": "LosAngeles",
+    "home": "1904 San Diego FC",
+    "away": "Los Angeles Force",
     "result": null
   },
   {
     "date": "2019-08-10T19:30:00-04:00",
-    "home": "Milwaukee",
+    "home": "Milwaukee Torrent",
     "away": "NapaValley",
     "result": [
       2,
@@ -181,8 +196,8 @@
   },
   {
     "date": "2019-08-10T19:30:00-04:00",
-    "home": "Chattanooga",
-    "away": "NewYork",
+    "home": "Chattanooga FC",
+    "away": "New York Cosmos B",
     "result": [
       0,
       1
@@ -190,8 +205,8 @@
   },
   {
     "date": "2019-08-17T19:30:00-04:00",
-    "home": "NewYork",
-    "away": "Milwaukee",
+    "home": "New York Cosmos B",
+    "away": "Milwaukee Torrent",
     "result": [
       2,
       2
@@ -199,8 +214,8 @@
   },
   {
     "date": "2019-08-17T19:30:00-04:00",
-    "home": "Detroit",
-    "away": "Chattanooga",
+    "home": "Detroit City FC",
+    "away": "Chattanooga FC",
     "result": [
       2,
       1
@@ -209,7 +224,7 @@
   {
     "date": "2019-08-24T19:30:00-04:00",
     "home": "NapaValley",
-    "away": "Detroit",
+    "away": "Detroit City FC",
     "result": [
       0,
       4
@@ -217,7 +232,7 @@
   },
   {
     "date": "2019-08-24T19:30:00-04:00",
-    "home": "Chattanooga",
+    "home": "Chattanooga FC",
     "away": "Michigan",
     "result": [
       1,
@@ -226,8 +241,8 @@
   },
   {
     "date": "2019-08-31T19:30:00-04:00",
-    "home": "Michigan",
-    "away": "NewYork",
+    "home": "Michigan Stars",
+    "away": "New York Cosmos B",
     "result": [
       0,
       2
@@ -236,7 +251,7 @@
   {
     "date": "2019-09-01T19:30:00-04:00",
     "home": "NapaValley",
-    "away": "Chattanooga",
+    "away": "Chattanooga FC",
     "result": [
       0,
       6
@@ -244,8 +259,8 @@
   },
   {
     "date": "2019-09-07T19:30:00-04:00",
-    "home": "Milwaukee",
-    "away": "Chattanooga",
+    "home": "Milwaukee Torrent",
+    "away": "Chattanooga FC",
     "result": [
       1,
       1
@@ -253,7 +268,7 @@
   },
   {
     "date": "2019-09-07T19:30:00-04:00",
-    "home": "NewYork",
+    "home": "New York Cosmos B",
     "away": "NapaValley",
     "result": [
       1,
@@ -262,7 +277,7 @@
   },
   {
     "date": "2019-09-14T19:30:00-04:00",
-    "home": "Chattanooga",
+    "home": "Chattanooga FC",
     "away": "NapaValley",
     "result": [
       3,
@@ -271,8 +286,8 @@
   },
   {
     "date": "2019-09-14T19:30:00-04:00",
-    "home": "NewYork",
-    "away": "Michigan",
+    "home": "New York Cosmos B",
+    "away": "Michigan Stars",
     "result": [
       2,
       0
@@ -280,8 +295,8 @@
   },
   {
     "date": "2019-09-14T19:30:00-04:00",
-    "home": "Milwaukee",
-    "away": "Detroit",
+    "home": "Milwaukee Torrent",
+    "away": "Detroit City FC",
     "result": [
       0,
       1
@@ -290,7 +305,7 @@
   {
     "date": "2019-09-21T19:30:00-04:00",
     "home": "NapaValley",
-    "away": "Milwaukee",
+    "away": "Milwaukee Torrent",
     "result": [
       1,
       1
@@ -298,8 +313,8 @@
   },
   {
     "date": "2019-09-21T19:30:00-04:00",
-    "home": "Michigan",
-    "away": "Chattanooga",
+    "home": "Michigan Stars",
+    "away": "Chattanooga FC",
     "result": [
       1,
       4
@@ -307,8 +322,8 @@
   },
   {
     "date": "2019-09-21T19:30:00-04:00",
-    "home": "Detroit",
-    "away": "NewYork",
+    "home": "Detroit City FC",
+    "away": "New York Cosmos B",
     "result": [
       1,
       1
@@ -316,7 +331,7 @@
   },
   {
     "date": "2019-09-26T19:30:00-04:00",
-    "home": "Michigan",
+    "home": "Michigan Stars",
     "away": "NapaValley",
     "result": [
       2,
@@ -325,8 +340,8 @@
   },
   {
     "date": "2019-09-28T19:30:00-04:00",
-    "home": "NewYork",
-    "away": "Chattanooga",
+    "home": "New York Cosmos B",
+    "away": "Chattanooga FC",
     "result": [
       3,
       1
@@ -334,8 +349,8 @@
   },
   {
     "date": "2019-09-28T19:30:00-04:00",
-    "home": "Michigan",
-    "away": "Milwaukee",
+    "home": "Michigan Stars",
+    "away": "Milwaukee Torrent",
     "result": [
       1,
       0
@@ -343,7 +358,7 @@
   },
   {
     "date": "2019-09-28T19:30:00-04:00",
-    "home": "Detroit",
+    "home": "Detroit City FC",
     "away": "NapaValley",
     "result": [
       3,
@@ -352,8 +367,8 @@
   },
   {
     "date": "2019-10-05T19:30:00-04:00",
-    "home": "Chattanooga",
-    "away": "Detroit",
+    "home": "Chattanooga FC",
+    "away": "Detroit City FC",
     "result": [
       0,
       1
@@ -361,8 +376,8 @@
   },
   {
     "date": "2019-10-05T19:30:00-04:00",
-    "home": "NewYork",
-    "away": "Milwaukee",
+    "home": "New York Cosmos B",
+    "away": "Milwaukee Torrent",
     "result": [
       2,
       2
@@ -370,8 +385,8 @@
   },
   {
     "date": "2019-10-08T19:30:00-04:00",
-    "home": "Detroit",
-    "away": "Michigan",
+    "home": "Detroit City FC",
+    "away": "Michigan Stars",
     "result": [
       2,
       0
@@ -379,44 +394,50 @@
   },
   {
     "date": "2019-10-12T19:00:00-04:00",
-    "home": "NewYork",
-    "away": "Detroit",
-    "result": null
+    "home": "New York Cosmos B",
+    "away": "Detroit City FC",
+    "result": [
+      0,
+      0
+    ]
   },
   {
     "date": "2019-10-12T19:00:00-04:00",
-    "home": "Milwaukee",
-    "away": "Michigan",
-    "result": null
+    "home": "Milwaukee Torrent",
+    "away": "Michigan Stars",
+    "result": [
+      2,
+      1
+    ]
   },
   {
     "date": "2019-10-16T19:00:00-04:00",
-    "home": "Michigan",
-    "away": "Detroit",
+    "home": "Michigan Stars",
+    "away": "Detroit City FC",
     "result": null
   },
   {
     "date": "2019-10-16T19:00:00-04:00",
     "home": "NapaValley",
-    "away": "NewYork",
+    "away": "New York Cosmos B",
     "result": null
   },
   {
     "date": "2019-10-19T19:30:00-04:00",
-    "home": "Detroit",
-    "away": "Milwaukee",
+    "home": "Detroit City FC",
+    "away": "Milwaukee Torrent",
     "result": null
   },
   {
     "date": "2019-10-26T18:00:00-04:00",
-    "home": "Chattanooga",
-    "away": "Milwaukee",
+    "home": "Chattanooga FC",
+    "away": "Milwaukee Torrent",
     "result": null
   },
   {
     "date": "2019-10-26T19:00:00-04:00",
     "home": "NapaValley",
-    "away": "Michigan",
+    "away": "Michigan Stars",
     "result": null
   }
 ]
