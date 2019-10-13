@@ -2,35 +2,27 @@ use chrono::{ DateTime, FixedOffset };
 use serde::{ de, Deserialize, Deserializer, Serialize, Serializer };
 use std::{ collections::{ HashMap }, fmt };
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
-pub enum ClubName { Atlanta, California, Chattanooga, Detroit, LosAngeles, Miami, Michigan, Milwaukee, Oakland, NewYork, NapaValley, Philadelphia, SanDiego, Stumptown }
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
-pub struct Club { pub name: ClubName }
+pub struct Club { pub name: String }
 #[derive(Clone, Debug)]
 pub struct Clubs { pub data: HashMap<Club, u32> }
-#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Match  {
     #[serde(deserialize_with = "self::deserialize_from_str")]
     #[serde(serialize_with = "self::serialize_to_str")]
     pub date: chrono::DateTime<FixedOffset>,
-    pub home: ClubName,
-    pub away: ClubName,
+    pub home: String,
+    pub away: String,
     pub result: Option<(u8, u8)>
 }
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub enum Scoring { Home, Away }
 
-impl Club { pub fn new(name: ClubName) -> Self { Club { name } } }
-
-impl fmt::Display for ClubName {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
+impl Club { pub fn new(name: String) -> Self { Club { name } } }
 
 impl Clubs {
     /// Returns the index 
-    pub fn get_index(self, club_name: ClubName) -> u32 {
+    pub fn get_index_by_name(self, club_name: String) -> u32 {
         let mut i = 0;
         for c in self.data { 
             if c.0.name == club_name {
@@ -42,7 +34,7 @@ impl Clubs {
 }
 
 impl Match {
-    pub fn new(date: DateTime<FixedOffset>, home: ClubName, away: ClubName, result: Option<(u8, u8)>) -> Self {
+    pub fn new(date: DateTime<FixedOffset>, home: String, away: String, result: Option<(u8, u8)>) -> Self {
         Match { date, home, away, result }
     }
 }

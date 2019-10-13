@@ -7,7 +7,7 @@ pub mod neural;
 pub mod utils;
 
 use chrono::{ DateTime, FixedOffset };
-use models::{ Club, ClubName, Clubs, Match, Scoring };
+use models::{ Club, Clubs, Match, Scoring };
 use neural::nn::{ NN, HaltCondition };
 use std::{ collections::{ HashMap, HashSet }, convert::{ TryInto }, fmt };
 
@@ -45,8 +45,8 @@ impl From<&[Match]> for Clubs {
         let mut tmp_clubs = HashSet::new();
         let mut data: HashMap<Club, u32> = HashMap::new();
         for m in matches {
-            tmp_clubs.insert(Club::new(m.home));
-            tmp_clubs.insert(Club::new(m.away));
+            tmp_clubs.insert(Club::new(m.home.clone()));
+            tmp_clubs.insert(Club::new(m.away.clone()));
         }
         for (i, c) in tmp_clubs.iter().enumerate() {
             data.insert(c.clone(), i as u32);
@@ -62,8 +62,8 @@ impl <'a>Features for Guru<'a> {
         // CLUBS: HOME_FACTOR AWAY_FACTOR
         let num_of_clubs: u32 = clubs.data.len().try_into().unwrap();
         let mut inputs = vec![];
-        let home_index = clubs.clone().get_index(m.home);
-        let away_index = clubs.clone().get_index(m.away);
+        let home_index = clubs.clone().get_index_by_name(m.home.clone());
+        let away_index = clubs.clone().get_index_by_name(m.away.clone());
         for i in 0..num_of_clubs {
             if i == home_index {
                 inputs.push(normalize(1.0, 0.0, 1.0 + AWAY_FACTOR));
@@ -222,14 +222,14 @@ impl Stats {
     pub fn game_days(matches: &[Match]) -> usize { matches.iter().fold(0, |i, _m| i + 1 ) }
 
     /// Creates ```Stats``` for a ```ClubName``` calculated from a Vec<Match>
-    pub fn gen_stats(club: ClubName, matches: &[Match]) -> Stats {
+    pub fn gen_stats(club: &Club, matches: &[Match]) -> Stats {
         let mut home_scores = vec![];
         let mut away_scores = vec![];
         for m in matches {
             if let Some(result) = m.result {
-                if m.home == club {
+                if m.home == club.name {
                     home_scores.push(result.0);
-                } else if m.away == club {
+                } else if m.away == club.name {
                     away_scores.push(result.1);
                 }
             }

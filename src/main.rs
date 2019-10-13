@@ -2,7 +2,7 @@
 extern crate guru;
 
 use guru::{
-    models::{ Clubs, ClubName, Match, Scoring },
+    models::{ Club, Clubs, Match, Scoring },
     Features,
     Guru, 
     neural::nn::NN, 
@@ -59,10 +59,10 @@ impl From< ( &Match, &[u8; 2] ) > for PredictionResult {
     }
 }
 
-fn stats(clubs: &Clubs, matches: &[Match]) -> HashMap<ClubName, Stats> {
+fn stats(clubs: &Clubs, matches: &[Match]) -> HashMap<String, Stats> {
     let mut leaguge_stats = HashMap::new();
     for c in &clubs.data {
-        leaguge_stats.insert(c.0.name, Stats::gen_stats(c.0.name, matches ) );
+        leaguge_stats.insert(c.0.name.clone(), Stats::gen_stats(c.0, matches ) );
     }
     leaguge_stats
 }
@@ -70,7 +70,7 @@ fn stats(clubs: &Clubs, matches: &[Match]) -> HashMap<ClubName, Stats> {
 /// Creates a Vec of tuples.
 /// Each tuple represents a training set, where inputs are at 0
 /// and outputs at 1
-pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Clubs, league_stats: &mut HashMap<ClubName, Stats, S>, all_matches: &[Match]) -> Vec<Vec<f64>> {
+pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Clubs, league_stats: &mut HashMap<String, Stats, S>, all_matches: &[Match]) -> Vec<Vec<f64>> {
     // vec of input values f64
     // returned
     let mut input_sets = vec![];
@@ -186,7 +186,7 @@ fn main()-> std::io::Result<()> {
     // splitting all matches into training and test matches for validation 
     let training_matches: Vec<Match> = all_matches.iter()
         .filter( |&m| m.result.is_some() )
-        .copied()
+        .cloned()
         .collect();
     
     let test_matches: Vec<Match> = training_matches.to_vec().drain(30..training_matches.len()).collect();
@@ -272,7 +272,7 @@ fn main()-> std::io::Result<()> {
     // Predict the future and become rich
     let prediction_matches: Vec<Match> = all_matches.iter()
         .filter( |&m| m.result.is_none() )
-        .copied()
+        .cloned()
         .collect();
    // dbg!(&prediction_matches);
     let prediction_set: Vec<(Vec<f64>, Vec<f64>)> = input_sets(&prediction_matches, &clubs, &mut stats, &all_matches).iter()
