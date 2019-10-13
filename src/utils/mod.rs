@@ -1,5 +1,5 @@
 use crate::models::Match;
-use std::{ fs::File, io::{ prelude::* } };
+use std::{fs::File, io::prelude::*};
 
 pub fn load_matches() -> std::io::Result<Vec<Match>> {
     let mut file = File::open("data.json")?;

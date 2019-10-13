@@ -1,6 +1,6 @@
 /***
 Modified version, cloned from https://github.com/jackm321/RustNN
-on October 11, 2019 - Latest commit 26aff11 on May 8, 2015 
+on October 11, 2019 - Latest commit 26aff11 on May 8, 2015
 **/
 
 //! An easy to use neural network library written in Rust.
@@ -60,13 +60,13 @@ on October 11, 2019 - Latest commit 26aff11 on May 8, 2015
 //! }
 //! ```
 
-use HaltCondition::{ Epochs, MSE, Timer };
-use LearningMode::{ Incremental };
-use std::iter::{Zip, Enumerate};
-use std::slice;
-use rustc_serialize::json;
-use time::{ Duration, PreciseTime };
 use rand::Rng;
+use rustc_serialize::json;
+use std::iter::{Enumerate, Zip};
+use std::slice;
+use time::{Duration, PreciseTime};
+use HaltCondition::{Epochs, Timer, MSE};
+use LearningMode::Incremental;
 
 static DEFAULT_LEARNING_RATE: f64 = 0.3f64;
 static DEFAULT_MOMENTUM: f64 = 0f64;
@@ -87,12 +87,12 @@ pub enum HaltCondition {
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum LearningMode {
     /// train the network Incrementally (updates weights after each example)
-    Incremental
+    Incremental,
 }
 
 /// Used to specify options that dictate how a network will be trained
 #[derive(Debug)]
-pub struct Trainer<'a,'b> {
+pub struct Trainer<'a, 'b> {
     examples: &'b [(Vec<f64>, Vec<f64>)],
     rate: f64,
     momentum: f64,
@@ -106,11 +106,10 @@ pub struct Trainer<'a,'b> {
 /// All of the options are optional because the `Trainer` struct
 /// has default values built in for each option. The `go()` method must
 /// be called however or the network will not be trained.
-impl<'a,'b> Trainer<'a,'b>  {
-
+impl<'a, 'b> Trainer<'a, 'b> {
     /// Specifies the learning rate to be used when training (default is `0.3`)
     /// This is the step size that is used in the backpropagation algorithm.
-    pub fn rate(&mut self, rate: f64) -> &mut Trainer<'a,'b> {
+    pub fn rate(&mut self, rate: f64) -> &mut Trainer<'a, 'b> {
         if rate <= 0f64 {
             panic!("the learning rate must be a positive number");
         }
@@ -120,7 +119,7 @@ impl<'a,'b> Trainer<'a,'b>  {
     }
 
     /// Specifies the momentum to be used when training (default is `0.0`)
-    pub fn momentum(&mut self, momentum: f64) -> &mut Trainer<'a,'b> {
+    pub fn momentum(&mut self, momentum: f64) -> &mut Trainer<'a, 'b> {
         if momentum <= 0f64 {
             panic!("momentum must be positive");
         }
@@ -131,12 +130,12 @@ impl<'a,'b> Trainer<'a,'b>  {
 
     /// Specifies how often (measured in batches) to log the current error rate (mean squared error) during training.
     /// `Some(x)` means log after every `x` batches and `None` means never log
-    pub fn log_interval(&mut self, log_interval: Option<u32>) -> &mut Trainer<'a,'b> {
+    pub fn log_interval(&mut self, log_interval: Option<u32>) -> &mut Trainer<'a, 'b> {
         match log_interval {
             Some(interval) if interval < 1 => {
                 panic!("log interval must be Some positive number or None")
             }
-            _ => ()
+            _ => (),
         }
 
         self.log_interval = log_interval;
@@ -148,15 +147,11 @@ impl<'a,'b> Trainer<'a,'b>  {
     /// while `MSE(e)` will stop the training when the error rate
     /// is at or below `e`. `Timer(d)` will halt after the [duration](https://doc.rust-lang.org/time/time/struct.Duration.html) `d` has
     /// elapsed.
-    pub fn halt_condition(&mut self, halt_condition: HaltCondition) -> &mut Trainer<'a,'b> {
+    pub fn halt_condition(&mut self, halt_condition: HaltCondition) -> &mut Trainer<'a, 'b> {
         match halt_condition {
-            Epochs(epochs) if epochs < 1 => {
-                panic!("must train for at least one epoch")
-            }
-            MSE(mse) if mse <= 0f64 => {
-                panic!("MSE must be greater than 0")
-            }
-            _ => ()
+            Epochs(epochs) if epochs < 1 => panic!("must train for at least one epoch"),
+            MSE(mse) if mse <= 0f64 => panic!("MSE must be greater than 0"),
+            _ => (),
         }
 
         self.halt_condition = halt_condition;
@@ -164,7 +159,7 @@ impl<'a,'b> Trainer<'a,'b>  {
     }
     /// Specifies what [mode](http://en.wikipedia.org/wiki/Backpropagation#Modes_of_learning) to train the network in.
     /// `Incremental` means update the weights in the network after every example.
-    pub fn learning_mode(&mut self, learning_mode: LearningMode) -> &mut Trainer<'a,'b> {
+    pub fn learning_mode(&mut self, learning_mode: LearningMode) -> &mut Trainer<'a, 'b> {
         self.learning_mode = learning_mode;
         self
     }
@@ -178,10 +173,9 @@ impl<'a,'b> Trainer<'a,'b>  {
             self.rate,
             self.momentum,
             self.log_interval,
-            self.halt_condition
+            self.halt_condition,
         )
     }
-
 }
 
 /// Neural network
@@ -192,7 +186,6 @@ pub struct NN {
 }
 
 impl NN {
-
     /// Each number in the `layers_sizes` parameter specifies a
     /// layer in the network. The number itself is the number of nodes in that
     /// layer. The first number is the input layer, the last
@@ -210,7 +203,6 @@ impl NN {
                 panic!("can't have any empty layers");
             }
         }
-
 
         let mut layers = Vec::new();
         let mut it = layers_sizes.iter();
@@ -235,7 +227,10 @@ impl NN {
             prev_layer_size = layer_size;
         }
         layers.shrink_to_fit();
-        NN { layers, num_inputs: first_layer_size }
+        NN {
+            layers,
+            num_inputs: first_layer_size,
+        }
     }
 
     /// Runs the network on an input and returns a vector of the results.
@@ -261,7 +256,7 @@ impl NN {
             log_interval: None,
             halt_condition: Epochs(DEFAULT_EPOCHS),
             learning_mode: Incremental,
-            nn: self
+            nn: self,
         }
     }
 
@@ -276,9 +271,14 @@ impl NN {
         network
     }
 
-    fn train_details(&mut self, examples: &[(Vec<f64>, Vec<f64>)], rate: f64, momentum: f64, log_interval: Option<u32>,
-                    halt_condition: HaltCondition) -> f64 {
-
+    fn train_details(
+        &mut self,
+        examples: &[(Vec<f64>, Vec<f64>)],
+        rate: f64,
+        momentum: f64,
+        log_interval: Option<u32>,
+        halt_condition: HaltCondition,
+    ) -> f64 {
         // check that input and output sizes are correct
         let input_layer_size = self.num_inputs;
         let output_layer_size = self.layers[self.layers.len() - 1].len();
@@ -294,36 +294,46 @@ impl NN {
         self.train_incremental(examples, rate, momentum, log_interval, halt_condition)
     }
 
-    fn train_incremental(&mut self, examples: &[(Vec<f64>, Vec<f64>)], rate: f64, momentum: f64, log_interval: Option<u32>,
-                    halt_condition: HaltCondition) -> f64 {
-
+    fn train_incremental(
+        &mut self,
+        examples: &[(Vec<f64>, Vec<f64>)],
+        rate: f64,
+        momentum: f64,
+        log_interval: Option<u32>,
+        halt_condition: HaltCondition,
+    ) -> f64 {
         let mut prev_deltas = self.make_weights_tracker(0.0f64);
         let mut epochs = 0u32;
         let mut training_error_rate = 0f64;
         let start_time = PreciseTime::now();
 
         loop {
-
             if epochs > 0 {
                 // log error rate if necessary
                 match log_interval {
                     Some(interval) if epochs % interval == 0 => {
                         println!("error rate: {}", training_error_rate);
-                    },
+                    }
                     _ => (),
                 }
 
                 // check if we've met the halt condition yet
                 match halt_condition {
                     Epochs(epochs_halt) => {
-                        if epochs == epochs_halt { break }
-                    },
+                        if epochs == epochs_halt {
+                            break;
+                        }
+                    }
                     MSE(target_error) => {
-                        if training_error_rate <= target_error { break }
-                    },
+                        if training_error_rate <= target_error {
+                            break;
+                        }
+                    }
                     Timer(duration) => {
                         let now = PreciseTime::now();
-                        if start_time.to(now) >= duration { break }
+                        if start_time.to(now) >= duration {
+                            break;
+                        }
                     }
                 }
             }
@@ -349,7 +359,7 @@ impl NN {
         for (layer_index, layer) in self.layers.iter().enumerate() {
             let mut layer_results = Vec::new();
             for node in layer.iter() {
-                layer_results.push( sigmoid(modified_dotprod(&node, &results[layer_index])) )
+                layer_results.push(sigmoid(modified_dotprod(&node, &results[layer_index])))
             }
             results.push(layer_results);
         }
@@ -357,7 +367,13 @@ impl NN {
     }
 
     // updates all weights in the network
-    fn update_weights(&mut self, network_weight_updates: &[Vec<Vec<f64>>], prev_deltas: &mut Vec<Vec<Vec<f64>>>, rate: f64, momentum: f64) {
+    fn update_weights(
+        &mut self,
+        network_weight_updates: &[Vec<Vec<f64>>],
+        prev_deltas: &mut Vec<Vec<Vec<f64>>>,
+        rate: f64,
+        momentum: f64,
+    ) {
         for layer_index in 0..self.layers.len() {
             let layer = &mut self.layers[layer_index];
             let layer_weight_updates = &network_weight_updates[layer_index];
@@ -373,18 +389,23 @@ impl NN {
                 }
             }
         }
-
     }
 
     // calculates all weight updates by backpropagation
-    fn calculate_weight_updates(&self, results: &[Vec<f64>], targets: &[f64]) -> Vec<Vec<Vec<f64>>> {
-        let mut network_errors:Vec<Vec<f64>> = Vec::new();
+    fn calculate_weight_updates(
+        &self,
+        results: &[Vec<f64>],
+        targets: &[f64],
+    ) -> Vec<Vec<Vec<f64>>> {
+        let mut network_errors: Vec<Vec<f64>> = Vec::new();
         let mut network_weight_updates = Vec::new();
         let layers = &self.layers;
         let network_results = &results[1..]; // skip the input layer
         let mut next_layer_nodes: Option<&Vec<Vec<f64>>> = None;
 
-        for (layer_index, (layer_nodes, layer_results)) in iter_zip_enum(layers, network_results).rev() {
+        for (layer_index, (layer_nodes, layer_results)) in
+            iter_zip_enum(layers, network_results).rev()
+        {
             let prev_layer_results = &results[layer_index];
             let mut layer_errors = Vec::new();
             let mut layer_weight_updates = Vec::new();
@@ -397,8 +418,13 @@ impl NN {
                 } else {
                     let mut sum = 0f64;
                     let next_layer_errors = &network_errors[network_errors.len() - 1];
-                    for (next_node, &next_node_error_data) in next_layer_nodes.unwrap().iter().zip((next_layer_errors).iter()) {
-                        sum += next_node[node_index+1] * next_node_error_data; // +1 because the 0th weight is the threshold
+                    for (next_node, &next_node_error_data) in next_layer_nodes
+                        .unwrap()
+                        .iter()
+                        .zip((next_layer_errors).iter())
+                    {
+                        sum += next_node[node_index + 1] * next_node_error_data;
+                        // +1 because the 0th weight is the threshold
                     }
                     result * (1f64 - result) * sum
                 };
@@ -408,7 +434,7 @@ impl NN {
                     let prev_layer_result = if weight_index == 0 {
                         1f64
                     } else {
-                       prev_layer_results[weight_index-1]
+                        prev_layer_results[weight_index - 1]
                     };
                     let weight_update = node_error * prev_layer_result;
                     node_weight_updates.push(weight_update);
@@ -459,15 +485,17 @@ fn sigmoid(y: f64) -> f64 {
 
 // takes two arrays and enumerates the iterator produced by zipping each of
 // their iterators together
-fn iter_zip_enum<'s, 't, S: 's, T: 't>(s: &'s [S], t: &'t [T]) ->
-    Enumerate<Zip<slice::Iter<'s, S>, slice::Iter<'t, T>>>  {
+fn iter_zip_enum<'s, 't, S: 's, T: 't>(
+    s: &'s [S],
+    t: &'t [T],
+) -> Enumerate<Zip<slice::Iter<'s, S>, slice::Iter<'t, T>>> {
     s.iter().zip(t.iter()).enumerate()
 }
 
 // calculates MSE of output layer
 fn calculate_error(results: &[Vec<f64>], targets: &[f64]) -> f64 {
-    let last_results = &results[results.len()-1];
-    let mut total:f64 = 0f64;
+    let last_results = &results[results.len() - 1];
+    let mut total: f64 = 0f64;
     for (&result, &target) in last_results.iter().zip(targets.iter()) {
         total += (target - result).powi(2);
     }
