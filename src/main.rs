@@ -141,7 +141,6 @@ pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Cl
         inputs.push( normalize(h_rel as f64, 0f64, (h_rel + a_rel) as f64) );
         inputs.push( normalize(a_rel as f64, 0f64, (h_rel + a_rel) as f64) );
         
-
         // h_ths STATS
         /***  
         Adding 2 features
@@ -176,7 +175,7 @@ pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Cl
 
 fn main()-> std::io::Result<()> {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() < 2{ panic!("ERROR: Need max error rate for training.")}
+    if args.len() < 2 { panic!("ERROR: Need max error rate for training.") }
     // all matches
     let all_matches = load_matches()?;
     let clubs: Clubs = Clubs::from(all_matches.as_slice());
@@ -254,6 +253,7 @@ fn main()-> std::io::Result<()> {
     println!();
     println!();
     // Prediction Network
+    // TODO: for each Match
     let mut test_results = guru.test("Testing Prediction Network on Training Set", &mut pred_net, &pred_training_set, &training_matches);
     println!();
     println!("Result {}", test_results[0].to_string());

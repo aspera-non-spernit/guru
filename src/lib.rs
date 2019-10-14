@@ -94,6 +94,7 @@ impl <'a>Features for Guru<'a> {
         Away Team played 2 matches away, scored 1, 1 = 2
         Goal difference 3.0
     **/
+    // TODO: goal_diff to date
     fn goal_diff(stats: &mut Stats) -> f64 {
         let h = stats.home_scores
             .drain(0..stats.games_played[0] as usize)
@@ -123,7 +124,8 @@ impl <'a>Training for Guru<'a> {
 }
 
 impl <'a>Testing for Guru<'a> {
-    // TODO separate Display
+    // TODO: separate Display
+    // TODO: take test_set (Vec<f64>, Vec<f64>)and single match: Match
     fn test(&self, header: &str, net: &mut NN, test_set: &[(Vec<f64>, Vec<f64>)], matches: &[Match]) -> [NetworkStats; 2] { 
         println!("{:?}", header);
         let ats = Stats::all_time_highest_score_in_league(&self.data_set);
