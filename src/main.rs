@@ -7,7 +7,7 @@ use guru::{
     Guru, 
     neural::nn::NN, 
     Stats,
-    utils::load_matches,
+    utils::{ load_matches, normalize },
     Training,
     Testing
 };
@@ -40,8 +40,8 @@ impl From< ( &Match, &[u8; 2] ) > for PredictionResult {
             Some(result) => {
                 if highest as f64 != 0.0 { 
                     PredictionResult(
-                        guru::normalize(f64::from(result.0), 0f64, highest),
-                        guru::normalize(f64::from(result.1), 0f64, highest)
+                        normalize(f64::from(result.0), 0f64, highest),
+                        normalize(f64::from(result.1), 0f64, highest)
                     )
                 } else {
                     PredictionResult(
@@ -89,8 +89,8 @@ pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Cl
         **/
         let ths: f64 = Stats::total_scoring_by_club_to_date(&league_stats.get(&m.home).unwrap(), Scoring::Home).into();
         let tas: f64 = Stats::total_scoring_by_club_to_date(&league_stats.get(&m.away).unwrap(), Scoring::Away).into();
-        inputs.push(guru::normalize( ths, 0f64, (ths + tas) as f64 ));
-        inputs.push(guru::normalize( tas, 0f64, (ths + tas) as f64 ));
+        inputs.push(normalize( ths, 0f64, (ths + tas) as f64 ));
+        inputs.push(normalize( tas, 0f64, (ths + tas) as f64 ));
  
         /***
         Adding 2 features
@@ -100,8 +100,8 @@ pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Cl
         **/
         let hsh: f64 = Stats::highest_alltime_scores_by_club(&league_stats.get(&m.home).unwrap()).0.into();
         let hsa: f64 = Stats::highest_alltime_scores_by_club(&league_stats.get(&m.away).unwrap()).1.into(); 
-        inputs.push(guru::normalize(hsh, 0f64, (hsh + hsa) as f64) );
-        inputs.push(guru::normalize(hsa, 0f64, (hsh + hsa) as f64) );
+        inputs.push(normalize(hsh, 0f64, (hsh + hsa) as f64) );
+        inputs.push(normalize(hsa, 0f64, (hsh + hsa) as f64) );
 
         let hs = Stats::highest_scores_to_date(
             &league_stats.get(&m.home).unwrap(),
@@ -113,8 +113,8 @@ pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Cl
         Finds the highest scoring for both home team at home and away team away to date
         Normalizes with min: 0 max: sum(hsh, hsa)
         **/
-        inputs.push( guru::normalize(f64::from(hs[0]), 0f64, f64::from(hs[0] + hs[1]) ) );
-        inputs.push( guru::normalize(f64::from(hs[1]), 0f64, f64::from(hs[0] + hs[1]) ) );
+        inputs.push( normalize(f64::from(hs[0]), 0f64, f64::from(hs[0] + hs[1]) ) );
+        inputs.push( normalize(f64::from(hs[1]), 0f64, f64::from(hs[0] + hs[1]) ) );
 
         /***
         Adding 2 features
@@ -138,8 +138,8 @@ pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Cl
         // println!("h {:?} {:?} {:?}", h_ths, h_tas, h_rel);
         // println!("a {:?} {:?} {:?}", a_ths, a_tas, a_rel);
         //println!("Home {:?} : {:?} Away",  guru::normalize(h_rel as f64, 0f64, (h_rel + a_rel) as f64),  guru::normalize(a_rel as f64, 0f64, (h_rel + a_rel) as f64));
-        inputs.push( guru::normalize(h_rel as f64, 0f64, (h_rel + a_rel) as f64) );
-        inputs.push( guru::normalize(a_rel as f64, 0f64, (h_rel + a_rel) as f64) );
+        inputs.push( normalize(h_rel as f64, 0f64, (h_rel + a_rel) as f64) );
+        inputs.push( normalize(a_rel as f64, 0f64, (h_rel + a_rel) as f64) );
         
 
         // h_ths STATS
@@ -150,8 +150,8 @@ pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Cl
         **/
         let ats = Stats::all_time_highest_score_in_league(all_matches);
         let highest = if ats[0] > ats[1] { f64::from(ats[0]) } else { f64::from(ats[1]) };
-        inputs.push( guru::normalize(f64::from(hs[0]), 0f64, highest as f64) );
-        inputs.push( guru::normalize( f64::from(hs[1]), 0f64, highest as f64) );
+        inputs.push( normalize(f64::from(hs[0]), 0f64, highest as f64) );
+        inputs.push( normalize( f64::from(hs[1]), 0f64, highest as f64) );
 
         /***
         Adding 1 feature 1 

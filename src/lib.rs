@@ -9,6 +9,7 @@ pub mod utils;
 use chrono::{ DateTime, FixedOffset };
 use models::{ Club, Clubs, Match, Scoring };
 use neural::nn::{ NN, HaltCondition };
+use utils::normalize;
 use std::{ collections::{ HashMap, HashSet }, convert::{ TryInto }, fmt };
 
 const AWAY_FACTOR: f64 = 1.0;
@@ -194,11 +195,6 @@ impl fmt::Display for NetworkStats {
 tested: {}, positive: {}, negative: {}, correct: {}%",
         self.tested, self.positive, self.negative, self.positive * 100 / div)
     }
-}
-
-/// Simple normalization function
-pub fn normalize(v: f64, min: f64, max: f64) -> f64 { 
-    if (max - min) == 0.0 {  (v - min)  } else { (v - min) / (max - min) }
 }
 
 impl Stats {
