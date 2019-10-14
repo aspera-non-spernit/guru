@@ -1,5 +1,59 @@
 [
   {
+    "date": "2019-05-12T19:00:00-04:00",
+    "home": "Michigan Stars FC",
+    "away": "Detroit City FC",
+    "result": [
+      0,
+      1
+    ]
+  },
+  {
+    "date": "2019-06-12T19:30:00-04:00",
+    "home": "Chattanooga FC",
+    "away": "Atlanta SC",
+    "result": [
+      3,
+      0
+    ]
+  },
+  {
+    "date": "2019-06-14T19:30:00-04:00",
+    "home": "Detroit City FC",
+    "away": "Michigan Stars FC",
+    "result": [
+      2,
+      1
+    ]
+  },
+  {
+    "date": "2019-06-22T19:30:00-04:00",
+    "home": "Atlanta SC",
+    "away": "Chattanooga FC",
+    "result": [
+      0,
+      5
+    ]
+  },
+  {
+    "date": "2019-07-16T19:00:00-04:00",
+    "home": "Miami FC",
+    "away": "Chattanooga FC",
+    "result": [
+      2,
+      0
+    ]
+  },
+  {
+    "date": "2019-08-03T19:00:00-04:00",
+    "home": "New York Cosmos B",
+    "away": "Miami FC",
+    "result": [
+      1,
+      3
+    ]
+  },
+  {
     "date": "2019-08-31T19:30:00-04:00",
     "home": "Detroit City FC",
     "away": "Philadelphia Fury",
@@ -188,7 +242,7 @@
   {
     "date": "2019-08-10T19:30:00-04:00",
     "home": "Milwaukee Torrent",
-    "away": "Napa Valley",
+    "away": "Napa Valley 1839 FC",
     "result": [
       2,
       0
@@ -223,7 +277,7 @@
   },
   {
     "date": "2019-08-24T19:30:00-04:00",
-    "home": "Napa Valley",
+    "home": "Napa Valley 1839 FC",
     "away": "Detroit City FC",
     "result": [
       0,
@@ -233,7 +287,7 @@
   {
     "date": "2019-08-24T19:30:00-04:00",
     "home": "Chattanooga FC",
-    "away": "Michigan",
+    "away": "Michigan Stars FC",
     "result": [
       1,
       1
@@ -241,7 +295,7 @@
   },
   {
     "date": "2019-08-31T19:30:00-04:00",
-    "home": "Michigan Stars",
+    "home": "Michigan Stars FC",
     "away": "New York Cosmos B",
     "result": [
       0,
@@ -250,7 +304,7 @@
   },
   {
     "date": "2019-09-01T19:30:00-04:00",
-    "home": "Napa Valley",
+    "home": "Napa Valley 1839 FC",
     "away": "Chattanooga FC",
     "result": [
       0,
@@ -269,7 +323,7 @@
   {
     "date": "2019-09-07T19:30:00-04:00",
     "home": "New York Cosmos B",
-    "away": "Napa Valley",
+    "away": "Napa Valley 1839 FC",
     "result": [
       1,
       0
@@ -278,7 +332,7 @@
   {
     "date": "2019-09-14T19:30:00-04:00",
     "home": "Chattanooga FC",
-    "away": "Napa Valley",
+    "away": "Napa Valley 1839 FC",
     "result": [
       3,
       0
@@ -287,7 +341,7 @@
   {
     "date": "2019-09-14T19:30:00-04:00",
     "home": "New York Cosmos B",
-    "away": "Michigan Stars",
+    "away": "Michigan Stars FC",
     "result": [
       2,
       0
@@ -304,7 +358,7 @@
   },
   {
     "date": "2019-09-21T19:30:00-04:00",
-    "home": "Napa Valley",
+    "home": "Napa Valley 1839 FC",
     "away": "Milwaukee Torrent",
     "result": [
       1,
@@ -313,7 +367,7 @@
   },
   {
     "date": "2019-09-21T19:30:00-04:00",
-    "home": "Michigan Stars",
+    "home": "Michigan Stars FC",
     "away": "Chattanooga FC",
     "result": [
       1,
@@ -331,8 +385,8 @@
   },
   {
     "date": "2019-09-26T19:30:00-04:00",
-    "home": "Michigan Stars",
-    "away": "Napa Valley",
+    "home": "Michigan Stars FC",
+    "away": "Napa Valley 1839 FC",
     "result": [
       2,
       0
@@ -349,7 +403,7 @@
   },
   {
     "date": "2019-09-28T19:30:00-04:00",
-    "home": "Michigan Stars",
+    "home": "Michigan Stars FC",
     "away": "Milwaukee Torrent",
     "result": [
       1,
@@ -359,7 +413,7 @@
   {
     "date": "2019-09-28T19:30:00-04:00",
     "home": "Detroit City FC",
-    "away": "Napa Valley",
+    "away": "Napa Valley 1839 FC",
     "result": [
       3,
       0
@@ -386,7 +440,7 @@
   {
     "date": "2019-10-08T19:30:00-04:00",
     "home": "Detroit City FC",
-    "away": "Michigan Stars",
+    "away": "Michigan Stars FC",
     "result": [
       2,
       0
@@ -404,7 +458,7 @@
   {
     "date": "2019-10-12T19:00:00-04:00",
     "home": "Milwaukee Torrent",
-    "away": "Michigan Stars",
+    "away": "Michigan Stars FC",
     "result": [
       2,
       1
@@ -412,13 +466,13 @@
   },
   {
     "date": "2019-10-16T19:00:00-04:00",
-    "home": "Michigan Stars",
+    "home": "Michigan Stars FC",
     "away": "Detroit City FC",
     "result": null
   },
   {
     "date": "2019-10-16T19:00:00-04:00",
-    "home": "Napa Valley",
+    "home": "Napa Valley 1839 FC",
     "away": "New York Cosmos B",
     "result": null
   },
@@ -436,8 +490,8 @@
   },
   {
     "date": "2019-10-26T19:00:00-04:00",
-    "home": "Napa Valley",
-    "away": "Michigan Stars",
+    "home": "Napa Valley 1839 FC",
+    "away": "Michigan Stars FC",
     "result": null
   }
 ]

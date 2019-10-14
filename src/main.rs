@@ -2,7 +2,7 @@
 extern crate guru;
 
 use guru::{
-    models::{ Club, Clubs, Match, Scoring },
+    models::{ Clubs, Match, Scoring },
     Features,
     Guru, 
     neural::nn::NN, 
@@ -158,7 +158,7 @@ pub fn input_sets<S: ::std::hash::BuildHasher>(set_matches: &[Match], clubs: &Cl
         Game Day. The date of the match relative to the schedule (all matches)
         as normalized value
         Most recent match = 1
-        earlisest match = 0
+        earliest match = 0
         **/
         inputs.push(Guru::game_day(&m.date, all_matches));
               

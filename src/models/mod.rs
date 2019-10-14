@@ -1,6 +1,6 @@
 use chrono::{ DateTime, FixedOffset };
 use serde::{ de, Deserialize, Deserializer, Serialize, Serializer };
-use std::{ collections::{ HashMap }, fmt };
+use std::{ collections::{ HashMap } };
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Club { pub name: String }
