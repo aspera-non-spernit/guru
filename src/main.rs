@@ -2,7 +2,6 @@
 extern crate guru;
 
 use guru::{
-<<<<<<< HEAD
     models::{ Clubs, Match, Scoring },
     Features,
     Guru, 
@@ -11,12 +10,6 @@ use guru::{
     utils::{ load_matches, normalize },
     Training,
     Testing
-=======
-    models::{Clubs, Match, Scoring},
-    neural::nn::NN,
-    utils::load_matches,
-    Features, Guru, Stats, Testing, Training,
->>>>>>> a0c62a85b73197ac885fec2270b3020150415833
 };
 use std::{collections::HashMap, str::FromStr};
 
