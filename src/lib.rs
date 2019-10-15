@@ -50,7 +50,7 @@ pub trait Features {
 }
 
 pub trait Generator {
-    fn generate(&self, m: &Match) -> Vec<f64>;
+    fn generate(&mut self, m: &Match) -> Vec<f64>;
 }
 pub trait Testing {
     fn test(
@@ -301,7 +301,7 @@ impl Stats {
 
     /// Returns the alltime highest scoring of a club home or away
     /// (highest scoring for club at hone, highest scoring for club away)
-    pub fn highest_alltime_scores_by_club(stats: &Stats) -> (u8, u8) {
+    pub fn highest_scoring_by_club_to_date(stats: &Stats) -> [u8; 2] {
         let mut home: u8 = 0;
         let mut away: u8 = 0;
         for &score in &stats.home_scores {
@@ -314,65 +314,15 @@ impl Stats {
                 away = score;
             }
         }
-        (home, away)
+        [home, away]
     }
 
-    /// Returns the highest scoring for the home team at home and the away team away to date
-    /// (highest scoring for the home team, highest scoring for the away team)
-    /// Only considers matches already played (match_count);
-    pub fn highest_scores_to_date(h_club: &Stats, a_club: &Stats) -> [u8; 2] {
-        let mut highest_scores: [u8; 2] = [0, 0];
-        if h_club.games_played[0] < h_club.home_scores.len() as u8 {
-            if let Some(hh) = h_club.home_scores[..h_club.games_played[0] as usize]
-                .iter()
-                .max()
-            {
-                highest_scores[0] = *hh;
-            } else {
-                highest_scores[0] = 0;
-            }
-        // collapsed else h.club.games_played... > h_club.home_scores.len()
-        } else if let Some(hh) = h_club.home_scores.iter().max() {
-            highest_scores[0] = *hh;
-        } else {
-            highest_scores[0] = 0;
-        }
-
-        if a_club.games_played[0] < a_club.home_scores.len() as u8 {
-            if let Some(ha) = a_club.away_scores[..a_club.games_played[1] as usize]
-                .iter()
-                .max()
-            {
-                highest_scores[1] = *ha;
-            } else {
-                highest_scores[1] = 0;
-            }
-        // collapsed else h.club.games_played... > h_club.home_scores.len()
-        } else if let Some(ha) = h_club.home_scores.iter().max() {
-            highest_scores[1] = *ha;
-        } else {
-            highest_scores[1] = 0;
-        }
-        highest_scores
-    }
     /// Sums and returns the scoring for home or away matches for given
     pub fn total_scoring_by_club_to_date(stats: &Stats) -> [u8; 2] {
-        let total: [u8; 2] = {
-            if !stats.games_played[0] == 0 && !stats.games_played[0] == 0 {
-                let total_home_scorings: u8 = ( &stats.home_scores[..( stats.games_played[0] - 1 ) as usize] )
-                    .iter()
-                    .sum();
-                let total_away_scorings: u8 = ( &stats.away_scores[..( stats.games_played[1] - 1 ) as usize] )
-                    .iter()
-                    .sum();
-              //  let away_scorings = &stats.home_scores[..(stats.games_played[0] - 1) as usize]
-             //   println!("{:?} {:?}",total_home_scorings, total_away_scorings);
-                [total_home_scorings, total_away_scorings]
-            } else {
-                [0, 0]
-            }
-        };
-        total
+        [
+            stats.home_scores.iter().sum::<u8>(),
+            stats.away_scores.iter().sum::<u8>()
+        ]
     }
 }
 
@@ -387,11 +337,11 @@ impl Default for Stats {
 }
 
 /// the u8 is the max value used to set the upper limit for a normalization function
-impl <T: Generator>From<(&Match, &Clubs, u8, T)> for TrainingEntry {
-    fn from(from: (&Match, &Clubs, u8, T) ) -> Self {
+impl <T: Generator>From<(&Match, &Clubs, u8, &mut T)> for TrainingEntry {
+    fn from(from: (&Match, &Clubs, u8, &mut T) ) -> Self {
         let inputs = from.3.generate(from.0);
         TrainingEntry {
-            inputs: Guru::club_features(from.0, from.1),
+            inputs: inputs,
             outputs: vec![
                 normalize(f64::from(from.0.result.unwrap()[0]), 0f64, from.2.into()),
                 normalize(f64::from(from.0.result.unwrap()[1]), 0f64, from.2.into())

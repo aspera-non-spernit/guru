@@ -2,7 +2,7 @@
 extern crate guru;
 
 use guru::{
-    models::{ Clubs, Match, Scoring, TrainingEntry },
+    models::{ Clubs, Match, TrainingEntry },
     Features,
     Guru, 
     Generator,
@@ -14,7 +14,7 @@ use guru::{
 };
 use std::{collections::HashMap, str::FromStr};
 
-fn stats(clubs: &Clubs, matches: &[Match]) -> HashMap<String, Stats> {
+fn stats(clubs: &Clubs) -> HashMap<String, Stats> {
     let mut leaguge_stats = HashMap::new();
     for c in &clubs.data {
         leaguge_stats.insert(c.0.name.clone(), Stats::default());
@@ -23,16 +23,91 @@ fn stats(clubs: &Clubs, matches: &[Match]) -> HashMap<String, Stats> {
 }
 
 #[derive(Clone, Debug)]
-struct MyInputGen<'a> { values: (&'a Vec<Match>, &'a Clubs, &'a HashMap<String, Stats>) }
+struct MyInputGen<'a> { values: (Vec<Match>, &'a Clubs, HashMap<String, Stats>) }
 
 impl Generator for MyInputGen<'_> {
     // 0 training_matches, 1 &clubs, 2 &stats
-    fn generate(&self, m: &Match) -> Vec<f64> {
+    fn generate(&mut self, m: &Match) -> Vec<f64> {
         let mut inputs = vec![];
+
+        // 14 features: clubs
         inputs.extend_from_slice( &Guru::club_features(m, self.values.1) );
+
+        // 1 features: Game Day Factor
+        // Ealier matches valued less than more recent matches
+        inputs.push(Guru::game_day(&m.date, &self.values.0));
+
+        // 2 features
+        // Total Home Scoring for Home Team
+        // Total Away Scoring for Away Team
+        // Normalized with max = sum(hts, ats);
+        // Strength of both teams realtive to each other
+        let hts = Stats::total_scoring_by_club_to_date(&self.values.2.get(&m.home).unwrap());
+        let ats = Stats::total_scoring_by_club_to_date(&self.values.2.get(&m.away).unwrap());
+        inputs.push( guru::utils::normalize(hts[0].into(), 0f64, (hts[0] + ats[1]).into()) );
+        inputs.push( guru::utils::normalize(ats[1].into(), 0f64, (hts[0] + ats[1]).into()) );
+
+        // 2 features
+        // Total Home Scoring for Home Team
+        // Total Away Scoring for Away Team
+        // Normalized with max = sum(hts, ats);
+        // Strength of both teams realtive to the league performance
+        // hcil - highest scoring in leaguge in data set/league
+        // TODO: should be to date
+        let hs = [
+            Stats::highest_scoring_by_club_to_date(&self.values.2.get(&m.home).unwrap())[0],
+            Stats::highest_scoring_by_club_to_date(&self.values.2.get(&m.away).unwrap())[1],
+        ];
+        let lhs = Stats::all_time_highest_score_in_league(&self.values.0);
+        inputs.push( guru::utils::normalize(hs[0].into(), 0f64, lhs[0].into()) );
+        inputs.push( guru::utils::normalize(hs[1].into(), 0f64, lhs[1].into()) );
+    
+        // let hs: f64 = if hcil[0] > hcil[1] { hcil[0].into() } else { hcil[1].into() };
+        // dbg!(hs);
+        // inputs.push( guru::utils::normalize(hts[0].into(), 0f64, hs ) );
+        // inputs.push( guru::utils::normalize(ats[1].into(), 0f64, hs ) );
+        // if guru::utils::normalize(hts[0].into(), 0f64, hs ) > 1f64 {
+        //     println!("match {:?} ", m);
+        // }
+
+
+
+        // Updating Stats
+        let mut h_stats = self.values.2.get_mut(&m.home).unwrap().clone();
+        let mut a_stats = self.values.2.get_mut(&m.away).unwrap().clone();
+
+        h_stats.home_scores.push(m.result.unwrap()[0]);
+        h_stats.games_played[0] += 1;
+        a_stats.away_scores.push(m.result.unwrap()[1]);
+        a_stats.games_played[1] += 1;
+
+        self.values.2.remove(&m.home);
+        self.values.2.insert(String::from(&m.home), h_stats.clone() );
+        self.values.2.remove(&m.away);
+        self.values.2.insert(String::from(&m.away), a_stats.clone() );
+        
+        // 
+        assert_eq!(
+            self.values.2.get(&m.home).unwrap().home_scores.len(),
+            self.values.2.get(&m.home).unwrap().games_played[0] as usize
+        );
+        assert_eq!(
+            self.values.2.get(&m.home).unwrap().away_scores.len(),
+            self.values.2.get(&m.home).unwrap().games_played[1] as usize
+        );
+        assert_eq!(
+            self.values.2.get(&m.away).unwrap().home_scores.len(),
+            self.values.2.get(&m.away).unwrap().games_played[0] as usize
+        );
+        assert_eq!(
+            self.values.2.get(&m.away).unwrap().away_scores.len(),
+            self.values.2.get(&m.away).unwrap().games_played[1] as usize
+        );
+        dbg!(&inputs);
         inputs
     }
 }
+
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
@@ -43,7 +118,7 @@ fn main() -> std::io::Result<()> {
     // Clubs is required because Clubs are taken from a set of matches (data.json)
     // A single club doesn't have an id. 
     let clubs: Clubs = Clubs::from(all_matches.as_slice());
-    let mut stats = stats(&clubs, &all_matches);
+    let mut stats = stats(&clubs);
     let guru = Guru::new(&all_matches);
 
     let training_matches: Vec<Match> = all_matches
@@ -58,17 +133,16 @@ fn main() -> std::io::Result<()> {
     
     let mut training_set = vec![];
     
-    let my_in_gen = MyInputGen {
+    let mut my_in_gen = MyInputGen {
         values: (
-            &training_matches.clone(),
+            training_matches.clone(),
             &clubs, 
-            &stats
+            stats.clone()
         )
     };
     for m in training_matches {
-        training_set.push(TrainingEntry::from( (&m, &clubs, max, my_in_gen.clone()) ));
+        training_set.push(TrainingEntry::from( (&m, &clubs, max, &mut my_in_gen) ));
     }
-    dbg!(&training_set);
     // Creating the network
     let _hidden_size = (training_set[0].inputs.len() as f64 * 0.66).round() as u32;
     let mut pred_net = NN::new(&[
