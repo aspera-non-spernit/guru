@@ -17,7 +17,12 @@ pub struct Match {
     pub date: chrono::DateTime<FixedOffset>,
     pub home: String,
     pub away: String,
-    pub result: Option<(u8, u8)>,
+    pub result: Option<[u8; 2]>,
+}
+#[derive(Debug)]
+pub struct TrainingEntry {
+    pub inputs: Vec<f64>,
+    pub outputs: Vec<f64>
 }
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub enum Scoring {
@@ -50,7 +55,7 @@ impl Match {
         date: DateTime<FixedOffset>,
         home: String,
         away: String,
-        result: Option<(u8, u8)>,
+        result: Option<[u8; 2]>,
     ) -> Self {
         Match {
             date,

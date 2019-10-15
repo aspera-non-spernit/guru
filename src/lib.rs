@@ -6,12 +6,12 @@ pub mod models;
 pub mod neural;
 pub mod utils;
 
-use chrono::{DateTime, FixedOffset};
-use models::{Club, Clubs, Match, Scoring};
-use neural::nn::{HaltCondition, NN};
+use chrono::{ DateTime, FixedOffset };
+use models::{ Club, Clubs, Match, Scoring, TrainingEntry };
+use neural::nn::{ HaltCondition, NN };
 use utils::normalize;
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{ HashMap, HashSet },
     convert::TryInto,
     fmt,
 };
@@ -41,17 +41,20 @@ pub trait Features {
     /// in the Vector is HOME_FACTOR = 1.0.
     /// The Value of the Away Team is AWAY_FACTOR = 0.7
     /// Clubs not playing in that much = 0.0
-    fn club_features(clubs: &Clubs, m: &Match) -> Vec<f64>;
+    fn club_features(m: &Match, clubs: &Clubs) -> Vec<f64>;
     /// Returns the game day as normalized value in relation to all game days,
     /// where for the normalization min is the first game day of the "season" and max
     /// the last day of the season
     fn game_day(m: &DateTime<FixedOffset>, schedule: &[Match]) -> f64;
     fn goal_diff(h_stats: &mut Stats) -> f64;
 }
+
+pub trait Generator {
+    fn generate(&self, m: &Match) -> Vec<f64>;
+}
 pub trait Testing {
     fn test(
         &self,
-        header: &str,
         net: &mut NN,
         test_set: &[(Vec<f64>, Vec<f64>)],
         matches: &[Match],
@@ -60,9 +63,8 @@ pub trait Testing {
 pub trait Training {
     fn train(
         &self,
-        header: &str,
         net: &mut NN,
-        training_set: &[(Vec<f64>, Vec<f64>)],
+        training_set: &[TrainingEntry],
         momentum: f64,
         rate: f64,
         halt_error: f64,
@@ -91,7 +93,7 @@ impl<'a> Guru<'a> {
 }
 
 impl<'a> Features for Guru<'a> {
-    fn club_features(clubs: &Clubs, m: &Match) -> Vec<f64> {
+    fn club_features(m: &Match, clubs: &Clubs) -> Vec<f64> {
         // CLUBS: HOME_FACTOR AWAY_FACTOR
         let num_of_clubs: u32 = clubs.data.len().try_into().unwrap();
         let mut inputs = vec![];
@@ -148,39 +150,14 @@ impl<'a> Features for Guru<'a> {
     }
 }
 
-impl<'a> Training for Guru<'a> {
-    fn train(
-        &self,
-        header: &str,
-        net: &mut NN,
-        training_set: &[(Vec<f64>, Vec<f64>)],
-        momentum: f64,
-        rate: f64,
-        halt_error: f64,
-    ) {
-        println!("Training {:?} Network...", &header);
-        if momentum > 1.0 || rate > 1.0 {
-            panic!("invoking train(): Values for momentum and rate must be <= 1.0")
-        }
-        net.train(training_set)
-            .halt_condition(HaltCondition::MSE(halt_error))
-            .log_interval(Some(1000))
-            .momentum(momentum)
-            .rate(rate)
-            .go();
-    }
-}
-
 impl<'a> Testing for Guru<'a> {
     // TODO separate Display
     fn test(
         &self,
-        header: &str,
         net: &mut NN,
         test_set: &[(Vec<f64>, Vec<f64>)],
         matches: &[Match],
     ) -> [NetworkStats; 2] {
-        println!("{:?}", header);
         let ats = Stats::all_time_highest_score_in_league(&self.data_set);
         let highest = ats.iter().max().unwrap();
         let mut res_stats = NetworkStats::default();
@@ -197,20 +174,20 @@ impl<'a> Testing for Guru<'a> {
                 );
                 println!(
                     "Expected: {:?} : {:?}",
-                    matches[i].result.unwrap().0,
-                    matches[i].result.unwrap().1
+                    matches[i].result.unwrap()[0],
+                    matches[i].result.unwrap()[1]
                 );
                 println!("Predicted:  {:?} : {:?}\n", phr, par);
                 // result stats
-                if matches[i].result.unwrap() == (phr, par) {
+                if matches[i].result.unwrap() == [phr, par] {
                     res_stats.update(true);
                 } else {
                     res_stats.update(false);
                 }
                 // winner stats
-                if matches[i].result.unwrap().0 > matches[i].result.unwrap().1 && phr > par
-                    || matches[i].result.unwrap().0 < matches[i].result.unwrap().1 && phr < par
-                    || matches[i].result.unwrap().0 == matches[i].result.unwrap().1 && phr == par
+                if matches[i].result.unwrap()[0] > matches[i].result.unwrap()[1] && phr > par
+                    || matches[i].result.unwrap()[0] < matches[i].result.unwrap()[1] && phr < par
+                    || matches[i].result.unwrap()[0] == matches[i].result.unwrap()[1] && phr == par
                 {
                     win_stats.update(true);
                 } else {
@@ -228,6 +205,31 @@ impl<'a> Testing for Guru<'a> {
             }
         }
         [res_stats, win_stats]
+    }
+}
+
+impl<'a> Training for Guru<'a> {
+    fn train(
+        &self,
+        net: &mut NN,
+        training_set: &[TrainingEntry],
+        momentum: f64,
+        rate: f64,
+        halt_error: f64,
+    ) {
+        if momentum > 1.0 || rate > 1.0 {
+            panic!("invoking train(): Values for momentum and rate must be <= 1.0")
+        }
+        // impl Into for TrainingEntry
+        let test_data: Vec<(Vec<f64>, Vec<f64>)> = training_set.iter()
+            .map(|e| (e.inputs.clone(), e.outputs.clone()) )
+            .collect();
+        net.train(&test_data)
+            .halt_condition(HaltCondition::MSE(halt_error))
+            .log_interval(Some(1000))
+            .momentum(momentum)
+            .rate(rate)
+            .go();
     }
 }
 
@@ -273,16 +275,19 @@ tested: {}, positive: {}, negative: {}, correct: {}%",
 }
 
 impl Stats {
+    pub fn update(&mut self, new: Stats) {
+        *self = new;
+    }
     /// Returns highest scoring in the league for at home and away
     /// (all time highest scoring at home, all time highes scoring away)
     pub fn all_time_highest_score_in_league(matches: &[Match]) -> [u8; 2] {
         let mut score: [u8; 2] = [0, 0];
         for m in matches {
             if let Some(result) = m.result {
-                if result.0 > score[0] {
-                    score[0] = result.0;
-                } else if result.1 > score[1] {
-                    score[1] = result.1;
+                if result[0] > score[0] {
+                    score[0] = result[0];
+                } else if result[1] > score[1] {
+                    score[1] = result[1];
                 }
             }
         }
@@ -292,26 +297,6 @@ impl Stats {
     /// Returns the number of game days in a Vec<Matches>
     pub fn game_days(matches: &[Match]) -> usize {
         matches.iter().fold(0, |i, _m| i + 1)
-    }
-
-    /// Creates ```Stats``` for a ```ClubName``` calculated from a Vec<Match>
-    pub fn gen_stats(club: &Club, matches: &[Match]) -> Stats {
-        let mut home_scores = vec![];
-        let mut away_scores = vec![];
-        for m in matches {
-            if let Some(result) = m.result {
-                if m.home == club.name {
-                    home_scores.push(result.0);
-                } else if m.away == club.name {
-                    away_scores.push(result.1);
-                }
-            }
-        }
-        Stats {
-            home_scores,
-            away_scores,
-            games_played: [0, 0],
-        }
     }
 
     /// Returns the alltime highest scoring of a club home or away
@@ -371,24 +356,46 @@ impl Stats {
         highest_scores
     }
     /// Sums and returns the scoring for home or away matches for given
-    pub fn total_scoring_by_club_to_date(stats: &Stats, ha: Scoring) -> u8 {
-        let total: u8 = if ha == Scoring::Home {
-            // TODO STATS played to usize
-            if stats.games_played[0] < stats.home_scores.len() as u8 {
-                stats.home_scores[..stats.games_played[0] as usize]
+    pub fn total_scoring_by_club_to_date(stats: &Stats) -> [u8; 2] {
+        let total: [u8; 2] = {
+            if !stats.games_played[0] == 0 && !stats.games_played[0] == 0 {
+                let total_home_scorings: u8 = ( &stats.home_scores[..( stats.games_played[0] - 1 ) as usize] )
                     .iter()
-                    .sum()
+                    .sum();
+                let total_away_scorings: u8 = ( &stats.away_scores[..( stats.games_played[1] - 1 ) as usize] )
+                    .iter()
+                    .sum();
+              //  let away_scorings = &stats.home_scores[..(stats.games_played[0] - 1) as usize]
+             //   println!("{:?} {:?}",total_home_scorings, total_away_scorings);
+                [total_home_scorings, total_away_scorings]
             } else {
-                stats.home_scores.iter().sum()
+                [0, 0]
             }
-        // collapsed else Scoring::Away
-        } else if stats.games_played[1] < stats.away_scores.len() as u8 {
-            stats.away_scores[..stats.games_played[1] as usize]
-                .iter()
-                .sum()
-        } else {
-            stats.away_scores.iter().sum()
         };
         total
+    }
+}
+
+impl Default for Stats {
+    fn default() -> Self {
+        Stats {
+            home_scores: vec![],
+            away_scores: vec![],
+            games_played: [0, 0],
+        }
+    }
+}
+
+/// the u8 is the max value used to set the upper limit for a normalization function
+impl <T: Generator>From<(&Match, &Clubs, u8, T)> for TrainingEntry {
+    fn from(from: (&Match, &Clubs, u8, T) ) -> Self {
+        let inputs = from.3.generate(from.0);
+        TrainingEntry {
+            inputs: Guru::club_features(from.0, from.1),
+            outputs: vec![
+                normalize(f64::from(from.0.result.unwrap()[0]), 0f64, from.2.into()),
+                normalize(f64::from(from.0.result.unwrap()[1]), 0f64, from.2.into())
+            ]
+        }
     }
 }
