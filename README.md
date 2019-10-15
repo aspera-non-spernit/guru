@@ -85,16 +85,33 @@ matches in the week on Oct 12
 | Stumptown : Chattanooga | 0 : 1  | 2 : 2 |
 | Milwaukee : Michigan | 2 : 0 | 2 : 1 |
 | New York : Detroit |	0 : 1 | 1 : 2 |
-| Atlanta : Miami |	0 : 2	| 1 : 2 |
+| Atlanta : Miami |	0 : 2	| 2 : 2 |
 
-##### Interpretation
+###### Challenge (of Oct 15 for matches Oct 16 - Oct 20).
+
+The tests on seen training data resulted in 29% correct results predicted and 76% correct winner/draw predictions.
+The tests on unseen test data resulted in 29% correct results predicted and 82% correct winner/draw predictions.
+
+On Oct 15 the following upcoming matches for Oct 16 were predicted:
+
+| Match | Predicted Result | Actual Result |
+|-------------------|------------------|---------------|
+| Chattanooga FC| 1 : 0 | Stumptown Athletic | tba | 
+| Oakland Roots SC| 2 : 0 | Los Angeles Force | tba | 
+| California United Strikers| 3 : 0 | 1904 San Diego FC | tba | 
+| Michigan Stars FC| 0 : 1 | Detroit City FC | tba |
+| Napa Valley 1839 FC| 0 : 3 | New York Cosmos B | tba |
+| Detroit City FC | 1 : 0 | Milwaukee Torrent | tba | 
+
+
+###### Interpretation
 
 Out of 5 matches the Network wasn't able to predict the correct result once.
 However it was able to predict the correct winner in 4 of 5 matches. Only the match Stumptown vs. Chattanooga
 was a predicted win for Chattanooga, but ended in a 2:2 draw.
 
 The prediction of the outcome of a future match on real world data is in the range of what the test results on
-unseen data suggested. In this particular example 80%. Due to the small number of matches a second false prediction,
+unseen data suggested. In this particular example 60%. Due to the small number of matches a second false prediction,
 the success reate would drop to 60% (3 out of 5 matches).
 
 It is expected that on a game day with much more matches, the success rate would remain in that range.
