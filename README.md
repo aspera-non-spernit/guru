@@ -79,13 +79,13 @@ On Oct 8-11, the network predicted the matches for the 10th week of NISA and NPS
 The Match Detroit : Michigan was on Oct 8, the result was included into the training set for four remaining
 matches in the week on Oct 12
 
-|: Match |: Predicted Result |: Actual Result |
+| Match | Predicted Result | Actual Result |
 |-------------------|------------------|---------------|
-|: Detroit : Michgan |:	5 : 0	|: 2 : 0 |
-|: Stumptown : Chattanooga |: 0 : 1  |: 2 : 2 |
-|: Milwaukee : Michigan |: 2 : 0 |: 2 : 1 |
-|: New York : Detroit |:	1 : 1 |: 0 : 0 |
-|: Atlanta : Miami |:	0 : 2	|: 1 : 2 |
+| Detroit : Michgan | 5 : 0	| 2 : 0 |
+| Stumptown : Chattanooga | 0 : 1  | 2 : 2 |
+| Milwaukee : Michigan | 2 : 0 | 2 : 1 |
+| New York : Detroit |	1 : 1 | 0 : 0 |
+| Atlanta : Miami |	0 : 2	| 1 : 2 |
 
 ##### Interpretation
 
