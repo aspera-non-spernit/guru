@@ -80,6 +80,7 @@ The Match Detroit : Michigan was on Oct 8, the result was included into the trai
 matches in the week on Oct 12
 
 |: Match |: Predicted Result |: Actual Result |
+|-------------------|------------------|---------------|
 |: Detroit : Michgan |:	5 : 0	|: 2 : 0 |
 |: Stumptown : Chattanooga |: 0 : 1  |: 2 : 2 |
 |: Milwaukee : Michigan |: 2 : 0 |: 2 : 1 |
