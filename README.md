@@ -84,7 +84,7 @@ matches in the week on Oct 12
 | Detroit : Michgan | 5 : 0	| 2 : 0 |
 | Stumptown : Chattanooga | 0 : 1  | 2 : 2 |
 | Milwaukee : Michigan | 2 : 0 | 2 : 1 |
-| New York : Detroit |	1 : 1 | 0 : 0 |
+| New York : Detroit |	0 : 1 | 1 : 2 |
 | Atlanta : Miami |	0 : 2	| 1 : 2 |
 
 ##### Interpretation
