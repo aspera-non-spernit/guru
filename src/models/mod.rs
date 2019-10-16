@@ -20,7 +20,7 @@ pub struct Match {
     pub result: Option<[u8; 2]>,
 }
 #[derive(Debug)]
-pub struct TrainingEntry {
+pub struct DataEntry {
     pub inputs: Vec<f64>,
     pub outputs: Vec<f64>
 }
