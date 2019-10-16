@@ -301,7 +301,7 @@ impl Stats {
         let mut hs: [u8; 2] = [0, 0];
         for n in matches {
             if let Some(result) = n.result {
-                if &n.date < d {
+                if n.date < *d {
                     if result[0] > hs[0] { hs[0] = result[0] }
                     if result[1] > hs[1] { hs[1] = result [1] }
                 }
@@ -356,7 +356,7 @@ impl <T: Generator>From<(&Match, &Clubs, u8, &mut T)> for DataEntry {
     fn from(from: (&Match, &Clubs, u8, &mut T) ) -> Self {
         let inputs = from.3.generate(from.0);
         DataEntry {
-            inputs: inputs,
+            inputs,
             outputs: vec![
                 normalize(f64::from(from.0.result.unwrap()[0]), 0f64, from.2.into()),
                 normalize(f64::from(from.0.result.unwrap()[1]), 0f64, from.2.into())

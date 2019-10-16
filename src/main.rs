@@ -107,10 +107,10 @@ impl Generator for MyInputGen<'_> {
             The former Away team scored to date and home 4 goals, and 1 goal away. Home Strength 4.0
             The relative normalized strengths between to teams: former Home 0,1765 + Away 0,8235 = 1.0
         **/
-        let h_rel: f64 = if hts[1] as f64 != 0f64 { hts[0] as f64 / hts[1] as f64 } else { hts[0]  as f64 };
-        let a_rel: f64 = if ats[0] as f64 != 0f64 { ats[1] as f64 / ats[0] as f64  } else { ats[1] as f64 };
-        inputs.push( guru::utils::normalize(h_rel, 0f64, (h_rel + a_rel).into()) );
-        inputs.push( guru::utils::normalize(a_rel, 0f64, (h_rel + a_rel).into()) );
+        let h_rel: f64 = if f64::from(hts[1]) != 0f64 { f64::from(hts[0]) / f64::from(hts[1]) } else { f64::from(hts[0]) };
+        let a_rel: f64 = if f64::from(ats[0]) != 0f64 { f64::from(ats[1]) / f64::from(ats[0]) } else { f64::from(ats[1]) };
+        inputs.push( guru::utils::normalize(h_rel, 0f64, h_rel + a_rel ) );
+        inputs.push( guru::utils::normalize(a_rel, 0f64, h_rel + a_rel ) );
 
         /*** Adding 2 features: Team's Highest Score to League Performance (Highest Scoring)
         Calculates two individual values for the home and away team relative to the league's performance
