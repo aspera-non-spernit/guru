@@ -35,6 +35,39 @@ pub struct Stats {
     pub games_played: [u8; 2],
 }
 
+// A Prediction contains the results of a match predicted by the network.
+#[derive(Debug)]
+pub struct Prediction {
+    date: DateTime<FixedOffset>,
+    teams: (String, String),
+    expected_scores: (u8, u8),
+    predicted_scores: (u8, u8),
+}
+
+// A prediction Displays as a single row of a markdown table.
+impl fmt::Display for Prediction {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "|{}|{}:{}|{}|", self.teams.0, self.predicted_scores.0,
+            self.predicted_scores.1, self.teams.1)
+    }
+}
+
+// A wrapper to store a vector of Prediction structs.
+#[derive(Debug)]
+pub struct Predictions(Vec<Prediction>);
+
+// A set of predictions display as a markdown table.
+impl fmt::Display for Predictions {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "|Home|Predicted result|Away|")?;
+        writeln!(f, "|:-|:-:|:-|")?;
+        for elem in self.0.iter() {
+            write!(f, "{}", elem)?;
+        }
+        fmt::Result::Ok(())
+    }
+}
+
 pub trait Features {
     /// Returns a normalized vector in size of the league (ie 14 clubs in league, len 14).
     /// Each club represents a position in the vector. The Value of the Home Team
@@ -58,7 +91,7 @@ pub trait Testing {
         net: &mut NN,
         test_set: &[DataEntry], //&[(Vec<f64>, Vec<f64>)],
         matches: &[Match],
-    ) -> [NetworkStats; 2];
+    ) -> ([NetworkStats; 2], Predictions);
 }
 pub trait Training {
     fn train(
@@ -157,7 +190,7 @@ impl<'a> Testing for Guru<'a> {
         net: &mut NN,
         test_set: &[DataEntry], //  &[(Vec<f64>, Vec<f64>)]
         matches: &[Match],
-    ) -> [NetworkStats; 2] {
+    ) -> ([NetworkStats; 2], Predictions) {
         let ats = Stats::all_time_highest_score_in_league(&self.data_set);
         let highest = ats.iter().max().unwrap();
         let mut res_stats = NetworkStats::default();
@@ -165,22 +198,22 @@ impl<'a> Testing for Guru<'a> {
         let test_data: Vec<(Vec<f64>, Vec<f64>)> = test_set.iter()
             .map(|e| (e.inputs.clone(), e.outputs.clone()) )
             .collect();
+        let mut predictions = Predictions(Vec::new());
         for i in 0..test_data.len() {
             let res = net.run(&test_data[i].0);
             let phr = (res[0] * f64::from(*highest).round()) as u8; // denormalized home result
             let par = (res[1] * f64::from(*highest).round()) as u8; // denormalized away result
                                                                     // assuming test else prediction
             if matches[i].result.is_some() {
-                println!(
-                    "{:?} : {:?} on {:?}",
-                    matches[i].home, matches[i].away, matches[i].date
-                );
-                println!(
-                    "Expected: {:?} : {:?}",
-                    matches[i].result.unwrap()[0],
-                    matches[i].result.unwrap()[1]
-                );
-                println!("Predicted:  {:?} : {:?}\n", phr, par);
+                // Create a prediction and add it to the Predictions vector.
+                let p = Prediction {
+                    date: matches[i].date,
+                    teams: (matches[i].home.clone(), matches[i].away.clone()),
+                    expected_scores:
+                        (matches[i].result.unwrap()[0], matches[i].result.unwrap()[1]),
+                    predicted_scores: (phr, par),
+                };
+                predictions.0.push(p);
                 // result stats
                 if matches[i].result.unwrap() == [phr, par] {
                     res_stats.update(true);
@@ -207,7 +240,7 @@ impl<'a> Testing for Guru<'a> {
                 );
             }
         }
-        [res_stats, win_stats]
+        ([res_stats, win_stats], predictions)
     }
 }
 

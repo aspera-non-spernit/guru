@@ -15,11 +15,11 @@ use guru::{
 use std::{collections::HashMap, str::FromStr};
 
 fn stats(clubs: &Clubs) -> HashMap<String, Stats> {
-    let mut leaguge_stats = HashMap::new();
+    let mut league_stats = HashMap::new();
     for c in &clubs.data {
-        leaguge_stats.insert(c.0.name.clone(), Stats::default());
+        league_stats.insert(c.0.name.clone(), Stats::default());
     }
-    leaguge_stats
+    league_stats
 }
 
 #[derive(Clone, Debug)]
@@ -241,7 +241,7 @@ fn main() -> std::io::Result<()> {
         0.2,
         f64::from_str(&args[1]).unwrap(),
     );
-    
+
     // testing / validating
     // TODO impl Into<Vec<(...) for DataEntry
     // or accet test(VecTrainingEntry)
@@ -251,21 +251,23 @@ fn main() -> std::io::Result<()> {
     // let test_data: Vec<(Vec<f64>, Vec<f64>)> = test_set.iter()
     //         .map(|e| (e.inputs.clone(), e.outputs.clone()) )
     //         .collect();
-    let mut test_results = guru.test(
+    let (test_results, predictions) = guru.test(
         &mut net,
         &training_set,
         &training_matches,
     );
-    println!("\n\n\n\nResult {}\n", test_results[0].to_string());
-    println!("Winner {}\n\n\n\n", test_results[1].to_string());
+    println!("{}", predictions);
+    println!("Result {}\n", test_results[0].to_string());
+    println!("Winner {}", test_results[1].to_string());
     println!("--------------------------");
-    test_results = guru.test(
+    let (test_results, predictions) = guru.test(
         &mut net,
         &test_set,
         &test_matches,
     );
-    println!("\n\n\n\nResult {}\n", test_results[0].to_string());
-    println!("Winner {}\n\n\n\n", test_results[1].to_string());
+    println!("{}", predictions);
+    println!("Result {}\n", test_results[0].to_string());
+    println!("Winner {}", test_results[1].to_string());
     println!("--------------------------");
 
     // prediction
