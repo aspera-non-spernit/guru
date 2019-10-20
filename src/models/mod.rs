@@ -1,6 +1,6 @@
-use chrono::{ DateTime, FixedOffset };
-use serde::{ de, Deserialize, Deserializer, Serialize, Serializer };
-use std::{ collections::{ HashMap } };
+use chrono::{DateTime, FixedOffset};
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use std::collections::HashMap;
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Club {
@@ -22,7 +22,7 @@ pub struct Match {
 #[derive(Debug)]
 pub struct DataEntry {
     pub inputs: Vec<f64>,
-    pub outputs: Vec<f64>
+    pub outputs: Vec<f64>,
 }
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub enum Scoring {

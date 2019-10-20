@@ -1,16 +1,14 @@
 #![forbid(unsafe_code)]
+#[macro_use]
+extern crate clap;
 extern crate guru;
 
+use clap::{ App };
 use guru::{
-    models::{ Clubs, Match, DataEntry },
-    Features,
-    Guru, 
-    Generator,
-    neural::nn::NN, 
-    Stats,
-    utils::{ load_matches },
-    Training,
-    Testing
+    models::{Clubs, DataEntry, Match},
+    neural::nn::NN,
+    utils::load_matches,
+    Features, Generator, Guru, Stats, Testing, Training,
 };
 use std::{collections::HashMap, str::FromStr};
 
@@ -23,9 +21,11 @@ fn stats(clubs: &Clubs) -> HashMap<String, Stats> {
 }
 
 #[derive(Clone, Debug)]
-struct MyInputGen<'a> { values: (Vec<Match>, &'a Clubs, HashMap<String, Stats>) }
+struct MyInputGen<'a> {
+    values: (Vec<Match>, &'a Clubs, HashMap<String, Stats>),
+}
 
-impl <'a>MyInputGen<'a> {
+impl<'a> MyInputGen<'a> {
     /***
     Updates the Stats for the home and away team
     Adds the respective goals in the result of the match to the home scores
@@ -43,9 +43,9 @@ impl <'a>MyInputGen<'a> {
         a_stats.games_played[1] += 1;
 
         self.values.2.remove(&m.home);
-        self.values.2.insert(String::from(&m.home), h_stats.clone() );
+        self.values.2.insert(String::from(&m.home), h_stats.clone());
         self.values.2.remove(&m.away);
-        self.values.2.insert(String::from(&m.away), a_stats.clone() );
+        self.values.2.insert(String::from(&m.away), a_stats.clone());
     }
 }
 impl Generator for MyInputGen<'_> {
@@ -63,9 +63,9 @@ impl Generator for MyInputGen<'_> {
         The normalized values for the home team 0.5556 (=1/1.8) and the away team 0.4444 (=0.8/1.8)
         A Away team 80% as strong as a Home Team.
         **/
-        inputs.extend_from_slice( &Guru::club_features(m, self.values.1) );
+        inputs.extend_from_slice(&Guru::club_features(m, self.values.1));
 
-        /*** 
+        /***
         Adding 1 feature: Game Day Factor
         Calculates the distance from the date of the match to the earliest and newest match date in data set.
         The match date is converted into a Unix Timestamp. The earliest and lates match dates as timestamp
@@ -92,8 +92,16 @@ impl Generator for MyInputGen<'_> {
         **/
         let hts = Stats::total_scoring_by_club_to_date(&self.values.2.get(&m.home).unwrap());
         let ats = Stats::total_scoring_by_club_to_date(&self.values.2.get(&m.away).unwrap());
-        inputs.push( guru::utils::normalize(hts[0].into(), 0f64, (hts[0] + ats[1]).into()) );
-        inputs.push( guru::utils::normalize(ats[1].into(), 0f64, (hts[0] + ats[1]).into()) );
+        inputs.push(guru::utils::normalize(
+            hts[0].into(),
+            0f64,
+            (hts[0] + ats[1]).into(),
+        ));
+        inputs.push(guru::utils::normalize(
+            ats[1].into(),
+            0f64,
+            (hts[0] + ats[1]).into(),
+        ));
 
         /***
         Adding 2 features : Relative Home Advantage
@@ -107,10 +115,18 @@ impl Generator for MyInputGen<'_> {
             The former Away team scored to date and home 4 goals, and 1 goal away. Home Strength 4.0
             The relative normalized strengths between to teams: former Home 0,1765 + Away 0,8235 = 1.0
         **/
-        let h_rel: f64 = if f64::from(hts[1]) != 0f64 { f64::from(hts[0]) / f64::from(hts[1]) } else { f64::from(hts[0]) };
-        let a_rel: f64 = if f64::from(ats[0]) != 0f64 { f64::from(ats[1]) / f64::from(ats[0]) } else { f64::from(ats[1]) };
-        inputs.push( guru::utils::normalize(h_rel, 0f64, h_rel + a_rel ) );
-        inputs.push( guru::utils::normalize(a_rel, 0f64, h_rel + a_rel ) );
+        let h_rel: f64 = if f64::from(hts[1]) != 0f64 {
+            f64::from(hts[0]) / f64::from(hts[1])
+        } else {
+            f64::from(hts[0])
+        };
+        let a_rel: f64 = if f64::from(ats[0]) != 0f64 {
+            f64::from(ats[1]) / f64::from(ats[0])
+        } else {
+            f64::from(ats[1])
+        };
+        inputs.push(guru::utils::normalize(h_rel, 0f64, h_rel + a_rel));
+        inputs.push(guru::utils::normalize(a_rel, 0f64, h_rel + a_rel));
 
         /*** Adding 2 features: Team's Highest Score to League Performance (Highest Scoring)
         Calculates two individual values for the home and away team relative to the league's performance
@@ -128,12 +144,20 @@ impl Generator for MyInputGen<'_> {
             Stats::highest_scoring_by_club_to_date(&self.values.2.get(&m.away).unwrap())[1],
         ];
         let hsil = Stats::highest_scoring_in_league_to_date(&self.values.0, &m.date);
-        inputs.push( guru::utils::normalize( hs[0].into(), 0f64, hsil[0].into() ) );
-        inputs.push( guru::utils::normalize( hs[1].into(), 0f64, hsil[1].into() ) );
-    
+        inputs.push(guru::utils::normalize(hs[0].into(), 0f64, hsil[0].into()));
+        inputs.push(guru::utils::normalize(hs[1].into(), 0f64, hsil[1].into()));
+
         /*** Adding 2 features: Relative Highest Scoring between clubs to date **/
-        inputs.push( guru::utils::normalize( hs[0].into(), 0f64, (hs[0] + hs[1]).into() ) );
-        inputs.push( guru::utils::normalize( hs[1].into(), 0f64, (hs[0] + hs[1]).into() ) );
+        inputs.push(guru::utils::normalize(
+            hs[0].into(),
+            0f64,
+            (hs[0] + hs[1]).into(),
+        ));
+        inputs.push(guru::utils::normalize(
+            hs[1].into(),
+            0f64,
+            (hs[0] + hs[1]).into(),
+        ));
 
         //TODO:
         /*** Adding 2 features: Team's match history
@@ -145,22 +169,26 @@ impl Generator for MyInputGen<'_> {
             Total Scores: Team A: 6 Team B 2:
             Normalized values: Team A 0.75 Team B 0.25
         **/
-        println!("match: {:?}", &m);
-        let v: Vec<Option<&Match>> = self.values.0.iter()
+        let v: Vec<Option<&Match>> = self
+            .values
+            .0
+            .iter()
             .map(|n| {
                 if n.home == m.home && n.away == m.away {
                     Some(m)
-                } else { None }
+                } else {
+                    None
+                }
             })
             .collect();
         for ma in v {
             if ma.is_some() {
-                dbg!(&ma);
+                // dbg!(&ma);
             }
         }
         // Updating Stats
         self.update(&m);
-  
+
         assert_eq!(
             self.values.2.get(&m.home).unwrap().home_scores.len(),
             self.values.2.get(&m.home).unwrap().games_played[0] as usize
@@ -182,10 +210,10 @@ impl Generator for MyInputGen<'_> {
 }
 
 fn main() -> std::io::Result<()> {
-    let args: Vec<String> = std::env::args().collect();
-    if args.len() < 2 {
-        panic!("ERROR: Need max error rate for training.")
-    }
+    let yaml = load_yaml!("/home/genom/Development/guru/cli.yml");
+    let opts = App::from_yaml(yaml).get_matches();
+    let error = f64::from_str(opts.value_of("error").unwrap()).unwrap();
+
     // all matches
     let all_matches = load_matches()?;
     // Clubs is required because ```Club```(s) are taken from a set of matches (data.json) without
@@ -201,27 +229,25 @@ fn main() -> std::io::Result<()> {
         .collect();
     // taking from training_matches for testing
     let test_matches: Vec<Match> = training_matches.drain(33..training_matches.len()).collect();
-    
+
     // required for normalization of results (output)
     let ats = Stats::all_time_highest_score_in_league(&all_matches);
     let max = if ats[0] > ats[1] { ats[0] } else { ats[1] };
 
     let mut my_in_gen = MyInputGen {
-        values: (
-            training_matches.clone(),
-            &clubs, 
-            stats.clone()
-        )
+        values: (training_matches.clone(), &clubs, stats.clone()),
     };
 
     let mut training_set: Vec<DataEntry> = vec![];
     let mut test_set: Vec<DataEntry> = vec![];
 
-    for m in training_matches.clone() { // TODO: fix clone
-        training_set.push(DataEntry::from( (&m, &clubs, max, &mut my_in_gen) ));
+    for m in training_matches.clone() {
+        // TODO: fix clone
+        training_set.push(DataEntry::from((&m, &clubs, max, &mut my_in_gen)));
     }
-    for m in test_matches.clone() { // TODO: fix clone
-        test_set.push(DataEntry::from( (&m, &clubs, max, &mut my_in_gen) ));
+    for m in test_matches.clone() {
+        // TODO: fix clone
+        test_set.push(DataEntry::from((&m, &clubs, max, &mut my_in_gen)));
     }
 
     // Creating the network
@@ -239,9 +265,9 @@ fn main() -> std::io::Result<()> {
         &training_set,
         0.3,
         0.2,
-        f64::from_str(&args[1]).unwrap(),
+        error,
     );
-    
+
     // testing / validating
     // TODO impl Into<Vec<(...) for DataEntry
     // or accet test(VecTrainingEntry)
@@ -251,19 +277,11 @@ fn main() -> std::io::Result<()> {
     // let test_data: Vec<(Vec<f64>, Vec<f64>)> = test_set.iter()
     //         .map(|e| (e.inputs.clone(), e.outputs.clone()) )
     //         .collect();
-    let mut test_results = guru.test(
-        &mut net,
-        &training_set,
-        &training_matches,
-    );
+    let mut test_results = guru.test(&mut net, &training_set, &training_matches);
     println!("\n\n\n\nResult {}\n", test_results[0].to_string());
     println!("Winner {}\n\n\n\n", test_results[1].to_string());
     println!("--------------------------");
-    test_results = guru.test(
-        &mut net,
-        &test_set,
-        &test_matches,
-    );
+    test_results = guru.test(&mut net, &test_set, &test_matches);
     println!("\n\n\n\nResult {}\n", test_results[0].to_string());
     println!("Winner {}\n\n\n\n", test_results[1].to_string());
     println!("--------------------------");
@@ -287,6 +305,5 @@ fn main() -> std::io::Result<()> {
     //     &prediction_set,
     //     &prediction_matches,
     // );
-    
     Ok(())
 }

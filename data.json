@@ -468,7 +468,10 @@
     "date": "2019-10-16T19:00:00-04:00",
     "home": "Michigan Stars FC",
     "away": "Detroit City FC",
-    "result": null
+    "result": [
+	    0,
+	    1
+    ]
   },
   {
     "date": "2019-10-16T19:00:00-04:00",

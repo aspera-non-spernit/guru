@@ -10,7 +10,10 @@ pub fn load_matches() -> std::io::Result<Vec<Match>> {
 }
 
 /// Simple normalization function
-pub fn normalize(v: f64, min: f64, max: f64) -> f64 { 
-    if (max - min) == 0.0 {  (v - min)  } else { (v - min) / (max - min) }
+pub fn normalize(v: f64, min: f64, max: f64) -> f64 {
+    if (max - min) == 0.0 {
+        (v - min)
+    } else {
+        (v - min) / (max - min)
+    }
 }
-

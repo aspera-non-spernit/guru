@@ -6,15 +6,15 @@ pub mod models;
 pub mod neural;
 pub mod utils;
 
-use chrono::{ DateTime, FixedOffset };
-use models::{ Club, Clubs, Match, DataEntry };
-use neural::nn::{ HaltCondition, NN };
-use utils::normalize;
+use chrono::{DateTime, FixedOffset};
+use models::{Club, Clubs, DataEntry, Match};
+use neural::nn::{HaltCondition, NN};
 use std::{
-    collections::{ HashMap, HashSet },
+    collections::{HashMap, HashSet},
     convert::TryInto,
     fmt,
 };
+use utils::normalize;
 
 const AWAY_FACTOR: f64 = 1.0;
 
@@ -162,8 +162,9 @@ impl<'a> Testing for Guru<'a> {
         let highest = ats.iter().max().unwrap();
         let mut res_stats = NetworkStats::default();
         let mut win_stats = NetworkStats::default();
-        let test_data: Vec<(Vec<f64>, Vec<f64>)> = test_set.iter()
-            .map(|e| (e.inputs.clone(), e.outputs.clone()) )
+        let test_data: Vec<(Vec<f64>, Vec<f64>)> = test_set
+            .iter()
+            .map(|e| (e.inputs.clone(), e.outputs.clone()))
             .collect();
         for i in 0..test_data.len() {
             let res = net.run(&test_data[i].0);
@@ -224,8 +225,9 @@ impl<'a> Training for Guru<'a> {
             panic!("invoking train(): Values for momentum and rate must be <= 1.0")
         }
         // impl Into for DataEntry
-        let test_data: Vec<(Vec<f64>, Vec<f64>)> = training_set.iter()
-            .map(|e| (e.inputs.clone(), e.outputs.clone()) )
+        let test_data: Vec<(Vec<f64>, Vec<f64>)> = training_set
+            .iter()
+            .map(|e| (e.inputs.clone(), e.outputs.clone()))
             .collect();
         net.train(&test_data)
             .halt_condition(HaltCondition::MSE(halt_error))
@@ -297,13 +299,20 @@ impl Stats {
         score
     }
 
-    pub fn highest_scoring_in_league_to_date(matches: &[Match], d: &DateTime<FixedOffset>) -> [u8; 2] {
+    pub fn highest_scoring_in_league_to_date(
+        matches: &[Match],
+        d: &DateTime<FixedOffset>,
+    ) -> [u8; 2] {
         let mut hs: [u8; 2] = [0, 0];
         for n in matches {
             if let Some(result) = n.result {
                 if n.date < *d {
-                    if result[0] > hs[0] { hs[0] = result[0] }
-                    if result[1] > hs[1] { hs[1] = result [1] }
+                    if result[0] > hs[0] {
+                        hs[0] = result[0]
+                    }
+                    if result[1] > hs[1] {
+                        hs[1] = result[1]
+                    }
                 }
             }
         }
@@ -336,7 +345,7 @@ impl Stats {
     pub fn total_scoring_by_club_to_date(stats: &Stats) -> [u8; 2] {
         [
             stats.home_scores.iter().sum::<u8>(),
-            stats.away_scores.iter().sum::<u8>()
+            stats.away_scores.iter().sum::<u8>(),
         ]
     }
 }
@@ -352,15 +361,15 @@ impl Default for Stats {
 }
 
 /// the u8 is the max value used to set the upper limit for a normalization function
-impl <T: Generator>From<(&Match, &Clubs, u8, &mut T)> for DataEntry {
-    fn from(from: (&Match, &Clubs, u8, &mut T) ) -> Self {
+impl<T: Generator> From<(&Match, &Clubs, u8, &mut T)> for DataEntry {
+    fn from(from: (&Match, &Clubs, u8, &mut T)) -> Self {
         let inputs = from.3.generate(from.0);
         DataEntry {
             inputs,
             outputs: vec![
                 normalize(f64::from(from.0.result.unwrap()[0]), 0f64, from.2.into()),
-                normalize(f64::from(from.0.result.unwrap()[1]), 0f64, from.2.into())
-            ]
+                normalize(f64::from(from.0.result.unwrap()[1]), 0f64, from.2.into()),
+            ],
         }
     }
 }

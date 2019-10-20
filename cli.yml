@@ -1,0 +1,16 @@
+name: guru
+version: "0.0.1"
+author: Daniel Hammeley <daniel@hammeley.info>
+about: Predict Football Matches
+args:
+    - error:
+        help: The maximum network error
+        # short: e
+        # long: error
+        takes_value: true
+        required: true
+    - input:
+        help: File name of a persisted network
+        short: i
+        long: input
+        takes_value: true
