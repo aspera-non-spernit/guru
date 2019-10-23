@@ -201,19 +201,28 @@
     "date": "2019-10-19T22:04:00-04:00",
     "home": "Chattanooga FC",
     "away": "Stumptown Athletic",
-    "result": null
+    "result": [
+      1,
+      0
+    ]
   },
   {
     "date": "2019-10-19T22:04:00-04:00",
     "home": "Oakland Roots SC",
     "away": "Los Angeles Force",
-    "result": null
+    "result": [
+      1,
+      1
+    ]
   },
   {
     "date": "2019-10-20T22:04:00-04:00",
     "home": "California United Strikers",
     "away": "1904 San Diego FC",
-    "result": null
+    "result": [
+      4,
+      1
+    ]
   },
   {
     "date": "2019-10-25T22:04:00-04:00",
@@ -477,13 +486,19 @@
     "date": "2019-10-16T19:00:00-04:00",
     "home": "Napa Valley 1839 FC",
     "away": "New York Cosmos B",
-    "result": null
+    "result": [
+      0,
+      7
+    ]
   },
   {
     "date": "2019-10-19T19:30:00-04:00",
     "home": "Detroit City FC",
     "away": "Milwaukee Torrent",
-    "result": null
+    "result": [
+      0,
+      1
+    ]
   },
   {
     "date": "2019-10-26T18:00:00-04:00",
