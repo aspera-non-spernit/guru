@@ -183,9 +183,9 @@ impl Generator for MyInputGen<'_> {
         .map(|n| n )
         .for_each(move| n| {
             if m.home == n.home {
-                hist[0] += n.result.unwrap()[0]; hist[1] += n.result.unwrap()[1];
+                &[hist[0] + n.result.unwrap()[0], hist[1] + n.result.unwrap()[1] ];
             } else {
-                hist[0] += n.result.unwrap()[1]; hist[1] += n.result.unwrap()[0];
+                &[hist[0] + n.result.unwrap()[1], hist[1] + n.result.unwrap()[0] ];
             }
         });    
         println!("{:?} {:?} {:?}", m.date, m.home, m.away);
