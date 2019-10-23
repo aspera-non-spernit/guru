@@ -224,7 +224,7 @@ fn main() -> std::io::Result<()> {
     let stats = stats(&clubs);
     let guru = Guru::new(&all_matches);
 
-    let training_matches: Vec<Match> = all_matches
+    let mut training_matches: Vec<Match> = all_matches
         .iter()
         .filter(|&m| m.result.is_some())
         .cloned()
@@ -233,7 +233,7 @@ fn main() -> std::io::Result<()> {
     let test_matches: Vec<Match> = training_matches.drain(33..training_matches.len()).collect();
     // using matches in the data set that have no result (match in the future) to predict the result 
     // for those matches
-    let prediction_matches: Vec<Match> = all_matches
+    let mut prediction_matches: Vec<Match> = all_matches
         .iter()
         .filter(|&m| m.result.is_none())
         .cloned()
@@ -248,29 +248,37 @@ fn main() -> std::io::Result<()> {
         values: (training_matches.clone(), &clubs, stats.clone()),
     };
 
-    let mut training_set: Vec<DataEntry> = vec![];
-    let mut test_set: Vec<DataEntry> = vec![];
-    let mut prediction_set: Vec<DataEntry> = vec![];
+   // let mut training_set: Vec<DataEntry> = vec![];
+    // let mut test_set: Vec<DataEntry> = vec![];
+    // let mut prediction_set: Vec<DataEntry> = vec![];
 
-    let mut training_set: Vec<DataEntry> = training_matches.iter()
+    let training_set: Vec<DataEntry> = training_matches.iter()
         .map(|m| {
-            DataEntry::from( (&m, &clubs, max, &mut my_in_gen) )
+            DataEntry::from( (m, &clubs, max, &mut my_in_gen) )
         })
-        .cloned()
         .collect();
-
-    for m in training_matches.clone() {
-        // TODO: fix clone
-        training_set.push(DataEntry::from((&m, &clubs, max, &mut my_in_gen)));
-    }
-    for m in test_matches.clone() {
-        // TODO: fix clone
-        test_set.push(DataEntry::from((&m, &clubs, max, &mut my_in_gen)));
-    }
-    for m in prediction_matches.clone() {
-        // TODO: fix clone
-        prediction_set.push(DataEntry::from((&m, &clubs, max, &mut my_in_gen)));
-    }
+    let test_set: Vec<DataEntry> = test_matches.iter()
+        .map(|m| {
+            DataEntry::from( (m, &clubs, max, &mut my_in_gen) )
+        })
+        .collect();
+    let prediction_set: Vec<DataEntry> = prediction_matches.iter()
+        .map(|m| {
+            DataEntry::from( (m, &clubs, max, &mut my_in_gen) )
+        })
+        .collect();
+    // for m in training_matches.clone() {
+    //     // TODO: fix clone
+    //     training_set.push(DataEntry::from((&m, &clubs, max, &mut my_in_gen)));
+    // }
+    // for m in test_matches.clone() {
+    //     // TODO: fix clone
+    //     test_set.push(DataEntry::from((&m, &clubs, max, &mut my_in_gen)));
+    // }
+    // for m in prediction_matches.clone() {
+    //     // TODO: fix clone
+    //     prediction_set.push(DataEntry::from((&m, &clubs, max, &mut my_in_gen)));
+    // }
 
     // Creating the network
     //let _hidden_size = (training_set[0].inputs.len() as f64 * 0.66).round() as u32;
