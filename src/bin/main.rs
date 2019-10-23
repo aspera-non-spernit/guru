@@ -183,11 +183,7 @@ impl Generator for MyInputGen<'_> {
                 }
             })
             .collect();
-        for ma in v {
-            if ma.is_some() {
-                // dbg!(&ma);
-            }
-        }
+
         // Updating Stats
         self.update(&m);
 
@@ -215,19 +211,28 @@ fn main() -> std::io::Result<()> {
     let yaml = load_yaml!("/home/genom/Development/guru/cli.yml");
     let opts = App::from_yaml(yaml).get_matches();
     let error = f64::from_str(opts.value_of("error").unwrap()).unwrap();
-    let all_matches = if let Some(f) = opts.value_of("data") {
+    let mut all_matches = if let Some(f) = opts.value_of("data") {
         load_matches(f)?
     } else {
         // example matches
         load_matches("examples/data.json")?
     };
+    // must be sorted, doesn't matter to what,
+    // network needs the same order otherwise the nwtwork
+    // would not be able to calculate error correctly for networks loaded from file
+    // TODO: avoid sorted, collect into all_matches
+    let mut sorted: Vec<Match> = all_matches.iter().cloned().collect();
+    dbg!(&sorted);
+    sorted.sort_by(|a, b| a.home.cmp(&b.home).to_owned() );
+    dbg!(&sorted);
+    // all_matches = sorted.clone();
     // Clubs is required because ```Club```(s) are taken from a set of matches (data.json) without
     // ids
-    let clubs: Clubs = Clubs::from(all_matches.as_slice());
+    let clubs: Clubs = Clubs::from(sorted.as_slice());
     let stats = stats(&clubs);
-    let guru = Guru::new(&all_matches);
+    let guru = Guru::new(&sorted);
 
-    let mut training_matches: Vec<Match> = all_matches
+    let mut training_matches: Vec<Match> = sorted
         .iter()
         .filter(|&m| m.result.is_some())
         .cloned()
@@ -236,14 +241,14 @@ fn main() -> std::io::Result<()> {
     let test_matches: Vec<Match> = training_matches.drain(37..training_matches.len()).collect();
     // using matches in the data set that have no result (match in the future) to predict the result 
     // for those matches
-    let prediction_matches: Vec<Match> = all_matches
+    let prediction_matches: Vec<Match> = sorted
         .iter()
         .filter(|&m| m.result.is_none())
         .cloned()
         .collect();
 
     // required for normalization of results (output)
-    let ats = Stats::all_time_highest_score_in_league(&all_matches);
+    let ats = Stats::all_time_highest_score_in_league(&sorted);
     // TODO: let Generator do that
     let max = if ats[0] > ats[1] { ats[0] } else { ats[1] };
 
