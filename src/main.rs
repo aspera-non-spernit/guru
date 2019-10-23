@@ -13,11 +13,11 @@ use guru::{
 use std::{collections::HashMap, str::FromStr};
 
 fn stats(clubs: &Clubs) -> HashMap<String, Stats> {
-    let mut leaguge_stats = HashMap::new();
+    let mut league_stats = HashMap::new();
     for c in &clubs.data {
-        leaguge_stats.insert(c.0.name.clone(), Stats::default());
+        league_stats.insert(c.0.name.clone(), Stats::default());
     }
-    leaguge_stats
+    league_stats
 }
 
 #[derive(Clone, Debug)]
@@ -230,7 +230,7 @@ fn main() -> std::io::Result<()> {
         .cloned()
         .collect();
     // taking from training_matches for testing
-    let test_matches: Vec<Match> = training_matches.drain(33..training_matches.len()).collect();
+    let test_matches: Vec<Match> = training_matches.drain(37..training_matches.len()).collect();
     // using matches in the data set that have no result (match in the future) to predict the result 
     // for those matches
     let mut prediction_matches: Vec<Match> = all_matches
@@ -283,16 +283,29 @@ fn main() -> std::io::Result<()> {
     );
 
     // testing / validating
-    let mut test_results = guru.test(&mut net, &training_set, &training_matches);
-    println!("\n\n\n\nResult {}\n", test_results[0].to_string());
-    println!("Winner {}\n\n\n\n", test_results[1].to_string());
+    let (test_results, predictions) = guru.test(
+        &mut net,
+        &training_set,
+        &training_matches,
+    );
+    println!("{}", predictions);
+    println!("Result {}\n", test_results[0].to_string());
+    println!("Winner {}", test_results[1].to_string());
     println!("--------------------------");
-    test_results = guru.test(&mut net, &test_set, &test_matches);
-    println!("\n\n\n\nResult {}\n", test_results[0].to_string());
-    println!("Winner {}\n\n\n\n", test_results[1].to_string());
+    let (test_results, predictions) = guru.test(
+        &mut net,
+        &test_set,
+        &test_matches,
+    );
+    println!("{}", predictions);
+    println!("Result {}\n", test_results[0].to_string());
+    println!("Winner {}", test_results[1].to_string());
     println!("--------------------------");
     // predict future matches
-    test_results = guru.test(&mut net, &prediction_set, &prediction_matches);
-
+    let (test_results, predictions) = guru.test(&mut net, &prediction_set, &prediction_matches);
+    // TODO: Fix empty
+    // println!("{}", predictions);
+    println!("Result {}\n", test_results[0].to_string());
+    println!("Winner {}", test_results[1].to_string());
     Ok(())
 }
