@@ -91,6 +91,15 @@
   },
   {
     "date": "2019-09-15T19:00:00-04:00",
+    "home": "Miami FC",
+    "away": "Philadelphia Fury",
+    "result": [
+      8,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-15T19:00:00-04:00",
     "home": "Atlanta SC",
     "away": "Stumptown Athletic",
     "result": [
@@ -480,6 +489,15 @@
     "result": [
       0,
       7
+    ]
+  },
+  {
+    "date": "2019-10-19T19:30:00-04:00",
+    "home": "Detroit City FC",
+    "away": "Milwaukee Torrent",
+    "result": [
+      0,
+      1
     ]
   },
   {
