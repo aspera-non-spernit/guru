@@ -10,6 +10,13 @@ pub struct Club {
 pub struct Clubs {
     pub data: HashMap<Club, u32>,
 }
+
+#[derive(Debug)]
+pub struct DataEntry {
+    pub inputs: Vec<f64>,
+    pub outputs: Vec<f64>,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Match {
     #[serde(deserialize_with = "self::deserialize_from_str")]
@@ -19,11 +26,7 @@ pub struct Match {
     pub away: String,
     pub result: Option<[u8; 2]>,
 }
-#[derive(Debug)]
-pub struct DataEntry {
-    pub inputs: Vec<f64>,
-    pub outputs: Vec<f64>,
-}
+
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub enum Scoring {
     Home,

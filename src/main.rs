@@ -36,12 +36,14 @@ impl<'a> MyInputGen<'a> {
     fn update(&mut self, m: &Match) {
         let mut h_stats = self.values.2.get_mut(&m.home).unwrap().clone();
         let mut a_stats = self.values.2.get_mut(&m.away).unwrap().clone();
-
-        h_stats.home_scores.push(m.result.unwrap()[0]);
-        h_stats.games_played[0] += 1;
-        a_stats.away_scores.push(m.result.unwrap()[1]);
-        a_stats.games_played[1] += 1;
-
+        // no updating results, if prediction
+        if let Some(result) = m.result {
+            h_stats.home_scores.push(result[0]);
+            h_stats.games_played[0] += 1;
+            a_stats.away_scores.push(result[1]);
+            a_stats.games_played[1] += 1;
+        }
+    
         self.values.2.remove(&m.home);
         self.values.2.insert(String::from(&m.home), h_stats.clone());
         self.values.2.remove(&m.away);
@@ -229,9 +231,17 @@ fn main() -> std::io::Result<()> {
         .collect();
     // taking from training_matches for testing
     let test_matches: Vec<Match> = training_matches.drain(33..training_matches.len()).collect();
+    // using matches in the data set that have no result (match in the future) to predict the result 
+    // for those matches
+    let mut prediction_matches: Vec<Match> = all_matches
+        .iter()
+        .filter(|&m| m.result.is_none())
+        .cloned()
+        .collect();
 
     // required for normalization of results (output)
     let ats = Stats::all_time_highest_score_in_league(&all_matches);
+    // TODO: let Generator do that
     let max = if ats[0] > ats[1] { ats[0] } else { ats[1] };
 
     let mut my_in_gen = MyInputGen {
@@ -240,12 +250,17 @@ fn main() -> std::io::Result<()> {
 
     let mut training_set: Vec<DataEntry> = vec![];
     let mut test_set: Vec<DataEntry> = vec![];
+    let mut prediction_set: Vec<DataEntry> = vec![];
 
     for m in training_matches.clone() {
         // TODO: fix clone
         training_set.push(DataEntry::from((&m, &clubs, max, &mut my_in_gen)));
     }
     for m in test_matches.clone() {
+        // TODO: fix clone
+        test_set.push(DataEntry::from((&m, &clubs, max, &mut my_in_gen)));
+    }
+    for m in prediction_matches.clone() {
         // TODO: fix clone
         test_set.push(DataEntry::from((&m, &clubs, max, &mut my_in_gen)));
     }
@@ -269,14 +284,6 @@ fn main() -> std::io::Result<()> {
     );
 
     // testing / validating
-    // TODO impl Into<Vec<(...) for DataEntry
-    // or accet test(VecTrainingEntry)
-    // let training_data: Vec<(Vec<f64>, Vec<f64>)> = test_set.iter()
-    //         .map(|e| (e.inputs.clone(), e.outputs.clone()) )
-    //         .collect();
-    // let test_data: Vec<(Vec<f64>, Vec<f64>)> = test_set.iter()
-    //         .map(|e| (e.inputs.clone(), e.outputs.clone()) )
-    //         .collect();
     let mut test_results = guru.test(&mut net, &training_set, &training_matches);
     println!("\n\n\n\nResult {}\n", test_results[0].to_string());
     println!("Winner {}\n\n\n\n", test_results[1].to_string());
@@ -285,25 +292,8 @@ fn main() -> std::io::Result<()> {
     println!("\n\n\n\nResult {}\n", test_results[0].to_string());
     println!("Winner {}\n\n\n\n", test_results[1].to_string());
     println!("--------------------------");
+    // predict future matches
+    test_results = guru.test(&mut net, &prediction_set, &prediction_matches);
 
-    // prediction
-    // // Predict the future and become rich
-    // let prediction_matches: Vec<Match> = all_matches
-    //     .iter()
-    //     .filter(|&m| m.result.is_none())
-    //     .cloned()
-    //     .collect();
-    // // dbg!(&prediction_matches);
-    // let prediction_set: Vec<(Vec<f64>, Vec<f64>)> =
-    //     input_sets(&prediction_matches, &clubs, &mut stats, &all_matches)
-    //         .iter()
-    //         .map(|m| (m.clone(), vec![]))
-    //         .collect();
-    // guru.test(
-    //     "Predicting future matches..",
-    //     &mut pred_net,
-    //     &prediction_set,
-    //     &prediction_matches,
-    // );
     Ok(())
 }
