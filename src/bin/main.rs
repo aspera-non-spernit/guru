@@ -297,6 +297,7 @@ fn main() -> std::io::Result<()> {
         &training_set,
         &training_matches,
     );
+    println!("Testing on (seen) Training Data");
     println!("{}", predictions);
     println!("Result {}\n", test_results[0].to_string());
     println!("Winner {}", test_results[1].to_string());
@@ -306,6 +307,7 @@ fn main() -> std::io::Result<()> {
         &test_set,
         &test_matches,
     );
+    println!("Testing on (unseen) Test Data");
     println!("{}", test_predictions);
     println!("Result {}\n", test_results[0].to_string());
     println!("Winner {}", test_results[1].to_string());
