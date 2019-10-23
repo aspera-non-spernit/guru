@@ -352,7 +352,7 @@ impl Markdown for Predictions {
     fn to_table(&self) -> String {
         let mut s = String::new();
         s.push_str("|Home|Predicted result|Away|\n");
-        s.push_str("|:-|:-|:-|\n");
+        s.push_str("|-:|:-:|:-|\n");
         for elem in self.0.iter() {
             s.push_str(&elem.to_table());
             s.push_str("\n");
