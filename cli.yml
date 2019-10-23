@@ -5,14 +5,15 @@ about: Predict Football Matches
 args:
     - error:
         help: The maximum network error
-        # short: e
-        # long: error
-        takes_value: true
+        short: e
+        long: error
         required: true
+        takes_value: true
     - data:
         help: File name of the training data
         short: d
         long: data
+        required: false
         takes_value: true
     - load-network:
         help: Loads a previously trained network
