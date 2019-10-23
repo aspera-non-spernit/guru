@@ -175,22 +175,36 @@ impl Generator for MyInputGen<'_> {
             Total Scores: Team A: 6 Team B 2:
             Normalized values: Team A 0.75 Team B 0.25
         **/
-        let mut hist: &[u8;2] = &[0, 0];
-        self.values.0.iter()
-        .filter( |n| m.home == n.home && m.away == n.away || m.home == n.away && m.away == n.home )
-        .filter( |n| n.date < m.date )
-        .filter( |n| n.result.is_some() )
-        .map(|n| n )
-        .for_each(move| n| {
-            if m.home == n.home {
-                &[hist[0] + n.result.unwrap()[0], hist[1] + n.result.unwrap()[1] ];
-            } else {
-                &[hist[0] + n.result.unwrap()[1], hist[1] + n.result.unwrap()[0] ];
-            }
-        });    
-        println!("{:?} {:?} {:?}", m.date, m.home, m.away);
-        dbg!(&hist);
-       // dbg!(&hist);
+        let hist = self.values
+            .0
+            .iter()
+            .filter(|n| {
+                m.home == n.home && m.away == n.away || m.home == n.away && m.away == n.home
+            })
+            .filter(|n| n.date < m.date)
+            .filter(|n| n.result.is_some())
+            .fold([0; 2], |hist, n| {
+                if m.home == n.home {
+                    [
+                        hist[0] + n.result.unwrap()[0],
+                        hist[1] + n.result.unwrap()[1],
+                    ]
+                } else {
+                    [
+                        hist[0] + n.result.unwrap()[1],
+                        hist[1] + n.result.unwrap()[0],
+                    ]
+                }
+            });
+        
+        // if m.home == "Detroit City FC" && m.away == "New York Cosmos B" ||
+        //     m.away == "Detroit City FC" && m.home == "New York Cosmos B" {
+        //         println!("{:?}", m);
+        //         dbg!(&hist);
+        // }
+        inputs.push(guru::utils::normalize(hist[0].into(), 0f64, (hist[0] + hist[1]).into()));
+        inputs.push(guru::utils::normalize(hist[1].into(), 0f64, (hist[0] + hist[1]).into()));
+
         // Updating Stats
         self.update(&m);
 
@@ -229,7 +243,7 @@ fn main() -> std::io::Result<()> {
     // would not be able to calculate error correctly for networks loaded from file
     // TODO: avoid sorted, collect into all_matches
     let mut sorted: Vec<Match> = all_matches.iter().cloned().collect();
-    sorted.sort_by(|a, b| a.home.cmp(&b.home).to_owned() );
+    sorted.sort_by(|a, b| a.date.cmp(&b.date).to_owned() );
     // Clubs is required because ```Club```(s) are taken from a set of matches (data.json) without
     // ids
     let clubs: Clubs = Clubs::from(sorted.as_slice());
@@ -328,3 +342,5 @@ fn main() -> std::io::Result<()> {
     println!("{}", predictions.to_table());
     Ok(())
 }
+
+
