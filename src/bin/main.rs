@@ -301,17 +301,17 @@ fn main() -> std::io::Result<()> {
     println!("Result {}\n", test_results[0].to_string());
     println!("Winner {}", test_results[1].to_string());
     println!("--------------------------");
-    let (test_results, predictions) = guru.test(
+    let (test_results, test_predictions) = guru.test(
         &mut net,
         &test_set,
         &test_matches,
     );
-    println!("{}", predictions);
+    println!("{}", test_predictions);
     println!("Result {}\n", test_results[0].to_string());
     println!("Winner {}", test_results[1].to_string());
     println!("--------------------------");
     // predict future matches
-    let (_test_results, _predictions) = guru.test(&mut net, &prediction_set, &prediction_matches);
+    let (_test_results, predictions) = guru.test(&mut net, &prediction_set, &prediction_matches);
     // TODO: Fix empty
     println!("{}", predictions);
     Ok(())
