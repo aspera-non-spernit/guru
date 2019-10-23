@@ -423,8 +423,8 @@ impl<T: Generator> From<(&Match, &Clubs, u8, &mut T)> for DataEntry {
         let inputs = from.3.generate(from.0);
         let outputs = if let Some(result) = from.0.result {
             vec![
-                normalize(f64::from(from.0.result.unwrap()[0]), 0f64, from.2.into()),
-                normalize(f64::from(from.0.result.unwrap()[1]), 0f64, from.2.into()),
+                normalize(f64::from(result[0]), 0f64, from.2.into()),
+                normalize(f64::from(result[1]), 0f64, from.2.into()),
             ]
         } else {
             vec![]
