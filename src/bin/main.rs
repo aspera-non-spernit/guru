@@ -8,7 +8,7 @@ use guru::{
     models::{Clubs, DataEntry, Match},
     neural::nn::NN,
     utils::{load_matches, load_network, save_network},
-    Features, Generator, Guru, Stats, Testing, Training,
+    Features, Generator, Guru, Markdown, Stats, Testing, Training,
 };
 use std::{collections::HashMap, str::FromStr};
 
@@ -300,7 +300,7 @@ fn main() -> std::io::Result<()> {
     println!("{}", predictions);
     println!("Result {}\n", test_results[0].to_string());
     println!("Winner {}", test_results[1].to_string());
-    println!("--------------------------");
+    println!("--------------------------\n\n");
     let (test_results, test_predictions) = guru.test(
         &mut net,
         &test_set,
@@ -309,10 +309,11 @@ fn main() -> std::io::Result<()> {
     println!("{}", test_predictions);
     println!("Result {}\n", test_results[0].to_string());
     println!("Winner {}", test_results[1].to_string());
-    println!("--------------------------");
+    println!("--------------------------\n\n");
     // predict future matches
     let (_test_results, predictions) = guru.test(&mut net, &prediction_set, &prediction_matches);
     // TODO: Fix empty
-    println!("{}", predictions);
+    println!("Predicting future matches: \n");
+    println!("{}", predictions.to_table());
     Ok(())
 }

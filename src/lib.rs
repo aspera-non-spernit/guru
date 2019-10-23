@@ -45,29 +45,9 @@ pub struct Prediction {
     predicted_scores: (u8, u8),
 }
 
-// A prediction Displays as a single row of a markdown table.
-impl fmt::Display for Prediction {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "|{}|{}:{}|{}|", self.teams.0, self.predicted_scores.0,
-            self.predicted_scores.1, self.teams.1)
-    }
-}
-
 // A wrapper to store a vector of Prediction structs.
 #[derive(Debug)]
 pub struct Predictions(Vec<Prediction>);
-
-// A set of predictions display as a markdown table.
-impl fmt::Display for Predictions {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "|Home|Predicted result|Away|")?;
-        writeln!(f, "|:-|:-:|:-|")?;
-        for elem in self.0.iter() {
-            write!(f, "{}", elem)?;
-        }
-        fmt::Result::Ok(())
-    }
-}
 
 pub trait Features {
     /// Returns a normalized vector in size of the league (ie 14 clubs in league, len 14).
@@ -106,6 +86,10 @@ let mut my_input_generator = MyInputGen {
 **/
 pub trait Generator {
     fn generate(&mut self, m: &Match) -> Vec<f64>;
+}
+
+pub trait Markdown {
+    fn to_table(&self) -> String;
 }
 pub trait Testing {
     fn test(
@@ -255,14 +239,14 @@ impl<'a> Testing for Guru<'a> {
                     win_stats.update(false);
                 }
             } else {
-                println!(
-                    "Prediction: {:?} {:?} : {:?} {:?} on {:?}",
-                    matches[i].home,
-                    phr,
-                    par,
-                    matches[i].away,
-                    matches[i].date.date()
-                );
+                let p = Prediction {
+                    date: matches[i].date,
+                    teams: (matches[i].home.clone(), matches[i].away.clone()),
+                    expected_scores:
+                        (0, 0),
+                    predicted_scores: (phr, par),
+                };
+                predictions.0.push(p);
             }
         }
         ([res_stats, win_stats], predictions)
@@ -333,6 +317,46 @@ tested: {}, positive: {}, negative: {}, correct: {}%",
             self.negative,
             self.positive * 100 / div
         )
+    }
+}
+
+// A prediction Displays as a single row of a markdown table.
+impl fmt::Display for Prediction {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "{} {} : {} {}", self.teams.0, self.predicted_scores.0,
+            self.predicted_scores.1, self.teams.1)?;
+        writeln!(f, "Expected: {} : {}",self.expected_scores.0,
+            self.expected_scores.1)?;
+            fmt::Result::Ok(())
+    }
+}
+
+impl Markdown for Prediction {
+    fn to_table(&self) -> String {
+        format!("|{}|{} : {}|{}|", self.teams.0, self.predicted_scores.0,
+            self.predicted_scores.1, self.teams.1)
+    }
+}
+
+// A set of predictions display as a markdown table.
+impl fmt::Display for Predictions {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "Home | Predicted result | Away")?;
+        for elem in self.0.iter() {
+            write!(f, "{}", elem)?;
+        }
+        fmt::Result::Ok(())
+    }
+}
+impl Markdown for Predictions {
+    fn to_table(&self) -> String {
+        let mut s = String::new();
+        s.push_str("|Home|Predicted result|Away|\n");
+        for elem in self.0.iter() {
+            s.push_str(&elem.to_table());
+            s.push_str("\n");
+        }
+        s
     }
 }
 
