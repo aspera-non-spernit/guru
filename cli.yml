@@ -1,5 +1,5 @@
 name: guru
-version: "0.0.1"
+version: "0.1.0"
 author: Daniel Hammeley <daniel@hammeley.info>
 about: Predict Football Matches
 args:
@@ -14,3 +14,15 @@ args:
         short: d
         long: data
         takes_value: true
+    - load-network:
+        help: Loads a previously trained network
+        short: l
+        long: load-network
+        required: false
+        takes_value: false
+    - save-network:
+        help: Saves a trained network to file
+        short: s
+        long: save-network
+        required: false
+        takes_value: false

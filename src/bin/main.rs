@@ -7,7 +7,7 @@ use clap::{ App };
 use guru::{
     models::{Clubs, DataEntry, Match},
     neural::nn::NN,
-    utils::load_matches,
+    utils::{load_matches, load_network, save_network},
     Features, Generator, Guru, Stats, Testing, Training,
 };
 use std::{collections::HashMap, str::FromStr};
@@ -214,6 +214,7 @@ impl Generator for MyInputGen<'_> {
 fn main() -> std::io::Result<()> {
     let yaml = load_yaml!("/home/genom/Development/guru/cli.yml");
     let opts = App::from_yaml(yaml).get_matches();
+ 
     let error = f64::from_str(opts.value_of("error").unwrap()).unwrap();
     let all_matches = if let Some(f) = opts.value_of("data") {
         load_matches(f)?
@@ -236,7 +237,7 @@ fn main() -> std::io::Result<()> {
     let test_matches: Vec<Match> = training_matches.drain(37..training_matches.len()).collect();
     // using matches in the data set that have no result (match in the future) to predict the result 
     // for those matches
-    let mut prediction_matches: Vec<Match> = all_matches
+    let prediction_matches: Vec<Match> = all_matches
         .iter()
         .filter(|&m| m.result.is_none())
         .cloned()
@@ -269,12 +270,17 @@ fn main() -> std::io::Result<()> {
 
     // Creating the network
     //let _hidden_size = (training_set[0].inputs.len() as f64 * 0.66).round() as u32;
-    let mut net = NN::new(&[
-        training_set[0].inputs.len() as u32,
-        15,
-        9,
-        training_set[0].outputs.len() as u32,
-    ]);
+    let mut net = if opts.is_present("load-network") {
+        load_network()?
+    } else {
+        NN::new(&[
+            training_set[0].inputs.len() as u32,
+            15,
+            9,
+            training_set[0].outputs.len() as u32,
+        ])
+    };
+
     println!("Training Prediction Network...");
     // training
     guru.train(
@@ -284,6 +290,7 @@ fn main() -> std::io::Result<()> {
         0.2,
         error,
     );
+    if opts.is_present("save-network") { save_network(&net)?; }
 
     // testing / validating
     let (test_results, predictions) = guru.test(
@@ -305,10 +312,10 @@ fn main() -> std::io::Result<()> {
     println!("Winner {}", test_results[1].to_string());
     println!("--------------------------");
     // predict future matches
-    let (test_results, predictions) = guru.test(&mut net, &prediction_set, &prediction_matches);
+    let (_test_results, _predictions) = guru.test(&mut net, &prediction_set, &prediction_matches);
     // TODO: Fix empty
     // println!("{}", predictions);
-    println!("Result {}\n", test_results[0].to_string());
-    println!("Winner {}", test_results[1].to_string());
+    // println!("Result {}\n", test_results[0].to_string());
+    // println!("Winner {}", test_results[1].to_string());
     Ok(())
 }

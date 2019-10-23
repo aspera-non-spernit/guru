@@ -3,7 +3,9 @@ Modified version, cloned from https://github.com/jackm321/RustNN
 on October 11, 2019 - Latest commit 26aff11 on May 8, 2015
 **/
 
-//! An easy to use neural network library written in Rust.
+//! This easy to use feed forward neural network is a modified fork from
+//! https://github.com/jackm321/RustNN on October 11, 2019 
+//! Latest commit 26aff11 on May 8, 2015
 //!
 //! # Description
 //! nn is a [feedforward neural network ](http://en.wikipedia.org/wiki/Feedforward_neural_network)

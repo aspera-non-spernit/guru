@@ -2,21 +2,35 @@ use chrono::{DateTime, FixedOffset};
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::HashMap;
 
+/**
+Represents an arbitrary Club. 
+guru will create a club, giving a well-formed set of matches (example/data.json)
+**/
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Club {
     pub name: String,
 }
+
+/**
+All clubs that were found in a set of matches.
+**/
 #[derive(Clone, Debug)]
 pub struct Clubs {
     pub data: HashMap<Club, u32>,
 }
 
+/**
+One item of a training, test or prediction set, that consists of a set of input features and output features.
+**/
 #[derive(Debug)]
 pub struct DataEntry {
     pub inputs: Vec<f64>,
     pub outputs: Vec<f64>,
 }
 
+/**
+
+**/
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Match {
     #[serde(deserialize_with = "self::deserialize_from_str")]
@@ -27,6 +41,9 @@ pub struct Match {
     pub result: Option<[u8; 2]>,
 }
 
+/**
+Can be used to mark either the scoring of the home team or the away team.
+**/
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub enum Scoring {
     Home,

@@ -16,6 +16,7 @@ use std::{
 };
 use utils::normalize;
 
+/// The AWAY_FACTOR was used to denote the strength of Away Teams across the entire data set.
 const AWAY_FACTOR: f64 = 1.0;
 
 #[derive(Clone, Debug)]
@@ -82,6 +83,27 @@ pub trait Features {
     fn goal_diff(h_stats: &mut Stats) -> f64;
 }
 
+/**
+Implementing ```Generator``` allows to pass a custom set of input features to guru
+and the network.
+It is used by DataEntry::from to return a set of training matches
+Example:
+```rust
+
+#[derive(Clone, Debug)]
+struct MyInputGen<'a> {
+    values: (Vec<Match>, &'a Clubs, HashMap<String, Stats>),
+}
+
+impl<'a> MyInputGen<'a> {
+
+}
+let mut my_input_generator = MyInputGen {
+    values: (training_matches.clone(), &clubs, stats.clone()),
+};
+
+```
+**/
 pub trait Generator {
     fn generate(&mut self, m: &Match) -> Vec<f64>;
 }
