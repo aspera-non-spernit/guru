@@ -215,9 +215,12 @@ fn main() -> std::io::Result<()> {
     let yaml = load_yaml!("/home/genom/Development/guru/cli.yml");
     let opts = App::from_yaml(yaml).get_matches();
     let error = f64::from_str(opts.value_of("error").unwrap()).unwrap();
-
-    // all matches
-    let all_matches = load_matches()?;
+    let all_matches = if let Some(f) = opts.value_of("input") {
+        load_matches(f)?
+    } else {
+        // example matches
+        load_matches("examples/data.json")?
+    };
     // Clubs is required because ```Club```(s) are taken from a set of matches (data.json) without
     // ids
     let clubs: Clubs = Clubs::from(all_matches.as_slice());
