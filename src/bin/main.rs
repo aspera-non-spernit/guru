@@ -130,6 +130,26 @@ impl Generator for MyInputGen<'_> {
         inputs.push(guru::utils::normalize(h_rel, 0f64, h_rel + a_rel));
         inputs.push(guru::utils::normalize(a_rel, 0f64, h_rel + a_rel));
 
+        let hs = [
+            Stats::highest_scoring_by_club_to_date(&self.values.2.get(&m.home).unwrap())[0],
+            Stats::highest_scoring_by_club_to_date(&self.values.2.get(&m.away).unwrap())[1],
+        ];
+        /*** Adding 2 features: Relative Highest Scoring between clubs to date
+        Highest scoring of the Home Team is 7
+        Highest scoring of the Away Team is 4
+        Values: Team A: 0,6364 Team B 0,3636
+        **/
+
+        inputs.push(guru::utils::normalize(
+            hs[0].into(),
+            0f64,
+            (hs[0] + hs[1]).into(),
+        ));
+        inputs.push(guru::utils::normalize(
+            hs[1].into(),
+            0f64,
+            (hs[0] + hs[1]).into(),
+        ));
         /*** Adding 2 features: Team's Highest Score to League Performance (Highest Scoring)
         Calculates two individual values for the home and away team relative to the league's performance
         Example:
@@ -141,25 +161,9 @@ impl Generator for MyInputGen<'_> {
             The relative strength of the Home team to the best Home performer in the league: 0.5
             Features are not related to each other, do not add up to 1.0
         **/
-        let hs = [
-            Stats::highest_scoring_by_club_to_date(&self.values.2.get(&m.home).unwrap())[0],
-            Stats::highest_scoring_by_club_to_date(&self.values.2.get(&m.away).unwrap())[1],
-        ];
         let hsil = Stats::highest_scoring_in_league_to_date(&self.values.0, &m.date);
         inputs.push(guru::utils::normalize(hs[0].into(), 0f64, hsil[0].into()));
         inputs.push(guru::utils::normalize(hs[1].into(), 0f64, hsil[1].into()));
-
-        /*** Adding 2 features: Relative Highest Scoring between clubs to date **/
-        inputs.push(guru::utils::normalize(
-            hs[0].into(),
-            0f64,
-            (hs[0] + hs[1]).into(),
-        ));
-        inputs.push(guru::utils::normalize(
-            hs[1].into(),
-            0f64,
-            (hs[0] + hs[1]).into(),
-        ));
 
         //TODO:
         /*** Adding 2 features: Team's match history
@@ -171,19 +175,24 @@ impl Generator for MyInputGen<'_> {
             Total Scores: Team A: 6 Team B 2:
             Normalized values: Team A 0.75 Team B 0.25
         **/
-        let v: Vec<Option<&Match>> = self
-            .values
-            .0
-            .iter()
-            .map(|n| {
-                if n.home == m.home && n.away == m.away {
-                    Some(m)
-                } else {
-                    None
-                }
-            })
-            .collect();
-
+        let mut hist: &[u8;2] = &[0, 0];
+        self.values.0.iter()
+        .filter( |n| m.home == n.home && m.away == n.away || m.home == n.away && m.away == n.home )
+        .filter( |n| n.date < m.date )
+        .filter( |n| n.result.is_some() )
+        .map(|n| n.result.unwrap() )
+        .for_each(move|result| {
+            if m.home == n.home {
+                hist[0] += result[0]; hist[1] += result[1];
+            } else {
+                hist[0] += result[1]; hist[1] += result[0];
+            }
+        })
+        .collect();
+    
+        println!("{:?} {:?} {:?}", m.date, m.home, m.away);
+        dbg!(&hist);
+       // dbg!(&hist);
         // Updating Stats
         self.update(&m);
 
@@ -211,7 +220,7 @@ fn main() -> std::io::Result<()> {
     let yaml = load_yaml!("/home/genom/Development/guru/cli.yml");
     let opts = App::from_yaml(yaml).get_matches();
     let error = f64::from_str(opts.value_of("error").unwrap()).unwrap();
-    let mut all_matches = if let Some(f) = opts.value_of("data") {
+    let all_matches = if let Some(f) = opts.value_of("data") {
         load_matches(f)?
     } else {
         // example matches
@@ -222,10 +231,7 @@ fn main() -> std::io::Result<()> {
     // would not be able to calculate error correctly for networks loaded from file
     // TODO: avoid sorted, collect into all_matches
     let mut sorted: Vec<Match> = all_matches.iter().cloned().collect();
-    dbg!(&sorted);
     sorted.sort_by(|a, b| a.home.cmp(&b.home).to_owned() );
-    dbg!(&sorted);
-    // all_matches = sorted.clone();
     // Clubs is required because ```Club```(s) are taken from a set of matches (data.json) without
     // ids
     let clubs: Clubs = Clubs::from(sorted.as_slice());
