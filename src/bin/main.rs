@@ -180,16 +180,14 @@ impl Generator for MyInputGen<'_> {
         .filter( |n| m.home == n.home && m.away == n.away || m.home == n.away && m.away == n.home )
         .filter( |n| n.date < m.date )
         .filter( |n| n.result.is_some() )
-        .map(|n| n.result.unwrap() )
-        .for_each(move|result| {
+        .map(|n| n )
+        .for_each(move| n| {
             if m.home == n.home {
-                hist[0] += result[0]; hist[1] += result[1];
+                hist[0] += n.result.unwrap()[0]; hist[1] += n.result.unwrap()[1];
             } else {
-                hist[0] += result[1]; hist[1] += result[0];
+                hist[0] += n.result.unwrap()[1]; hist[1] += n.result.unwrap()[0];
             }
-        })
-        .collect();
-    
+        });    
         println!("{:?} {:?} {:?}", m.date, m.home, m.away);
         dbg!(&hist);
        // dbg!(&hist);
