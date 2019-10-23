@@ -160,6 +160,7 @@ impl<'a> Testing for Guru<'a> {
     ) -> [NetworkStats; 2] {
         let ats = Stats::all_time_highest_score_in_league(&self.data_set);
         let highest = ats.iter().max().unwrap();
+        // TODO: move to caller
         let mut res_stats = NetworkStats::default();
         let mut win_stats = NetworkStats::default();
         let test_data: Vec<(Vec<f64>, Vec<f64>)> = test_set
@@ -170,7 +171,8 @@ impl<'a> Testing for Guru<'a> {
             let res = net.run(&test_data[i].0);
             let phr = (res[0] * f64::from(*highest).round()) as u8; // denormalized home result
             let par = (res[1] * f64::from(*highest).round()) as u8; // denormalized away result
-                                                                    // assuming test else prediction
+            // assuming test else prediction
+            // TODO: move to caller
             if matches[i].result.is_some() {
                 println!(
                     "{:?} : {:?} on {:?}",

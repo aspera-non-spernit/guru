@@ -9,6 +9,13 @@ pub fn load_matches() -> std::io::Result<Vec<Match>> {
     Ok(matches)
 }
 
+pub fn loading_network() {
+    println!("loading network..");
+
+}
+pub fn save_network() {
+    println!("saving..");
+}
 /// Simple normalization function
 pub fn normalize(v: f64, min: f64, max: f64) -> f64 {
     if (max - min) == 0.0 {
