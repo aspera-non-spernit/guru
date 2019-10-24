@@ -102,21 +102,20 @@ impl Generator for MyInputGen<'_> {
             in the play-offs. If there's a pattern. The network will pick that up and may be able
             to produce better predictions knowing that a result of a friendly is less reliable than a play-off result.
         **/
-        // TODO: only A-Z a-z 0-9 allowed data.json must replace or remove other characters
-        // String may cause overflow panic
-        let mut leagues: HashSet<i32> = HashSet::new();
+        // does count 5 leagues, when 6 in data set, but println! 6 leagues.
+        let mut leagues: HashSet<i64> = HashSet::new();
         for m in &self.values.0 {
-            leagues.insert(*&i32::from_str_radix(&m.league,32).unwrap());
+            leagues.insert(*&i64::from_str_radix(&m.league,36).unwrap());
         }
 
         let hl: f64 = (*leagues.iter().max().unwrap()) as f64;
         inputs.push( guru::utils::normalize(
-                *&i32::from_str_radix(&m.league, 32).unwrap() as f64,
+                *&i64::from_str_radix(&m.league, 36).unwrap() as f64,
                 0f64,
                 hl
             )
         );
-
+     
         /***
         Adding 3x2 features. The values for Home add up to 1.0 and the values for away 
         add up to 1.0.
