@@ -82,6 +82,40 @@ impl Generator for MyInputGen<'_> {
         inputs.push(Guru::game_day(&m.date, &self.values.0));
 
         /***
+        Adding 3x2 features. The values for Home add up to 1.0 and the values for away 
+        add up to 1.0.
+        Home and Away values are not related to each other.
+        TODO: 
+        Adding 2 features: Home and Away Wins to date (no relation to each other)
+        Sums up for the home and away them the previous matches won at home or away
+        Example:
+            The home team played 4 games at home, and won 3 of these.
+            The away team played 4 games away, won 1 of them
+            Home: 0.75 (3 of 4 matches won at home)
+            Away: 0.25 (1 of 4 matches won away)
+        **/
+        /***
+        TODO:
+        Adding 2 features: Home and Away Draws to date (no relation to each other)
+        Sums up for the home and away them the previous draws at home or away
+        Example:
+            The home team played 4 games at home, and 1 was a draw.
+            The away team played 4 games away, 2 of them were a draw
+            Home: 0.25 (1 of 4 matches at home a draw)
+            Away: 0.5 (1 of 4 matches away a draw)
+        **/
+        /***
+        TODO:
+        Adding 2 features: Homw and Away Losses to date (no relation to each other)
+        Sums up for the home and away them the previous matches lost at home or away
+        Example:
+            The home team played 4 games at home, and lost none.
+            The away team played 4 games away, won 1 of them
+            Home: 0.0 (0 of 4 matches lost at home)
+            Away: 0.25 (1 of 4 matches lost at away)
+        **/
+
+        /***
         Adding 2 features : Total Scorings to Game Day
         Calculates the relative strength of home and away team based on total scorings to game date
         Example:
@@ -255,8 +289,11 @@ fn main() -> std::io::Result<()> {
         .filter(|&m| m.result.is_some())
         .cloned()
         .collect();
-    // taking from training_matches for testing
-    let test_matches: Vec<Match> = training_matches.drain(37..training_matches.len()).collect();
+
+    // taking 90% from training_matches for testing
+    let upper: usize = (training_matches.len() as f32 * 0.9).round() as usize;
+    dbg!(upper);
+    let test_matches: Vec<Match> = training_matches.drain(upper..training_matches.len()).collect();
     // using matches in the data set that have no result (match in the future) to predict the result 
     // for those matches
     let prediction_matches: Vec<Match> = sorted
