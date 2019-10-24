@@ -242,7 +242,7 @@ fn main() -> std::io::Result<()> {
     // network needs the same order otherwise the nwtwork
     // would not be able to calculate error correctly for networks loaded from file
     // TODO: avoid sorted, collect into all_matches
-    let mut sorted: Vec<Match> = all_matches.iter().cloned().collect();
+    let mut sorted: Vec<Match> = all_matches.to_vec();
     sorted.sort_by(|a, b| a.date.cmp(&b.date).to_owned() );
     // Clubs is required because ```Club```(s) are taken from a set of matches (data.json) without
     // ids
