@@ -229,14 +229,14 @@ impl Generator for MyInputGen<'_> {
 }
 
 fn main() -> std::io::Result<()> {
-    let yaml = load_yaml!("/home/genom/Development/guru/cli.yml");
+    let yaml = load_yaml!("../../config/cli.yml");
     let opts = App::from_yaml(yaml).get_matches();
     let error = f64::from_str(opts.value_of("error").unwrap()).unwrap();
     let all_matches = if let Some(f) = opts.value_of("data") {
         load_matches(f)?
     } else {
         // example matches
-        load_matches("examples/data.json")?
+        load_matches("data/data.json")?
     };
     // must be sorted, doesn't matter to what,
     // network needs the same order otherwise the nwtwork
