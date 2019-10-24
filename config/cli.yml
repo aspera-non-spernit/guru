@@ -1,6 +1,6 @@
 name: guru
 version: "0.1.0"
-author: Daniel Hammeley <daniel@hammeley.info>
+authors: Daniel Hammeley <daniel@hammeley.info>
 about: Predict Football Matches
 args:
     - error:
@@ -27,3 +27,8 @@ args:
         long: save-network
         required: false
         takes_value: false
+    - split-data:
+        help: Splits the data set into a training and a test set according to this factor
+        long: split-data
+        required: false
+        takes_value: true

@@ -290,9 +290,11 @@ fn main() -> std::io::Result<()> {
         .cloned()
         .collect();
 
-    // taking 90% from training_matches for testing
-    let upper: usize = (training_matches.len() as f32 * 0.9).round() as usize;
-    dbg!(upper);
+    // taking n% from training_matches for testing.
+    let split: f32 = if opts.is_present("split-data") {
+        opts.value_of("split-data").unwrap().parse().unwrap()
+    } else { 0.9 };
+    let upper: usize = (training_matches.len() as f32 * split).round() as usize;
     let test_matches: Vec<Match> = training_matches.drain(upper..training_matches.len()).collect();
     // using matches in the data set that have no result (match in the future) to predict the result 
     // for those matches
