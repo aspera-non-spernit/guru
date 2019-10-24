@@ -14,7 +14,7 @@ use std::{
     convert::TryInto,
     fmt,
 };
-use utils::normalize;
+use utils::{ generators::Generator, normalize };
 
 /// The AWAY_FACTOR was used to denote the strength of Away Teams across the entire data set.
 const AWAY_FACTOR: f64 = 1.0;
@@ -97,6 +97,25 @@ impl From<&[Match]> for Clubs {
             data.insert(c.clone(), i as u32);
         }
         Clubs { data }
+    }
+}
+
+/// the u8 is the max value used to set the upper limit for a normalization function
+impl<T: Generator> From<(&Match, &Clubs, u8, &mut T)> for DataEntry {
+    fn from(from: (&Match, &Clubs, u8, &mut T)) -> Self {
+        let inputs = from.3.generate(from.0);
+        let outputs = if let Some(result) = from.0.result {
+            vec![
+                normalize(f64::from(result[0]), 0f64, from.2.into()),
+                normalize(f64::from(result[1]), 0f64, from.2.into()),
+            ]
+        } else {
+            vec![]
+        };
+        DataEntry {
+            inputs,
+            outputs
+        }
     }
 }
 
