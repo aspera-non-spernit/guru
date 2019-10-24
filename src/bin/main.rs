@@ -10,7 +10,7 @@ use guru::{
     utils::{load_matches, load_network, save_network},
     Features, Generator, Guru, Markdown, Stats, Testing, Training,
 };
-use std::{collections::HashMap, str::FromStr};
+use std::{collections::{HashMap, HashSet}, str::FromStr};
 
 fn stats(clubs: &Clubs) -> HashMap<String, Stats> {
     let mut league_stats = HashMap::new();
@@ -78,10 +78,9 @@ impl Generator for MyInputGen<'_> {
             Date of the current match is 2019-10-02 Unix Timestamp 1569974400
             The last match in the data set is on 2019-11-02 Unix Timestamp 1572652800
             The value for the game day factor is 0.8218 (a relative recent match)
+            Future matches (those without a result have values > 1.0)
         **/
-        // TODO: only A-Z a-z 0-9 allowed data.json must replace or remove other characters
-        // String may cause overflow panic
-        inputs.push(*&i64::from_str_radix(&m.league, 32).unwrap() as f64);
+        inputs.push(Guru::game_day(&m.date, &self.values.0));
 
         /*** 
         Adding 1 feature: League
@@ -103,7 +102,20 @@ impl Generator for MyInputGen<'_> {
             in the play-offs. If there's a pattern. The network will pick that up and may be able
             to produce better predictions knowing that a result of a friendly is less reliable than a play-off result.
         **/
-        inputs.extend_from_slice(&Guru::club_features(m, self.values.1));
+        // TODO: only A-Z a-z 0-9 allowed data.json must replace or remove other characters
+        // String may cause overflow panic
+        let mut leagues: HashSet<i64> = HashSet::new();
+        for m in &self.values.0 {
+            leagues.insert(*&i64::from_str_radix(&m.league, 32).unwrap());
+        }
+
+        let hl: f64 = (*leagues.iter().max().unwrap()) as f64;
+        inputs.push( guru::utils::normalize(
+                *&i64::from_str_radix(&m.league, 32).unwrap() as f64,
+                0f64,
+                hl
+            )
+        );
 
         /***
         Adding 3x2 features. The values for Home add up to 1.0 and the values for away 
@@ -282,6 +294,7 @@ impl Generator for MyInputGen<'_> {
             self.values.2.get(&m.away).unwrap().away_scores.len(),
             self.values.2.get(&m.away).unwrap().games_played[1] as usize
         );
+        dbg!(&inputs);
         inputs
     }
 }
