@@ -147,7 +147,7 @@ impl<'a, 'b> Trainer<'a, 'b> {
     /// Specifies when to stop training. `Epochs(x)` will stop the training after
     /// `x` epochs (one epoch is one loop through all of the training examples)
     /// while `MSE(e)` will stop the training when the error rate
-    /// is at or below `e`. `Timer(d)` will halt after the [duration](https://doc.rust-lang.org/time/time/struct.Duration.html) `d` has
+    /// is at or below `e`. `Timer(d)` will halt after the [duration](https://doc.rust-lang.org/std/time/struct.Duration.html) `d` has
     /// elapsed.
     pub fn halt_condition(&mut self, halt_condition: HaltCondition) -> &mut Trainer<'a, 'b> {
         match halt_condition {
