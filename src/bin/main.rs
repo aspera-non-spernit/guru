@@ -79,7 +79,31 @@ impl Generator for MyInputGen<'_> {
             The last match in the data set is on 2019-11-02 Unix Timestamp 1572652800
             The value for the game day factor is 0.8218 (a relative recent match)
         **/
-        inputs.push(Guru::game_day(&m.date, &self.values.0));
+        // TODO: only A-Z a-z 0-9 allowed data.json must replace or remove other characters
+        // String may cause overflow panic
+        inputs.push(*&i64::from_str_radix(&m.league, 32).unwrap() as f64);
+
+        /*** 
+        Adding 1 feature: League
+        Takes the league field of a match and converts the String into an integer then f64
+        Rationale: Allows to add a non-judgmental feature that represents the overall strength
+        of the league, which may be relevant in inter league matches (ie Open Cup) or in a Pro-Rel System.
+        It also allows some separation between phases of a season, if the field league is used that way.
+        Example:
+            The data set consists of matches from the the German Bundesliga, UK Premier Leaguge, and NISA.
+            The matches of NISA show Team A to be very strong, however compared to other leagues in the
+            Data set, Team A may be less successful.
+            The String radix allows to add that feature without ranking the league by personal opinion.
+            A first Division league in Tibet may be weaker than a a 4th Division NPSL league.
+        If matches in a regular season are marked differently than for instance play-offs, friendlies
+        or off-season matches, it may allow the network to pick up patterns in the roster or changing the strategy
+        of the teams throughout those phases.
+        Example: 
+            Team A tries out new formations and a more offensive play in a pre-season or a friendly, than
+            in the play-offs. If there's a pattern. The network will pick that up and may be able
+            to produce better predictions knowing that a result of a friendly is less reliable than a play-off result.
+        **/
+        inputs.extend_from_slice(&Guru::club_features(m, self.values.1));
 
         /***
         Adding 3x2 features. The values for Home add up to 1.0 and the values for away 

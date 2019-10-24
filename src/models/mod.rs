@@ -36,6 +36,7 @@ pub struct Match {
     #[serde(deserialize_with = "self::deserialize_from_str")]
     #[serde(serialize_with = "self::serialize_to_str")]
     pub date: chrono::DateTime<FixedOffset>,
+    pub league: String,
     pub home: String,
     pub away: String,
     pub result: Option<[u8; 2]>,
@@ -73,11 +74,13 @@ impl Clubs {
 impl Match {
     pub fn new(
         date: DateTime<FixedOffset>,
+        league: String,
         home: String,
         away: String,
         result: Option<[u8; 2]>,
     ) -> Self {
         Match {
+            league,
             date,
             home,
             away,
