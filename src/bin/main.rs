@@ -372,21 +372,24 @@ fn main() -> std::io::Result<()> {
     } else {
         NN::new(&[
             training_set[0].inputs.len() as u32,
-            15,
-            9,
+            17,
+            11,
+            7,
             training_set[0].outputs.len() as u32,
         ])
     };
 
-    println!("Training Prediction Network...");
-    // training
-    guru.train(
-        &mut net,
-        &training_set,
-        0.3,
-        0.2,
-        error,
-    );
+    if !opts.is_present("no-train") {
+        println!("Training Prediction Network...");
+        guru.train(
+            &mut net,
+            &training_set,
+            0.3,
+            0.2,
+            error,
+        );
+    }
+
     if opts.is_present("save-network") { save_network(&net)?; }
 
     // testing / validating

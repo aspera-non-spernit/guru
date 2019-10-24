@@ -32,3 +32,8 @@ args:
         long: split-data
         required: false
         takes_value: true
+    - no-train:
+        help: Does not train the network prior testing and prediction.\nCan be used for debug or if a trained network is loaded from file.
+        long: no-train
+        required: false
+        takes_value: false
