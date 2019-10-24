@@ -1,11 +1,9 @@
 use crate::{
-    models::{Clubs, DataEntry, Match},
+    models::{Clubs, Match},
     utils::normalize,
-    Features, Guru, Stats
+    Features, Guru, Stats,
 };
 use std::collections::{HashMap, HashSet};
-
-
 
 #[derive(Clone, Debug)]
 pub struct DefaultInputGenerator<'a> {
@@ -54,7 +52,7 @@ impl<'a> DefaultInputGenerator<'a> {
             a_stats.away_scores.push(result[1]);
             a_stats.games_played[1] += 1;
         }
-    
+
         self.values.2.remove(&m.home);
         self.values.2.insert(String::from(&m.home), h_stats.clone());
         self.values.2.remove(&m.away);
@@ -93,7 +91,7 @@ impl Generator for DefaultInputGenerator<'_> {
         **/
         inputs.push(Guru::game_day(&m.date, &self.values.0));
 
-        /*** 
+        /***
         Adding 1 feature: League
         Takes the league field of a match and converts the String into an integer then f64
         Rationale: Allows to add a non-judgmental feature that represents the overall strength
@@ -108,7 +106,7 @@ impl Generator for DefaultInputGenerator<'_> {
         If matches in a regular season are marked differently than for instance play-offs, friendlies
         or off-season matches, it may allow the network to pick up patterns in the roster or changing the strategy
         of the teams throughout those phases.
-        Example: 
+        Example:
             Team A tries out new formations and a more offensive play in a pre-season or a friendly, than
             in the play-offs. If there's a pattern. The network will pick that up and may be able
             to produce better predictions knowing that a result of a friendly is less reliable than a play-off result.
@@ -116,22 +114,21 @@ impl Generator for DefaultInputGenerator<'_> {
         // does count 5 leagues, when 6 in data set, but println! 6 leagues.
         let mut leagues: HashSet<i64> = HashSet::new();
         for m in &self.values.0 {
-            leagues.insert(*&i64::from_str_radix(&m.league,36).unwrap());
+            leagues.insert(i64::from_str_radix(&m.league, 36).unwrap());
         }
 
         let hl: f64 = (*leagues.iter().max().unwrap()) as f64;
-        inputs.push( normalize(
-                *&i64::from_str_radix(&m.league, 36).unwrap() as f64,
-                0f64,
-                hl
-            )
-        );
-     
+        inputs.push(normalize(
+            i64::from_str_radix(&m.league, 36).unwrap() as f64,
+            0f64,
+            hl,
+        ));
+
         /***
-        Adding 3x2 features. The values for Home add up to 1.0 and the values for away 
+        Adding 3x2 features. The values for Home add up to 1.0 and the values for away
         add up to 1.0.
         Home and Away values are not related to each other.
-        TODO: 
+        TODO:
         Adding 2 features: Home and Away Wins to date (no relation to each other)
         Sums up for the home and away them the previous matches won at home or away
         Example:
@@ -174,16 +171,8 @@ impl Generator for DefaultInputGenerator<'_> {
         **/
         let hts = Stats::total_scoring_by_club_to_date(&self.values.2.get(&m.home).unwrap());
         let ats = Stats::total_scoring_by_club_to_date(&self.values.2.get(&m.away).unwrap());
-        inputs.push(normalize(
-            hts[0].into(),
-            0f64,
-            (hts[0] + ats[1]).into(),
-        ));
-        inputs.push(normalize(
-            ats[1].into(),
-            0f64,
-            (hts[0] + ats[1]).into(),
-        ));
+        inputs.push(normalize(hts[0].into(), 0f64, (hts[0] + ats[1]).into()));
+        inputs.push(normalize(ats[1].into(), 0f64, (hts[0] + ats[1]).into()));
 
         /***
         Adding 2 features : Relative Home Advantage
@@ -220,16 +209,8 @@ impl Generator for DefaultInputGenerator<'_> {
         Values: Team A: 0,6364 Team B 0,3636
         **/
 
-        inputs.push(normalize(
-            hs[0].into(),
-            0f64,
-            (hs[0] + hs[1]).into(),
-        ));
-        inputs.push(normalize(
-            hs[1].into(),
-            0f64,
-            (hs[0] + hs[1]).into(),
-        ));
+        inputs.push(normalize(hs[0].into(), 0f64, (hs[0] + hs[1]).into()));
+        inputs.push(normalize(hs[1].into(), 0f64, (hs[0] + hs[1]).into()));
         /*** Adding 2 features: Team's Highest Score to League Performance (Highest Scoring)
         Calculates two individual values for the home and away team relative to the league's performance
         Example:
@@ -255,7 +236,8 @@ impl Generator for DefaultInputGenerator<'_> {
             Total Scores: Team A: 6 Team B 2:
             Normalized values: Team A 0.75 Team B 0.25
         **/
-        let hist = self.values
+        let hist = self
+            .values
             .0
             .iter()
             .filter(|n| {
@@ -276,7 +258,7 @@ impl Generator for DefaultInputGenerator<'_> {
                     ]
                 }
             });
-        
+
         // if m.home == "Detroit City FC" && m.away == "New York Cosmos B" ||
         //     m.away == "Detroit City FC" && m.home == "New York Cosmos B" {
         //         println!("{:?}", m);

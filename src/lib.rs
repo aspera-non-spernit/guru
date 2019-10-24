@@ -14,7 +14,7 @@ use std::{
     convert::TryInto,
     fmt,
 };
-use utils::{ generators::Generator, normalize };
+use utils::{generators::Generator, normalize};
 
 /// The AWAY_FACTOR was used to denote the strength of Away Teams across the entire data set.
 const AWAY_FACTOR: f64 = 1.0;
@@ -112,10 +112,7 @@ impl<T: Generator> From<(&Match, &Clubs, u8, &mut T)> for DataEntry {
         } else {
             vec![]
         };
-        DataEntry {
-            inputs,
-            outputs
-        }
+        DataEntry { inputs, outputs }
     }
 }
 
@@ -205,15 +202,14 @@ impl<'a> Testing for Guru<'a> {
             let res = net.run(&test_data[i].0);
             let phr = (res[0] * f64::from(*highest).round()) as u8; // denormalized home result
             let par = (res[1] * f64::from(*highest).round()) as u8; // denormalized away result
-            // assuming test else prediction
-            // TODO: move to caller
+                                                                    // assuming test else prediction
+                                                                    // TODO: move to caller
             if matches[i].result.is_some() {
                 // Create a prediction and add it to the Predictions vector.
                 let p = Prediction {
                     date: matches[i].date,
                     teams: (matches[i].home.clone(), matches[i].away.clone()),
-                    expected_scores:
-                        (matches[i].result.unwrap()[0], matches[i].result.unwrap()[1]),
+                    expected_scores: (matches[i].result.unwrap()[0], matches[i].result.unwrap()[1]),
                     predicted_scores: (phr, par),
                 };
                 predictions.0.push(p);
@@ -236,8 +232,7 @@ impl<'a> Testing for Guru<'a> {
                 let p = Prediction {
                     date: matches[i].date,
                     teams: (matches[i].home.clone(), matches[i].away.clone()),
-                    expected_scores:
-                        (0, 0),
+                    expected_scores: (0, 0),
                     predicted_scores: (phr, par),
                 };
                 predictions.0.push(p);
@@ -317,18 +312,26 @@ tested: {}, positive: {}, negative: {}, correct: {}%",
 // A prediction Displays as a single row of a markdown table.
 impl fmt::Display for Prediction {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "{} {} : {} {}", self.teams.0, self.predicted_scores.0,
-            self.predicted_scores.1, self.teams.1)?;
-        writeln!(f, "Expected: {} : {}",self.expected_scores.0,
-            self.expected_scores.1)?;
-            fmt::Result::Ok(())
+        writeln!(
+            f,
+            "{} {} : {} {}",
+            self.teams.0, self.predicted_scores.0, self.predicted_scores.1, self.teams.1
+        )?;
+        writeln!(
+            f,
+            "Expected: {} : {}",
+            self.expected_scores.0, self.expected_scores.1
+        )?;
+        fmt::Result::Ok(())
     }
 }
 
 impl Markdown for Prediction {
     fn to_table(&self) -> String {
-        format!("|{}|{} : {}|{}|", self.teams.0, self.predicted_scores.0,
-            self.predicted_scores.1, self.teams.1)
+        format!(
+            "|{}|{} : {}|{}|",
+            self.teams.0, self.predicted_scores.0, self.predicted_scores.1, self.teams.1
+        )
     }
 }
 

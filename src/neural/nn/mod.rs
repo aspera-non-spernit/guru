@@ -4,7 +4,7 @@ on October 11, 2019 - Latest commit 26aff11 on May 8, 2015
 **/
 
 //! This easy to use feed forward neural network is a modified fork from
-//! https://github.com/jackm321/RustNN on October 11, 2019 
+//! https://github.com/jackm321/RustNN on October 11, 2019
 //! Latest commit 26aff11 on May 8, 2015
 //!
 //! # Description

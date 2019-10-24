@@ -3,7 +3,7 @@ use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::HashMap;
 
 /**
-Represents an arbitrary Club. 
+Represents an arbitrary Club.
 guru will create a club, giving a well-formed set of matches (example/data.json)
 **/
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]

@@ -1,7 +1,4 @@
-use crate::{
-  models::Match,
-  neural::nn::NN
-};
+use crate::{models::Match, neural::nn::NN};
 use std::{fs::File, io::prelude::*};
 
 pub mod generators;
