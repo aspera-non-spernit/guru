@@ -294,7 +294,6 @@ impl Generator for MyInputGen<'_> {
             self.values.2.get(&m.away).unwrap().away_scores.len(),
             self.values.2.get(&m.away).unwrap().games_played[1] as usize
         );
-        dbg!(&inputs);
         inputs
     }
 }
