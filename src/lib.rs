@@ -63,31 +63,6 @@ pub trait Features {
     fn goal_diff(h_stats: &mut Stats) -> f64;
 }
 
-/**
-Implementing ```Generator``` allows to pass a custom set of input features to guru
-and the network.
-It is used by DataEntry::from to return a set of training matches
-Example:
-```rust
-
-#[derive(Clone, Debug)]
-struct MyInputGen<'a> {
-    values: (Vec<Match>, &'a Clubs, HashMap<String, Stats>),
-}
-
-impl<'a> MyInputGen<'a> {
-
-}
-let mut my_input_generator = MyInputGen {
-    values: (training_matches.clone(), &clubs, stats.clone()),
-};
-
-```
-**/
-pub trait Generator {
-    fn generate(&mut self, m: &Match) -> Vec<f64>;
-}
-
 pub trait Markdown {
     fn to_table(&self) -> String;
 }
@@ -438,25 +413,6 @@ impl Default for Stats {
             home_scores: vec![],
             away_scores: vec![],
             games_played: [0, 0],
-        }
-    }
-}
-
-/// the u8 is the max value used to set the upper limit for a normalization function
-impl<T: Generator> From<(&Match, &Clubs, u8, &mut T)> for DataEntry {
-    fn from(from: (&Match, &Clubs, u8, &mut T)) -> Self {
-        let inputs = from.3.generate(from.0);
-        let outputs = if let Some(result) = from.0.result {
-            vec![
-                normalize(f64::from(result[0]), 0f64, from.2.into()),
-                normalize(f64::from(result[1]), 0f64, from.2.into()),
-            ]
-        } else {
-            vec![]
-        };
-        DataEntry {
-            inputs,
-            outputs
         }
     }
 }
