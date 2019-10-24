@@ -104,14 +104,14 @@ impl Generator for MyInputGen<'_> {
         **/
         // TODO: only A-Z a-z 0-9 allowed data.json must replace or remove other characters
         // String may cause overflow panic
-        let mut leagues: HashSet<i64> = HashSet::new();
+        let mut leagues: HashSet<i32> = HashSet::new();
         for m in &self.values.0 {
-            leagues.insert(*&i64::from_str_radix(&m.league, 32).unwrap());
+            leagues.insert(*&i32::from_str_radix(&m.league,32).unwrap());
         }
 
         let hl: f64 = (*leagues.iter().max().unwrap()) as f64;
         inputs.push( guru::utils::normalize(
-                *&i64::from_str_radix(&m.league, 32).unwrap() as f64,
+                *&i32::from_str_radix(&m.league, 32).unwrap() as f64,
                 0f64,
                 hl
             )
