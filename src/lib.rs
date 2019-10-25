@@ -154,11 +154,22 @@ impl<'a> Features for Guru<'a> {
     }
 
     fn game_day(match_date: &DateTime<FixedOffset>, schedule: &[Match]) -> f64 {
-        let mut gd: Vec<i64> = schedule.iter().map(|m| m.date.timestamp()).collect();
-        gd.dedup();
-        let min = gd.iter().min().unwrap();
-        let max = gd.iter().max().unwrap();
-        normalize(match_date.timestamp() as f64, *min as f64, *max as f64)
+        // let mut gd: Vec<i64> = schedule.iter()
+            // .map(|m| m.date.timestamp())
+            // .collect();
+        // gd.dedup();
+        // let min = gd.iter().min().unwrap();
+        // let max = gd.iter().max().unwrap();
+        // normalize(match_date.timestamp() as f64, *min as f64, *max as f64)
+
+        let mm: HashSet<i64> = schedule.iter()
+            .map(|s| s.date.timestamp())
+            .collect();
+        normalize(
+            match_date.timestamp() as f64,
+            *mm.iter().min().unwrap() as f64,
+            *mm.iter().max().unwrap() as f64
+        )
     }
 
     /*** Returns the goal difference between
