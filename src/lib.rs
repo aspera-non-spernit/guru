@@ -87,15 +87,27 @@ pub trait Training {
 
 impl From<&[Match]> for Clubs {
     fn from(matches: &[Match]) -> Self {
-        let mut tmp_clubs = HashSet::new();
-        let mut data: HashMap<Club, u32> = HashMap::new();
-        for m in matches {
-            tmp_clubs.insert(Club::new(m.home.clone()));
-            tmp_clubs.insert(Club::new(m.away.clone()));
-        }
-        for (i, c) in tmp_clubs.iter().enumerate() {
-            data.insert(c.clone(), i as u32);
-        }
+        // old altnernative
+        // let mut tmp_clubs = HashSet::new();
+        // let mut data: HashMap<Club, u32> = HashMap::new();
+        // for m in matches {
+        //     tmp_clubs.insert(Club::new(m.home.clone()));
+        //     tmp_clubs.insert(Club::new(m.away.clone()));
+        // }
+        // for (i, c) in tmp_clubs.iter().enumerate() {
+        //     data.insert(c.clone(), i as u32);
+        // }
+        let data: HashMap<Club, u32> = matches.iter()
+            .fold( HashSet::new(), | mut clubs, m| {
+                clubs.insert(Club::new(m.home.clone()));
+                clubs.insert(Club::new(m.away.clone()));
+                clubs
+            })
+            .iter().enumerate()
+            .map(|(i, club)| {
+                (club.clone(), i as u32)
+            })
+            .collect();
         Clubs { data }
     }
 }
