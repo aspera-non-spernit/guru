@@ -94,10 +94,9 @@ fn main() -> std::io::Result<()> {
     } else {
         NN::new(&[
             training_set[0].inputs.len() as u32,
-            21,
-            14,
-            9,
-            6,
+            12,
+            8,
+            5,
             training_set[0].outputs.len() as u32,
         ])
     };
