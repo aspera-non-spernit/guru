@@ -131,7 +131,7 @@ impl Generator for DefaultInputGenerator<'_> {
         add up to 1.0.
         Home and Away values are not related to each other.
         TODO:
-        Adding 2 features: Home and Away Wins to date (no relation to each other)
+        Adding 2 features: Home and Away WINS to date (no relation to each other)
         Sums up for the home and away them the previous matches won at home or away
         Example:
             The home team played 4 games at home, and won 3 of these.
@@ -140,7 +140,7 @@ impl Generator for DefaultInputGenerator<'_> {
             Away: 0.25 (1 of 4 matches won away)
 
         **/
-        let wins = Stats::wins_to_date(&self.values.0, &m);
+        let wins = Stats::wdl_to_date(&self.values.0, &m, std::cmp::Ordering::Greater);
         inputs.push(normalize(
             wins[0] as f64,
             0f64,
@@ -153,7 +153,7 @@ impl Generator for DefaultInputGenerator<'_> {
         ));
         /***
         TODO:
-        Adding 2 features: Home and Away Draws to date (no relation to each other)
+        Adding 2 features: Home and Away DRAWS to date (no relation to each other)
         Sums up for the home and away them the previous draws at home or away
         Example:
             The home team played 4 games at home, and 1 was a draw.
@@ -161,10 +161,20 @@ impl Generator for DefaultInputGenerator<'_> {
             Home: 0.25 (1 of 4 matches at home a draw)
             Away: 0.5 (1 of 4 matches away a draw)
         **/
-
+        let draws = Stats::wdl_to_date(&self.values.0, &m, std::cmp::Ordering::Equal);
+        inputs.push(normalize(
+            draws[0] as f64,
+            0f64,
+            draws[0] as f64 + draws[1] as f64,
+        ));
+        inputs.push(normalize(
+            draws[1] as f64,
+            0f64,
+            draws[0] as f64 + draws[1] as f64,
+        ));
         /***
         TODO:
-        Adding 2 features: Home and Away Losses to date (no relation to each other)
+        Adding 2 features: Home and Away LOSSSES to date (no relation to each other)
         Sums up for the home and away them the previous matches lost at home or away
         Example:
             The home team played 4 games at home, and lost none.
@@ -172,7 +182,17 @@ impl Generator for DefaultInputGenerator<'_> {
             Home: 0.0 (0 of 4 matches lost at home)
             Away: 0.25 (1 of 4 matches lost at away)
         **/
-
+        let losses = Stats::wdl_to_date(&self.values.0, &m, std::cmp::Ordering::Less);
+        inputs.push(normalize(
+            losses[0] as f64,
+            0f64,
+            losses[0] as f64 + losses[1] as f64,
+        ));
+        inputs.push(normalize(
+            losses[1] as f64,
+            0f64,
+            losses[0] as f64 + losses[1] as f64,
+        ));
         /***
         Adding 2 features : Total Scorings to Game Day
         Calculates the relative strength of home and away team based on total scorings to game date
@@ -273,12 +293,6 @@ impl Generator for DefaultInputGenerator<'_> {
                     ]
                 }
             });
-
-        // if m.home == "Detroit City FC" && m.away == "New York Cosmos B" ||
-        //     m.away == "Detroit City FC" && m.home == "New York Cosmos B" {
-        //         println!("{:?}", m);
-        //         dbg!(&hist);
-        // }
         inputs.push(normalize(hist[0].into(), 0f64, (hist[0] + hist[1]).into()));
         inputs.push(normalize(hist[1].into(), 0f64, (hist[0] + hist[1]).into()));
 

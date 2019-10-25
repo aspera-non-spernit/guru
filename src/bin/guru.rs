@@ -94,13 +94,13 @@ fn main() -> std::io::Result<()> {
     } else {
         NN::new(&[
             training_set[0].inputs.len() as u32,
-            17,
-            11,
-            7,
+            21,
+            14,
+            9,
+            6,
             training_set[0].outputs.len() as u32,
         ])
     };
-
     if !opts.is_present("no-train") {
         println!("Training Prediction Network...");
         guru.train(&mut net, &training_set, 0.3, 0.2, error);

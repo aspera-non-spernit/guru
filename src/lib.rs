@@ -421,31 +421,38 @@ impl Stats {
     }
 
     /***
-    Returns the home wins for the home team and the away wins for the away team
+    Returns the either the wins, draws or losses for the home team at home
+    and the away team away.
+    Note:
+        Ordering::Greater is for Wins
+        Ordering::Less for Losses
+        Ordering::Equal for Draws
     to date (date of the match)
     **/
-    pub fn wins_to_date(matches: &[Match], m: &Match) -> [usize; 2] {
-        let hw = matches.iter()
+    pub fn wdl_to_date(matches: &[Match], m: &Match, ord: std::cmp::Ordering) -> [usize; 2] {
+        let h = matches.iter()
             .filter(|n|
-                n.home == m.home && 
+                n.home == m.home &&
                 n.date < m.date &&
                 n.result.is_some()
             )     
-            .map(|n| n.result.unwrap())
-            .filter(|r| r[0] > r[1])
-            .collect::<Vec<[u8; 2]>>()
+            .map(|n| n.result.unwrap() )
+            .map(|r| r[0].cmp(&r[1]) )
+            .filter(|o| o.eq(&ord) )
+            .collect::<Vec<std::cmp::Ordering>>()
             .len();
-        let aw = matches.iter()
+        let a = matches.iter()
             .filter(|n|
-                n.away == m.away &&
+                n.away == m.away && 
                 n.date < m.date &&
                 n.result.is_some()
-            )
-            .map(|n| n.result.unwrap())
-            .filter(|r| r[0] < r[1])
-            .collect::<Vec<[u8; 2]>>()
+            )     
+            .map(|n| n.result.unwrap() )
+            .map(|r| r[0].cmp(&r[1]) )
+            .filter(|o| o.eq(&ord) )
+            .collect::<Vec<std::cmp::Ordering>>()
             .len();
-        [hw, aw]
+        [h, a]
     }
 
     /// Returns the number of game days in a Vec<Matches>
