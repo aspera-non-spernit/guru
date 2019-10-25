@@ -59,7 +59,9 @@ impl<'a> DefaultInputGenerator<'a> {
         self.values.2.insert(String::from(&m.away), a_stats.clone());
     }
 }
+
 impl Generator for DefaultInputGenerator<'_> {
+
     // 0 training_matches, 1 &clubs, 2 &stats
     fn generate(&mut self, m: &Match) -> Vec<f64> {
         let mut inputs = vec![];
@@ -136,7 +138,19 @@ impl Generator for DefaultInputGenerator<'_> {
             The away team played 4 games away, won 1 of them
             Home: 0.75 (3 of 4 matches won at home)
             Away: 0.25 (1 of 4 matches won away)
+
         **/
+        let wins = Stats::wins_to_date(&self.values.0, &m);
+        inputs.push(normalize(
+            wins[0] as f64,
+            0f64,
+            wins[0] as f64 + wins[1] as f64,
+        ));
+        inputs.push(normalize(
+            wins[1] as f64,
+            0f64,
+            wins[0] as f64 + wins[1] as f64,
+        ));
         /***
         TODO:
         Adding 2 features: Home and Away Draws to date (no relation to each other)
@@ -147,9 +161,10 @@ impl Generator for DefaultInputGenerator<'_> {
             Home: 0.25 (1 of 4 matches at home a draw)
             Away: 0.5 (1 of 4 matches away a draw)
         **/
+
         /***
         TODO:
-        Adding 2 features: Homw and Away Losses to date (no relation to each other)
+        Adding 2 features: Home and Away Losses to date (no relation to each other)
         Sums up for the home and away them the previous matches lost at home or away
         Example:
             The home team played 4 games at home, and lost none.

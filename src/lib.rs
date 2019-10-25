@@ -382,9 +382,8 @@ impl Markdown for Predictions {
 }
 
 impl Stats {
-    pub fn update(&mut self, new: Stats) {
-        *self = new;
-    }
+    pub fn update(&mut self, new: Stats) {  *self = new; }
+
     /// Returns highest scoring in the league for at home and away
     /// (all time highest scoring at home, all time highes scoring away)
     pub fn all_time_highest_score_in_league(matches: &[Match]) -> [u8; 2] {
@@ -420,6 +419,35 @@ impl Stats {
         }
         hs
     }
+
+    /***
+    Returns the home wins for the home team and the away wins for the away team
+    to date (date of the match)
+    **/
+    pub fn wins_to_date(matches: &[Match], m: &Match) -> [usize; 2] {
+        let hw = matches.iter()
+            .filter(|n|
+                n.home == m.home && 
+                n.date < m.date &&
+                n.result.is_some()
+            )     
+            .map(|n| n.result.unwrap())
+            .filter(|r| r[0] > r[1])
+            .collect::<Vec<[u8; 2]>>()
+            .len();
+        let aw = matches.iter()
+            .filter(|n|
+                n.away == m.away &&
+                n.date < m.date &&
+                n.result.is_some()
+            )
+            .map(|n| n.result.unwrap())
+            .filter(|r| r[0] < r[1])
+            .collect::<Vec<[u8; 2]>>()
+            .len();
+        [hw, aw]
+    }
+
     /// Returns the number of game days in a Vec<Matches>
     pub fn game_days(matches: &[Match]) -> usize {
         matches.iter().fold(0, |i, _m| i + 1)
