@@ -87,25 +87,14 @@ pub trait Training {
 
 impl From<&[Match]> for Clubs {
     fn from(matches: &[Match]) -> Self {
-        // old altnernative
-        // let mut tmp_clubs = HashSet::new();
-        // let mut data: HashMap<Club, u32> = HashMap::new();
-        // for m in matches {
-        //     tmp_clubs.insert(Club::new(m.home.clone()));
-        //     tmp_clubs.insert(Club::new(m.away.clone()));
-        // }
-        // for (i, c) in tmp_clubs.iter().enumerate() {
-        //     data.insert(c.clone(), i as u32);
-        // }
-        let data: HashMap<Club, u32> = matches.iter()
-            .fold( HashSet::new(), | mut clubs, m| {
-                clubs.insert(Club::new(m.home.clone()));
-                clubs.insert(Club::new(m.away.clone()));
-                clubs
-            })
-            .iter().enumerate()
+        let mut tmp_clubs = HashSet::new();
+        for m in matches {
+            tmp_clubs.insert(Club::new(m.home.clone()));
+            tmp_clubs.insert(Club::new(m.away.clone()));
+        }
+        let data: HashMap<Club, u32> = tmp_clubs.into_iter().enumerate()
             .map(|(i, club)| {
-                (club.clone(), i as u32)
+                (club, i as u32)
             })
             .collect();
         Clubs { data }
@@ -421,13 +410,13 @@ impl Stats {
     }
 
     /***
-    Returns the either the wins, draws or losses for the home team at home
+    Returns the either the wins, draws or losses to date for the home team at home
     and the away team away.
     Note:
         Ordering::Greater is for Wins
         Ordering::Less for Losses
         Ordering::Equal for Draws
-    to date (date of the match)
+    
     **/
     pub fn wdl_to_date(matches: &[Match], m: &Match, ord: std::cmp::Ordering) -> [usize; 2] {
         let h = matches.iter()
@@ -440,8 +429,6 @@ impl Stats {
             .map(|r| r[0].cmp(&r[1]) )
             .filter(|o| o.eq(&ord) )
             .count();
-            // .collect::<Vec<std::cmp::Ordering>>()
-            // .len();
         let a = matches.iter()
             .filter(|n|
                 n.away == m.away && 
@@ -452,8 +439,6 @@ impl Stats {
             .map(|r| r[0].cmp(&r[1]) )
             .filter(|o| o.eq(&ord) )
             .count();
-            // .collect::<Vec<std::cmp::Ordering>>()
-            // .len();
         [h, a]
     }
 
