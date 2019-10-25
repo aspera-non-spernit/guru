@@ -439,8 +439,9 @@ impl Stats {
             .map(|n| n.result.unwrap() )
             .map(|r| r[0].cmp(&r[1]) )
             .filter(|o| o.eq(&ord) )
-            .collect::<Vec<std::cmp::Ordering>>()
-            .len();
+            .count();
+            // .collect::<Vec<std::cmp::Ordering>>()
+            // .len();
         let a = matches.iter()
             .filter(|n|
                 n.away == m.away && 
@@ -450,8 +451,9 @@ impl Stats {
             .map(|n| n.result.unwrap() )
             .map(|r| r[0].cmp(&r[1]) )
             .filter(|o| o.eq(&ord) )
-            .collect::<Vec<std::cmp::Ordering>>()
-            .len();
+            .count();
+            // .collect::<Vec<std::cmp::Ordering>>()
+            // .len();
         [h, a]
     }
 
