@@ -76,7 +76,8 @@ impl Generator for DefaultInputGenerator<'_> {
         The normalized values for the home team 0.5556 (=1/1.8) and the away team 0.4444 (=0.8/1.8)
         A Away team 80% as strong as a Home Team.
         **/
-        inputs.extend_from_slice(&Guru::club_features(m, self.values.1));
+        // commented: probably unneccessary
+        //inputs.extend_from_slice(&Guru::club_features(m, self.values.1));
 
         /***
         Adding 1 feature: Game Day Factor
