@@ -9,19 +9,14 @@ pub mod neural;
 pub mod utils;
 
 use chrono::{DateTime, FixedOffset};
-use features::Features;
 use generators::Generator;
 use models::{Club, Clubs, DataEntry, Match};
 use neural::nn::{HaltCondition, NN};
 use std::{
     collections::{HashMap, HashSet},
-    convert::TryInto,
     fmt,
 };
 use utils::{normalize};
-
-/// The AWAY_FACTOR was used to denote the strength of Away Teams across the entire data set.
-const AWAY_FACTOR: f64 = 1.0;
 
 #[derive(Clone, Debug)]
 pub struct Guru<'a> {
@@ -112,45 +107,6 @@ impl<'a> Guru<'a> {
         Guru { data_set }
     }
 }
-
-impl<'a> Features for Guru<'a> {
-    fn club_features(m: &Match, clubs: &Clubs) -> Vec<f64> {
-        // CLUBS: HOME_FACTOR AWAY_FACTOR
-        let num_of_clubs: u32 = clubs.data.len().try_into().unwrap();
-        let mut inputs = vec![];
-        let home_index = clubs.clone().get_index_by_name(m.home.clone());
-        let away_index = clubs.clone().get_index_by_name(m.away.clone());
-        for i in 0..num_of_clubs {
-            if i == home_index {
-                inputs.push(normalize(1.0, 0.0, 1.0 + AWAY_FACTOR));
-            } else if i == away_index {
-                inputs.push(normalize(AWAY_FACTOR, 0.0, 1.0 + AWAY_FACTOR));
-            } else {
-                inputs.push(0f64);
-            }
-        }
-        inputs
-    }
-
-    fn game_day(schedule: &[Match], match_date: &DateTime<FixedOffset>) -> f64 {
-        // let mut gd: Vec<i64> = schedule.iter()
-            // .map(|m| m.date.timestamp())
-            // .collect();
-        // gd.dedup();
-        // let min = gd.iter().min().unwrap();
-        // let max = gd.iter().max().unwrap();
-        // normalize(match_date.timestamp() as f64, *min as f64, *max as f64)
-
-        let mm: HashSet<i64> = schedule.iter()
-            .map(|s| s.date.timestamp())
-            .collect();
-        normalize(
-            match_date.timestamp() as f64,
-            *mm.iter().min().unwrap() as f64,
-            *mm.iter().max().unwrap() as f64
-        )
-    }
-
     /*** Returns the goal difference between
     goals shot at home for the home team at home
     and the away team away
@@ -180,7 +136,7 @@ impl<'a> Features for Guru<'a> {
             f64::from(h)
         }
     }
-}
+
 
 impl<'a> Testing for Guru<'a> {
     // TODO separate Display
@@ -420,16 +376,16 @@ impl Stats {
         [home, away]
     }
 
-    pub fn median_goals_to_date(matches: &[Match], date: &DateTime<FixedOffset>) {
-        // matches.iter()
-        //     .filter(|n|
-        //         &n.date < date &&
-        //         n.result.is_some()
-        //     ).fold(&[Vec::new::<u8>(); 2], |g, n| {
-        //         g
-        //     }
-        //     );
-    }
+    // pub fn median_goals_to_date(matches: &[Match], date: &DateTime<FixedOffset>) {
+    //     // matches.iter()
+    //     //     .filter(|n|
+    //     //         &n.date < date &&
+    //     //         n.result.is_some()
+    //     //     ).fold(&[Vec::new::<u8>(); 2], |g, n| {
+    //     //         g
+    //     //     }
+    //     //     );
+    // }
     /// Sums and returns the scoring for home or away matches for given
     pub fn total_scoring_by_club_to_date(stats: &Stats) -> [u8; 2] {
         [
@@ -439,39 +395,6 @@ impl Stats {
     }
 
     pub fn update(&mut self, new: Stats) {  *self = new; }
-
-    /***
-    Returns the either the wins, draws or losses to date for the home team at home
-    and the away team away.
-    Note:
-        Ordering::Greater is for Wins
-        Ordering::Less for Losses
-        Ordering::Equal for Draws
-    
-    **/
-    pub fn wdl_to_date(matches: &[Match], m: &Match, ord: std::cmp::Ordering) -> [usize; 2] {
-        let h = matches.iter()
-            .filter(|n|
-                n.date < m.date &&
-                n.home == m.home &&
-                n.result.is_some()
-            )     
-            .map(|n| n.result.unwrap() )
-            .map(|r| r[0].cmp(&r[1]) )
-            .filter(|o| o.eq(&ord) )
-            .count();
-        let a = matches.iter()
-            .filter(|n|
-                n.away == m.away && 
-                n.date < m.date &&
-                n.result.is_some()
-            )     
-            .map(|n| n.result.unwrap() )
-            .map(|r| r[0].cmp(&r[1]) )
-            .filter(|o| o.eq(&ord) )
-            .count();
-        [h, a]
-    }
 }
 
 impl Default for Stats {

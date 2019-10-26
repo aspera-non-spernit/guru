@@ -1,10 +1,10 @@
 use crate::{
-    features::Features,
+    features::{GameDayFeature, LeagueFeature, MedianScoreFeature, WDLFeature},
     models::{Clubs, Match},
     utils::normalize,
-    Guru, Stats,
+    Stats,
 };
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 
 /***
 Example implementation
@@ -70,134 +70,26 @@ impl Generator for DefaultInputGenerator<'_> {
     fn generate(&mut self, m: &Match) -> Vec<f64> {
         let mut inputs = vec![];
 
-        /*** Adding 14 features: Clubs
-        The data set consists of c clubs (here: 14)
-        In a Vec of len 14 each each slot is reserved for one club throughout the training
-        Playing clubs are given a value of 1.0, non playing clubs are given a value of 0.0
-        The normalized value 0.5 for each team
-        Currently not used: a global AWAY FACTOR (or AWAY_DISADVANTAG, HOME_ADVANTAGE),
-        where home teams are given a value of 1.0, and away teams a afraction of 1.0 (ie. 0.8).
-        The normalized values for the home team 0.5556 (=1/1.8) and the away team 0.4444 (=0.8/1.8)
-        A Away team 80% as strong as a Home Team.
-        **/
-        // commented: probably unneccessary
-        //inputs.extend_from_slice(&Guru::club_features(m, self.values.1));
+        // Adding 1 feature: GameDay
+        inputs.push(GameDayFeature::from( (self.values.0.as_slice(), &m.date) ).data);
 
-        /***
-        Adding 1 feature: Game Day Factor
-        Calculates the distance from the date of the match to the earliest and newest match date in data set.
-        The match date is converted into a Unix Timestamp. The earliest and lates match dates as timestamp
-        act as min and max for the normalization.
-        The Idea: More recent matches a valued higher than earlier matches
-        Example:
-            The earliest match in the data set is on 2019-05-12 Unix Timestamp 1557619200
-            Date of the current match is 2019-10-02 Unix Timestamp 1569974400
-            The last match in the data set is on 2019-11-02 Unix Timestamp 1572652800
-            The value for the game day factor is 0.8218 (a relative recent match)
-            Future matches (those without a result have values > 1.0)
-        **/
-        inputs.push(Guru::game_day(&self.values.0, &m.date));
+        // Adding 1 feature: GoalDiff
+        // inputs.push(GoalDiffFeature::from( &mut self.values.2 ).data);
 
-        /***
-        Adding 1 feature: League
-        Takes the league field of a match and converts the String into an integer then f64
-        Rationale: Allows to add a non-judgmental feature that represents the overall strength
-        of the league, which may be relevant in inter league matches (ie Open Cup) or in a Pro-Rel System.
-        It also allows some separation between phases of a season, if the field league is used that way.
-        Example:
-            The data set consists of matches from the the German Bundesliga, UK Premier Leaguge, and NISA.
-            The matches of NISA show Team A to be very strong, however compared to other leagues in the
-            Data set, Team A may be less successful.
-            The String radix allows to add that feature without ranking the league by personal opinion.
-            A first Division league in Tibet may be weaker than a a 4th Division NPSL league.
-        If matches in a regular season are marked differently than for instance play-offs, friendlies
-        or off-season matches, it may allow the network to pick up patterns in the roster or changing the strategy
-        of the teams throughout those phases.
-        Example:
-            Team A tries out new formations and a more offensive play in a pre-season or a friendly, than
-            in the play-offs. If there's a pattern. The network will pick that up and may be able
-            to produce better predictions knowing that a result of a friendly is less reliable than a play-off result.
-        **/
-        // does count 5 leagues, when 6 in data set, but println! 6 leagues.
-        let mut leagues: HashSet<i64> = HashSet::new();
-        for m in &self.values.0 {
-            leagues.insert(i64::from_str_radix(&m.league, 36).unwrap());
-        }
+        // Adding 1 feature: League
+        inputs.push(LeagueFeature::from( (self.values.0.as_slice(), m) ).data);
+        
+        // Adding 3 x 2 features: WDLFeature
+        // Home and Away Wins
+        inputs.extend_from_slice(&WDLFeature::from( (self.values.0.as_slice(), m, std::cmp::Ordering::Greater) ).data);
+        // Home and Away Draws
+        inputs.extend_from_slice(&WDLFeature::from( (self.values.0.as_slice(), m, std::cmp::Ordering::Equal) ).data);
+        // Home and Away Losses
+        inputs.extend_from_slice(&WDLFeature::from( (self.values.0.as_slice(), m, std::cmp::Ordering::Less) ).data);
 
-        let hl: f64 = (*leagues.iter().max().unwrap()) as f64;
-        inputs.push(normalize(
-            i64::from_str_radix(&m.league, 36).unwrap() as f64,
-            0f64,
-            hl,
-        ));
+        // Adding 1 feature: MedianScore
+        inputs.extend_from_slice(&MedianScoreFeature::from ( (self.values.0.as_slice(), m) ).data );
 
-        /***
-        Adding 3x2 features. The values for Home add up to 1.0 and the values for away
-        add up to 1.0.
-        Home and Away values are not related to each other.
-        TODO:
-        Adding 2 features: Home and Away WINS to date (no relation to each other)
-        Sums up for the home and away them the previous matches won at home or away
-        Example:
-            The home team played 4 games at home, and won 3 of these.
-            The away team played 4 games away, won 1 of them
-            Home: 0.75 (3 of 4 matches won at home)
-            Away: 0.25 (1 of 4 matches won away)
-
-        **/
-        let wins = Stats::wdl_to_date(&self.values.0, &m, std::cmp::Ordering::Greater);
-        inputs.push(normalize(
-            wins[0] as f64,
-            0f64,
-            wins[0] as f64 + wins[1] as f64,
-        ));
-        inputs.push(normalize(
-            wins[1] as f64,
-            0f64,
-            wins[0] as f64 + wins[1] as f64,
-        ));
-        /***
-        TODO:
-        Adding 2 features: Home and Away DRAWS to date (no relation to each other)
-        Sums up for the home and away them the previous draws at home or away
-        Example:
-            The home team played 4 games at home, and 1 was a draw.
-            The away team played 4 games away, 2 of them were a draw
-            Home: 0.25 (1 of 4 matches at home a draw)
-            Away: 0.5 (1 of 4 matches away a draw)
-        **/
-        let draws = Stats::wdl_to_date(&self.values.0, &m, std::cmp::Ordering::Equal);
-        inputs.push(normalize(
-            draws[0] as f64,
-            0f64,
-            draws[0] as f64 + draws[1] as f64,
-        ));
-        inputs.push(normalize(
-            draws[1] as f64,
-            0f64,
-            draws[0] as f64 + draws[1] as f64,
-        ));
-        /***
-        TODO:
-        Adding 2 features: Home and Away LOSSSES to date (no relation to each other)
-        Sums up for the home and away them the previous matches lost at home or away
-        Example:
-            The home team played 4 games at home, and lost none.
-            The away team played 4 games away, won 1 of them
-            Home: 0.0 (0 of 4 matches lost at home)
-            Away: 0.25 (1 of 4 matches lost at away)
-        **/
-        let losses = Stats::wdl_to_date(&self.values.0, &m, std::cmp::Ordering::Less);
-        inputs.push(normalize(
-            losses[0] as f64,
-            0f64,
-            losses[0] as f64 + losses[1] as f64,
-        ));
-        inputs.push(normalize(
-            losses[1] as f64,
-            0f64,
-            losses[0] as f64 + losses[1] as f64,
-        ));
         /***
         Adding 2 features : Total Scorings to Game Day
         Calculates the relative strength of home and away team based on total scorings to game date
