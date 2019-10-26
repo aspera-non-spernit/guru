@@ -1,10 +1,14 @@
 use crate::{
+    features::Features,
     models::{Clubs, Match},
     utils::normalize,
-    Features, Guru, Stats,
+    Guru, Stats,
 };
 use std::collections::{HashMap, HashSet};
 
+/***
+Example implementation
+**/
 #[derive(Clone, Debug)]
 pub struct DefaultInputGenerator<'a> {
     pub values: (Vec<Match>, &'a Clubs, HashMap<String, Stats>),
@@ -92,7 +96,7 @@ impl Generator for DefaultInputGenerator<'_> {
             The value for the game day factor is 0.8218 (a relative recent match)
             Future matches (those without a result have values > 1.0)
         **/
-        inputs.push(Guru::game_day(&m.date, &self.values.0));
+        inputs.push(Guru::game_day(&self.values.0, &m.date));
 
         /***
         Adding 1 feature: League

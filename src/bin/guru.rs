@@ -5,9 +5,10 @@ extern crate guru;
 
 use clap::App;
 use guru::{
+    generators::DefaultInputGenerator,
     models::{Clubs, DataEntry, Match},
     neural::nn::NN,
-    utils::{generators::DefaultInputGenerator, load_matches, load_network, save_network},
+    utils::{load_matches, load_network, save_network},
     Guru, Markdown, Stats, Testing, Training,
 };
 use std::{collections::HashMap, str::FromStr};

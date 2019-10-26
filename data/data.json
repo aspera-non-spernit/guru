@@ -254,7 +254,10 @@
     "league": "nisaRegularE",
     "home": "Stumptown Athletic",
     "away": "Atlanta SC",
-    "result": null
+    "result": [
+	3,
+	2
+    ]
   },
   {
     "date": "2019-10-26T22:04:00-04:00",

@@ -1,8 +1,6 @@
 use crate::{models::Match, neural::nn::NN};
 use std::{fs::File, io::prelude::*};
 
-pub mod generators;
-
 /// A collection of utility functions.
 
 /**

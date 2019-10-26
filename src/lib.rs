@@ -2,11 +2,15 @@
 extern crate chrono;
 extern crate serde;
 extern crate serde_json;
+pub mod features;
+pub mod generators;
 pub mod models;
 pub mod neural;
 pub mod utils;
 
 use chrono::{DateTime, FixedOffset};
+use features::Features;
+use generators::Generator;
 use models::{Club, Clubs, DataEntry, Match};
 use neural::nn::{HaltCondition, NN};
 use std::{
@@ -14,7 +18,7 @@ use std::{
     convert::TryInto,
     fmt,
 };
-use utils::{generators::Generator, normalize};
+use utils::{normalize};
 
 /// The AWAY_FACTOR was used to denote the strength of Away Teams across the entire data set.
 const AWAY_FACTOR: f64 = 1.0;
@@ -48,20 +52,6 @@ pub struct Prediction {
 // A wrapper to store a vector of Prediction structs.
 #[derive(Debug)]
 pub struct Predictions(Vec<Prediction>);
-
-pub trait Features {
-    /// Returns a normalized vector in size of the league (ie 14 clubs in league, len 14).
-    /// Each club represents a position in the vector. The Value of the Home Team
-    /// in the Vector is HOME_FACTOR = 1.0.
-    /// The Value of the Away Team is AWAY_FACTOR = 0.7
-    /// Clubs not playing in that much = 0.0
-    fn club_features(m: &Match, clubs: &Clubs) -> Vec<f64>;
-    /// Returns the game day as normalized value in relation to all game days,
-    /// where for the normalization min is the first game day of the "season" and max
-    /// the last day of the season
-    fn game_day(m: &DateTime<FixedOffset>, schedule: &[Match]) -> f64;
-    fn goal_diff(h_stats: &mut Stats) -> f64;
-}
 
 pub trait Markdown {
     fn to_table(&self) -> String;
@@ -142,7 +132,7 @@ impl<'a> Features for Guru<'a> {
         inputs
     }
 
-    fn game_day(match_date: &DateTime<FixedOffset>, schedule: &[Match]) -> f64 {
+    fn game_day(schedule: &[Match], match_date: &DateTime<FixedOffset>) -> f64 {
         // let mut gd: Vec<i64> = schedule.iter()
             // .map(|m| m.date.timestamp())
             // .collect();
@@ -371,8 +361,6 @@ impl Markdown for Predictions {
 }
 
 impl Stats {
-    pub fn update(&mut self, new: Stats) {  *self = new; }
-
     /// Returns highest scoring in the league for at home and away
     /// (all time highest scoring at home, all time highes scoring away)
     pub fn all_time_highest_score_in_league(matches: &[Match]) -> [u8; 2] {
@@ -387,6 +375,11 @@ impl Stats {
             }
         }
         score
+    }
+
+    /// Returns the number of game days in a Vec<Matches>
+    pub fn game_days(matches: &[Match]) -> usize {
+        matches.iter().fold(0, |i, _m| i + 1)
     }
 
     pub fn highest_scoring_in_league_to_date(
@@ -409,44 +402,6 @@ impl Stats {
         hs
     }
 
-    /***
-    Returns the either the wins, draws or losses to date for the home team at home
-    and the away team away.
-    Note:
-        Ordering::Greater is for Wins
-        Ordering::Less for Losses
-        Ordering::Equal for Draws
-    
-    **/
-    pub fn wdl_to_date(matches: &[Match], m: &Match, ord: std::cmp::Ordering) -> [usize; 2] {
-        let h = matches.iter()
-            .filter(|n|
-                n.home == m.home &&
-                n.date < m.date &&
-                n.result.is_some()
-            )     
-            .map(|n| n.result.unwrap() )
-            .map(|r| r[0].cmp(&r[1]) )
-            .filter(|o| o.eq(&ord) )
-            .count();
-        let a = matches.iter()
-            .filter(|n|
-                n.away == m.away && 
-                n.date < m.date &&
-                n.result.is_some()
-            )     
-            .map(|n| n.result.unwrap() )
-            .map(|r| r[0].cmp(&r[1]) )
-            .filter(|o| o.eq(&ord) )
-            .count();
-        [h, a]
-    }
-
-    /// Returns the number of game days in a Vec<Matches>
-    pub fn game_days(matches: &[Match]) -> usize {
-        matches.iter().fold(0, |i, _m| i + 1)
-    }
-
     /// Returns the alltime highest scoring of a club home or away
     /// (highest scoring for club at hone, highest scoring for club away)
     pub fn highest_scoring_by_club_to_date(stats: &Stats) -> [u8; 2] {
@@ -465,12 +420,57 @@ impl Stats {
         [home, away]
     }
 
+    pub fn median_goals_to_date(matches: &[Match], date: &DateTime<FixedOffset>) {
+        // matches.iter()
+        //     .filter(|n|
+        //         &n.date < date &&
+        //         n.result.is_some()
+        //     ).fold(&[Vec::new::<u8>(); 2], |g, n| {
+        //         g
+        //     }
+        //     );
+    }
     /// Sums and returns the scoring for home or away matches for given
     pub fn total_scoring_by_club_to_date(stats: &Stats) -> [u8; 2] {
         [
             stats.home_scores.iter().sum::<u8>(),
             stats.away_scores.iter().sum::<u8>(),
         ]
+    }
+
+    pub fn update(&mut self, new: Stats) {  *self = new; }
+
+    /***
+    Returns the either the wins, draws or losses to date for the home team at home
+    and the away team away.
+    Note:
+        Ordering::Greater is for Wins
+        Ordering::Less for Losses
+        Ordering::Equal for Draws
+    
+    **/
+    pub fn wdl_to_date(matches: &[Match], m: &Match, ord: std::cmp::Ordering) -> [usize; 2] {
+        let h = matches.iter()
+            .filter(|n|
+                n.date < m.date &&
+                n.home == m.home &&
+                n.result.is_some()
+            )     
+            .map(|n| n.result.unwrap() )
+            .map(|r| r[0].cmp(&r[1]) )
+            .filter(|o| o.eq(&ord) )
+            .count();
+        let a = matches.iter()
+            .filter(|n|
+                n.away == m.away && 
+                n.date < m.date &&
+                n.result.is_some()
+            )     
+            .map(|n| n.result.unwrap() )
+            .map(|r| r[0].cmp(&r[1]) )
+            .filter(|o| o.eq(&ord) )
+            .count();
+        [h, a]
     }
 }
 
