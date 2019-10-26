@@ -137,7 +137,6 @@ impl<'a> Guru<'a> {
         }
     }
 
-
 impl<'a> Testing for Guru<'a> {
     // TODO separate Display
     fn test(

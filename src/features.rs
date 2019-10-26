@@ -6,7 +6,8 @@
 **/
 use chrono::{DateTime, FixedOffset};
 use crate::{
-    models::{Match},
+    Stats,
+    models::{Match, Scoring},
     utils::{normalize}
 };
 use std::{
@@ -40,35 +41,58 @@ impl From<(&[Match], &DateTime<FixedOffset>)> for GameDayFeature {
     }
 }
 /***
-    Returns normalized goal difference between goals shot for a team
+    TODO:
+        move to Stats::goal_diff
+        Return normalized Home + Away Goal Diff
+    Returns goal difference a Club shot at home and away
     Note: Stats must be updated before ```from``` is invoked.
+
     Example:
         Team A played 4 matches at home, score [3, 0, 2, 1] = 6
-        Team B played 2 matches away, scored [1, 1] = 2
-        Goal difference 3.0
+        Team A played 2 matches away, scored [1, 1] = 2
+        Scoring::Home = 3.0
+        Scoring::Away = 0.33
+    Intepretation:
+        Team A shot three times more goals at home than away
+        Team A shot 1/3 the goals away, it has shot a home.
 **/
-// pub struct GoalDiffFeature { pub data: f64 }
-// impl From<&mut Stats> for GoalDiffFeature {
-//     fn from(stats: &mut Stats) -> Self {
-//         let h = stats
-//             .home_scores
-//             .drain(0..stats.games_played[0] as usize)
-//             .collect::<Vec<u8>>()
-//             .iter()
-//             .sum::<u8>();
-//         let a = stats
-//             .away_scores
-//             .drain(0..stats.games_played[1] as usize)
-//             .collect::<Vec<u8>>()
-//             .iter()
-//             .sum::<u8>();
-//         if a != 0 {
-//             GoalDiffFeature { data: f64::from(h / a) }
-//         } else {
-//             GoalDiffFeature { data: f64::from(h) }
-//         }
-//     }
-// } 
+pub struct GoalDiffFeature { pub data: f64 }
+impl From<(&mut Stats, Scoring)> for GoalDiffFeature {
+
+    fn from(from: (&mut Stats, Scoring)) -> Self {
+
+        let h = from.0
+            .home_scores
+            .drain(0..from.0.games_played[0] as usize)
+            .collect::<Vec<u8>>()
+            .iter()
+            .sum::<u8>();
+        let a = from.0
+            .away_scores
+            .drain(0..from.0.games_played[1] as usize)
+            .collect::<Vec<u8>>()
+            .iter()
+            .sum::<u8>();
+        match from.1 {
+            Scoring::Home => {
+                if a != 0 {
+                    GoalDiffFeature { data: h as f64 / a as f64 }
+                } else {
+                    GoalDiffFeature { data: f64::from(h) }
+                }
+            },
+            Scoring::Away => {
+                println!("AWAY");
+                if h != 0 {
+                    GoalDiffFeature { data: a as f64 / h as f64 }
+                } else {
+                    GoalDiffFeature { data: f64::from(a) }
+                }
+            }
+        }
+        
+    }
+} 
 /***
     Used if the data set contains matches from various leagues and inter league matches.
     Assigns a str_radix to designate each league.

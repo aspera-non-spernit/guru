@@ -1,6 +1,6 @@
 use crate::{
-    features::{GameDayFeature, LeagueFeature, MedianScoreFeature, WDLFeature},
-    models::{Clubs, Match},
+    features::{GameDayFeature, GoalDiffFeature, LeagueFeature, MedianScoreFeature, WDLFeature},
+    models::{Clubs, Match, Scoring},
     utils::normalize,
     Stats,
 };
@@ -73,8 +73,26 @@ impl Generator for DefaultInputGenerator<'_> {
         // Adding 1 feature: GameDay
         inputs.push(GameDayFeature::from( (self.values.0.as_slice(), &m.date) ).data);
 
-        // Adding 1 feature: GoalDiff
-        // inputs.push(GoalDiffFeature::from( &mut self.values.2 ).data);
+        // Adding 2x1 feature: GoalDiff
+        // Home
+        let hgd = GoalDiffFeature::from( (&mut self.values.2.get_mut(&m.home).unwrap().clone(), Scoring::Home )).data;
+        // Away
+        let agd = GoalDiffFeature::from( (&mut self.values.2.get_mut(&m.away).unwrap().clone(), Scoring::Away )).data;
+        // TODO: Stats::goal_diff + GoalDiffFeature -> normalized data
+        let data = [
+            normalize(
+                hgd as f64,
+                0f64,
+                hgd + agd
+            ),
+            normalize(
+                agd as f64,
+                0f64,
+                hgd + agd
+            )
+        ];
+        inputs.push(data[0]);
+        inputs.push(data[1]);
 
         // Adding 1 feature: League
         inputs.push(LeagueFeature::from( (self.values.0.as_slice(), m) ).data);
@@ -87,7 +105,7 @@ impl Generator for DefaultInputGenerator<'_> {
         // Home and Away Losses
         inputs.extend_from_slice(&WDLFeature::from( (self.values.0.as_slice(), m, std::cmp::Ordering::Less) ).data);
 
-        // Adding 1 feature: MedianScore
+        // Adding 2 features: MedianScore
         inputs.extend_from_slice(&MedianScoreFeature::from ( (self.values.0.as_slice(), m) ).data );
 
         /***
