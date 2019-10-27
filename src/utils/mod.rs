@@ -105,7 +105,12 @@ pub fn rand_k_split<'a>(data_set: &'a Vec<Match>, k: usize, original: bool) -> S
             k_sets[i].push(cloned[n].clone());
             cloned.remove(n);
         }
+        
     }
+    for i in 0..cloned.len() {
+        k_sets[i].push(cloned.pop().unwrap());
+    }
+    assert!(cloned.len() == 0);
     if original {
         Sets::new(Some(data_set), k_sets.clone())
     } else {
