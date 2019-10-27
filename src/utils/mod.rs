@@ -1,4 +1,5 @@
-use crate::{models::Match, neural::nn::NN};
+use crate::{models::{Match, Sets}, neural::nn::NN};
+use rand::prelude::*;
 use std::{fs::File, io::prelude::*};
 
 /// A collection of utility functions.
@@ -59,4 +60,14 @@ pub fn normalize(v: f64, min: f64, max: f64) -> f64 {
     } else {
         (v - min) / (max - min)
     }
+}
+
+/**
+  Returns a sub set of matches where result == None
+**/
+pub fn no_results(data_set: &[Match]) -> Vec<Match> {
+    data_set.iter()
+      .filter(|&m| m.result.is_none())
+      .cloned()
+      .collect()
 }
