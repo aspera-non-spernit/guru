@@ -40,12 +40,14 @@ but would shift from a home loss to a draw.
 * **Majority Vote**: Takes the result that was voted the most. Can only be used for classification problems
 (predict winner, or draw).
 
+This example shows three models predicting either a home win [1, 0, 0], a draw [0, 1, 0]  or an away win [0, 1, 1]
+
 ```rust
-Model 1 [0, 1]
-Model 2 [0, 1]
-Model 3 [1: 0]
----------------
-Majority [1, 2]
+Model 1       [0, 0, 1]
+Model 2       [0, 0, 1]
+Model 3       [1, 0, 0]
+-----------------------
+Majority Vote [1, 0, 2]
 ```
 
 The Majority Vote would have selected Oakland Roots as Winner, since two models predicted Oakland Roots would win,
