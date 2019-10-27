@@ -10,13 +10,13 @@ was incorrectly predicted by two other models.
 
 **Example**
 
-Model 1: Miami FC 3 : 4 Oakland Roots
-Model 2: Miami FC 2 : 3 Oakland Roots
-Model 3: Miami FC 2 : 0 Oakland Roots
+* Model 1: Miami FC 3 : 4 Oakland Roots
+* Model 2: Miami FC 2 : 3 Oakland Roots
+* Model 3: Miami FC 2 : 0 Oakland Roots
 
 Actual result:
 
-Miami FC 3 : 2 Oakland Roots
+* Miami FC 3 : 2 Oakland Roots
 
 All three models were wrong on the actual result, Model 3 however, that failed on all other
 predictions, could identify the correct winner Miami FC instead of Oakland Roots.
