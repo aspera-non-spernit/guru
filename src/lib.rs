@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 extern crate chrono;
+extern crate rand;
 extern crate serde;
 extern crate serde_json;
 /// Contains example implemenations of input features.
