@@ -83,37 +83,33 @@ pub fn filter_no_results(data_set: &[Match]) -> Vec<Match> {
 
 
 /**
-  Splits the data set D  &[Match] into k subsets D of equal size.
-  Does not check for Some(result), if you want sub sets with Some(result) only
-  pass a set with Some(result) only.
-  If you want to keep a reference to the original data set D for convenience,
-  pass original: true.
-  data[last] may have a different size than the previous.
-**/
-pub fn rand_k_split<'a>(data_set: &'a Vec<Match>, k: usize, original: bool) -> Sets<'a> {
-    let mut cloned = &mut data_set.clone();
-    let dsl = &cloned.len();
-    let mut k_sets: Vec<Vec<Match>> = vec![];
-    let mut iter = data_set.iter();
-    let mut rng = rand::thread_rng();
+    Splits the data set D  &[Match] into k subsets D of equal size.
+    Does not check for Some(result), if you want sub sets with Some(result) only
+    pass a set with Some(result) only.
+    If you want to keep a reference to the original data set D for convenience,
+    pass original: true.
+    data[last] may have a different size than the previous.
 
-    for i in 0..k {
-        k_sets.push(vec![]);
-        let mut n = 0;
-        while k_sets[i].len() != dsl / k {
-            n = rng.gen_range(0, cloned.len());
-            k_sets[i].push(cloned[n].clone());
-            cloned.remove(n);
-        }
-        
+    **Rationale**:
+
+    If small data sets are splitted into a training and test set, there may not be
+    enough training samples for the network to calculate the function.
+    In such cases it's better to split the data set into multiple parts
+    and use cross validation to estimate the error.
+    See chapter 5.3.1 Cross Validation, Deep Leaning (Goodfellow, Bengio, Courville)
+**/
+pub fn rand_k_split<'a>(data_set: &'a mut Vec<Match>, k: usize, original: bool) -> Sets<'a> {
+    let mut rng = thread_rng();
+    data_set.shuffle(&mut rng);
+    let cs = &mut data_set.chunks_exact(k);
+    let mut result: Vec<Vec<Match>> = cs.map(|v| v.to_vec()).collect();
+    for (i, v) in cs.remainder().iter().enumerate() {
+        result[i].push(v.clone());
     }
-    for i in 0..cloned.len() {
-        k_sets[i].push(cloned.pop().unwrap());
-    }
-    assert!(cloned.len() == 0);
+    result.shuffle(&mut rng);
     if original {
-        Sets::new(Some(data_set), k_sets.clone())
+        Sets::new(Some(data_set), result.clone())
     } else {
-        Sets::new(None, k_sets.clone())
+        Sets::new(None, result.clone())
     }
 }
