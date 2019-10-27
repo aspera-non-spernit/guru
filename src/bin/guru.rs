@@ -6,7 +6,7 @@ extern crate guru;
 use clap::App;
 use guru::{
     generators::DefaultInputGenerator,
-    models::{Clubs, DataEntry, Match},
+    models::{Clubs, DataEntry, Match, Sets},
     neural::nn::NN,
     utils::{load_matches, load_network, filter_results, filter_no_results, rand_k_split, save_network},
     Guru, Markdown, Stats, Testing, Training,
@@ -43,18 +43,36 @@ fn main() -> std::io::Result<()> {
     let stats = stats(&clubs);
     let guru = Guru::new(&sorted);
 
-    let mut training_matchesm: Vec<Match> = filter_results(&sorted);
+    let mut training_matches: Vec<Match> = filter_results(&sorted);
 
-    // taking n% from training_matches for testing.
     let split: f32 = if opts.is_present("split-data") {
         opts.value_of("split-data").unwrap().parse().unwrap()
     } else {
-        0.9
+        0.5
     };
-    let upper: usize = (training_matches.len() as f32 * split).round() as usize;
-    let test_matches: Vec<Match> = training_matches
-        .drain(upper..training_matches.len())
-        .collect();
+    // note 
+    // training set in sets.data[1]
+    // test set in sets.data[0]
+    // due to drain
+    let sets: Sets = if split < 1.0 {
+        let upper: usize = (training_matches.len() as f32 * split).round() as usize;
+        Sets::new(
+            None,
+            vec![
+                training_matches
+                    .drain(upper..training_matches.clone().len())
+                    .collect(),
+                training_matches
+            ]
+        ) 
+    } else {
+        let k = &training_matches.len() / split as usize;
+        rand_k_split(&mut training_matches, k as usize, false)
+    };
+    // let upper: usize = (training_matches.len() as f32 * split).round() as usize;
+    // let test_matches: Vec<Match> = training_matches
+    //     .drain(upper..training_matches.len())
+    //     .collect();
     // using matches in the data set that have no result (match in the future) to predict the result
     // for those matches
     let prediction_matches: Vec<Match> = filter_no_results(&sorted);
@@ -64,14 +82,13 @@ fn main() -> std::io::Result<()> {
     // TODO: let Generator do that
     let max = if ats[0] > ats[1] { ats[0] } else { ats[1] };
     let mut def_in_gen = DefaultInputGenerator {
-        values: (training_matches.clone(), &clubs, stats.clone()),
+        values: (sets.data[0].clone(), &clubs, stats.clone()),
     };
-
-    let training_set: Vec<DataEntry> = training_matches
+    let training_set: Vec<DataEntry> = sets.data[1]
         .iter()
         .map(|m| DataEntry::from((m, &clubs, max, &mut def_in_gen)))
         .collect();
-    let test_set: Vec<DataEntry> = test_matches
+    let test_set: Vec<DataEntry> = sets.data[0]
         .iter()
         .map(|m| DataEntry::from((m, &clubs, max, &mut def_in_gen)))
         .collect();
@@ -103,13 +120,13 @@ fn main() -> std::io::Result<()> {
     }
 
     // testing / validating
-    let (test_results, predictions) = guru.test(&mut net, &training_set, &training_matches);
+    let (test_results, predictions) = guru.test(&mut net, &training_set, &sets.data[1]);
     println!("Testing on (seen) Training Data");
     println!("{}", predictions);
     println!("Result {}\n", test_results[0].to_string());
     println!("Winner {}", test_results[1].to_string());
     println!("--------------------------\n\n");
-    let (test_results, test_predictions) = guru.test(&mut net, &test_set, &test_matches);
+    let (test_results, test_predictions) = guru.test(&mut net, &test_set, &sets.data[0]);
     println!("Testing on (unseen) Test Data");
     println!("{}", test_predictions);
     println!("Result {}\n", test_results[0].to_string());

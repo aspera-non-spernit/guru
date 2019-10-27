@@ -28,7 +28,10 @@ args:
         required: false
         takes_value: false
     - split-data:
-        help: Splits the data set into a training and a test set according to this factor
+        help: Splits the data set into a training and a test set according to this factor.
+            If value < 1.0, value in % will be used for training, the remainer for testing.
+            Values >= 1.0 have to be a multiple of 1.0 (ie. 2.0, 3.0, 4.0). The data set will be
+            split into k sub sets. Cross validation will be used for training and testing.
         long: split-data
         required: false
         takes_value: true
