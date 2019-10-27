@@ -63,9 +63,18 @@ pub fn normalize(v: f64, min: f64, max: f64) -> f64 {
 }
 
 /**
-  Returns a sub set of matches where result == None
+    Filters from a data set D all matches that have Some(result)
 **/
-pub fn no_results(data_set: &[Match]) -> Vec<Match> {
+pub fn filter_results(data_set: &[Match]) -> Vec<Match> {
+    data_set.iter()
+        .filter(|&m| m.result.is_some())
+        .cloned()
+        .collect()
+}
+/**
+    Filters from a data set D matches where match.result == None
+**/
+pub fn filter_no_results(data_set: &[Match]) -> Vec<Match> {
     data_set.iter()
       .filter(|&m| m.result.is_none())
       .cloned()
