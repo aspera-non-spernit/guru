@@ -8,7 +8,7 @@ use guru::{
     generators::DefaultInputGenerator,
     models::{Clubs, DataEntry, Match},
     neural::nn::NN,
-    utils::{load_matches, load_network, save_network},
+    utils::{load_matches, load_network, no_results, rand_k_split, save_network},
     Guru, Markdown, Stats, Testing, Training,
 };
 use std::{collections::HashMap, str::FromStr};
@@ -61,11 +61,7 @@ fn main() -> std::io::Result<()> {
         .collect();
     // using matches in the data set that have no result (match in the future) to predict the result
     // for those matches
-    let prediction_matches: Vec<Match> = sorted
-        .iter()
-        .filter(|&m| m.result.is_none())
-        .cloned()
-        .collect();
+    let prediction_matches: Vec<Match> = no_results(&sorted);
 
     // required for normalization of results (output)
     let ats = Stats::all_time_highest_score_in_league(&sorted);
