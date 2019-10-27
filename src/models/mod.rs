@@ -47,6 +47,11 @@ pub struct Match {
     pub result: Option<[u8; 2]>,
 }
 
+#[derive(Debug)]
+pub struct Sets<'a> {
+    original: Option<&'a [Match]>,
+    data: Vec<Vec<Match>>
+}
 /**
 Can be used to mark either the scoring of the home team or the away team.
 **/
@@ -91,6 +96,12 @@ impl Match {
             away,
             result,
         }
+    }
+}
+
+impl <'a>Sets<'a> {
+    pub fn new(original: Option<&'a[Match]>, data: Vec<Vec<Match>>) -> Self {
+        Sets { original, data }
     }
 }
 
