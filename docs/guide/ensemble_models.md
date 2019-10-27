@@ -27,9 +27,9 @@ predictions, could identify the correct winner Miami FC instead of Oakland Roots
 or for classification problems (predict match outcome home win, draw, away win)
 
 ```rust
-Model 1 [3, 4]
-Model 2 [2, 3]
-Model 3 [2: 0]
+Model 1 [3.0,  4.0 ]
+Model 2 [2.0,  3.0 ]
+Model 3 [2.0,  0.0 ]
 --------------------
 Average [2.33, 2.33]
 ```
@@ -40,7 +40,7 @@ but would shift from a home loss to a draw.
 * **Majority Vote**: Takes the result that was voted the most. Can only be used for classification problems
 (predict winner, or draw).
 
-This example shows three models predicting either a home win [1, 0, 0], a draw [0, 1, 0]  or an away win [0, 1, 1]
+This example shows three models predicting either a home win [1, 0, 0], a draw [0, 1, 0]  or an away win [0, 0, 1]
 
 ```rust
 Model 1       [0, 0, 1]
@@ -56,17 +56,13 @@ only one model identified Miami FC as Winner.
 * **Weighted Average**: Different weights are applied to the models. Can be used for both regression and
 classification problems. The weights could be derived from the network error or previous performance.
 
-```rust
-Model 1 [3, 4], weight: 0.3
-Model 2 [2, 3], weight: 0.4
-Model 3 [2: 0], weight: 0.3
----------------------------
-total           weight: 1.0
-Model 1 [0.9, 1.2]
-Model 2 [0.8, 1.2]
-Model 3 [0.6, 0.0]
-------------------
-W.Avg   [2.3, 2.4]
+|Model|Weighted Result|Weight|Predicted Result|
+|:----|:--------------|:-----|:---------------|
+|Model 1|         [0.9, 1.2]|0.3|[3.0, 4.0]| 
+|Model 2|         [0.8, 1.2]|0.4|[2.0, 3.0]|
+|Model 3|         [0.6, 0.0]|0.3|[2.0, 0.0]|
+--------------------------------------------
+Weighted Average  [2.3, 2.4]
 ```
 
 The Weighted Avergage would shift towards a draw, with slighly higher chance for Oakland Root to win.
