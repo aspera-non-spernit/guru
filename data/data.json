@@ -264,14 +264,20 @@
     "league": "nisaICF",
     "home": "Miami FC",
     "away": "Oakland Roots SC",
-    "result": null
+    "result": [
+      3,
+      2
+    ]
   },
   {
     "date": "2019-10-26T22:04:00-04:00",
     "league": "nisaRegularW",
     "home": "Los Angeles Force",
     "away": "California United Strikers",
-    "result": null
+    "result": [
+      2,
+      2
+    ]
   },
   {
     "date": "2019-11-02T22:04:00-04:00",
@@ -565,13 +571,19 @@
     "league": "npslMC",
     "home": "Chattanooga FC",
     "away": "Milwaukee Torrent",
-    "result": null
+    "result": [
+      0,
+      0
+    ]
   },
   {
     "date": "2019-10-26T19:00:00-04:00",
     "league": "npslMC",
     "home": "Napa Valley 1839 FC",
     "away": "Michigan Stars FC",
-    "result": null
+    "result": [
+      3,
+      3
+    ]
   }
 ]
