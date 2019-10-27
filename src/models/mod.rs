@@ -29,6 +29,11 @@ pub struct DataEntry {
 }
 
 /**
+Represents a Match between two teams.
+
+**Note**:
+
+* Clubs are represented by a ```String``` not by the struct ```Club```
 
 **/
 #[derive(Clone, Debug, Deserialize, Serialize)]

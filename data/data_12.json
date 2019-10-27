@@ -1,0 +1,577 @@
+[
+  {
+    "date": "2019-05-12T19:00:00-04:00",
+    "league": "npslReg",
+    "home": "Michigan Stars FC",
+    "away": "Detroit City FC",
+    "result": [
+      0,
+      1
+    ]
+  },
+  {
+    "date": "2019-06-12T19:30:00-04:00",
+    "league": "npslReg",
+    "home": "Chattanooga FC",
+    "away": "Atlanta SC",
+    "result": [
+      3,
+      0
+    ]
+  },
+  {
+    "date": "2019-06-14T19:30:00-04:00",
+    "league": "npslReg",
+    "home": "Detroit City FC",
+    "away": "Michigan Stars FC",
+    "result": [
+      2,
+      1
+    ]
+  },
+  {
+    "date": "2019-06-22T19:30:00-04:00",
+    "league": "npslReg",
+    "home": "Atlanta SC",
+    "away": "Chattanooga FC",
+    "result": [
+      0,
+      5
+    ]
+  },
+  {
+    "date": "2019-07-16T19:00:00-04:00",
+    "league": "npslReg",
+    "home": "Miami FC",
+    "away": "Chattanooga FC",
+    "result": [
+      2,
+      0
+    ]
+  },
+  {
+    "date": "2019-08-03T19:00:00-04:00",
+    "league": "npslReg",
+    "home": "New York Cosmos B",
+    "away": "Miami FC",
+    "result": [
+      1,
+      3
+    ]
+  },
+  {
+    "date": "2019-08-31T19:30:00-04:00",
+    "league": "nisaILF",
+    "home": "Detroit City FC",
+    "away": "Philadelphia Fury",
+    "result": [
+      1,
+      0
+    ]
+  },
+  {
+    "date": "2019-08-31T22:00:00-04:00",
+    "league": "nisaRegularW",
+    "home": "Oakland Roots SC",
+    "away": "California United Strikers",
+    "result": [
+      3,
+      3
+    ]
+  },
+  {
+    "date": "2019-09-07T22:00:00-04:00",
+    "league": "nisaRegularW",
+    "home": "Los Angeles Force",
+    "away": "1904 San Diego FC",
+    "result": [
+      2,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-14T22:04:00-04:00",
+    "league": "nisaRegularW",
+    "home": "1904 San Diego FC",
+    "away": "California United Strikers",
+    "result": [
+      3,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-15T19:00:00-04:00",
+    "league": "nisaRegularE",
+    "home": "Miami FC",
+    "away": "Philadelphia Fury",
+    "result": [
+      8,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-15T19:00:00-04:00",
+    "league": "nisaRegularE",
+    "home": "Atlanta SC",
+    "away": "Stumptown Athletic",
+    "result": [
+      1,
+      3
+    ]
+  },
+  {
+    "date": "2019-09-22T19:00:00-04:00",
+    "league": "nisaRegularW",
+    "home": "California United Strikers",
+    "away": "Los Angeles Force",
+    "result": [
+      3,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-22T19:00:00-04:00",
+    "league": "nisaRegularE",
+    "home": "Miami FC",
+    "away": "Stumptown Athletic",
+    "result": [
+      2,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-25T22:00:00-04:00",
+    "league": "nisaRegularW",
+    "home": "California United Strikers",
+    "away": "Oakland Roots SC",
+    "result": [
+      1,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-28T22:04:00-04:00",
+    "league": "nisaRegularE",
+    "home": "Stumptown Athletic",
+    "away": "Miami FC",
+    "result": [
+      0,
+      2
+    ]
+  },
+  {
+    "date": "2019-09-28T22:04:00-04:00",
+    "league": "nisaRegularW",
+    "home": "1904 San Diego FC",
+    "away": "Oakland Roots SC",
+    "result": [
+      4,
+      3
+    ]
+  },
+  {
+    "date": "2019-10-02T22:00:00-04:00",
+    "league": "nisaRegularW",
+    "home": "California United Strikers",
+    "away": "1904 San Diego FC",
+    "result": [
+      3,
+      0
+    ]
+  },
+  {
+    "date": "2019-10-05T19:30:00-04:00",
+    "league": "nisaRegularW",
+    "home": "Los Angeles Force",
+    "away": "Oakland Roots SC",
+    "result": [
+      1,
+      0
+    ]
+  },
+  {
+    "date": "2019-10-06T19:30:00-04:00",
+    "league": "nisaRegularE",
+    "home": "Miami FC",
+    "away": "Atlanta SC",
+    "result": [
+      2,
+      2
+    ]
+  },
+  {
+    "date": "2019-10-12T22:04:00-04:00",
+    "league": "nisaRegularE",
+    "home": "Atlanta SC",
+    "away": "Miami FC",
+    "result": [
+      1,
+      2
+    ]
+  },
+  {
+    "date": "2019-10-12T22:04:00-04:00",
+    "league": "nisaILF",
+    "home": "Stumptown Athletic",
+    "away": "Chattanooga FC",
+    "result": [
+      2,
+      2
+    ]
+  },
+  {
+    "date": "2019-10-19T22:04:00-04:00",
+    "league": "nisaILF",
+    "home": "Chattanooga FC",
+    "away": "Stumptown Athletic",
+    "result": [
+      1,
+      0
+    ]
+  },
+  {
+    "date": "2019-10-19T22:04:00-04:00",
+    "league": "nisaRegularW",
+    "home": "Oakland Roots SC",
+    "away": "Los Angeles Force",
+    "result": [
+      1,
+      1
+    ]
+  },
+  {
+    "date": "2019-10-20T22:04:00-04:00",
+    "league": "nisaRegularW",
+    "home": "California United Strikers",
+    "away": "1904 San Diego FC",
+    "result": [
+      4,
+      1
+    ]
+  },
+  {
+    "date": "2019-10-25T22:04:00-04:00",
+    "league": "nisaRegularE",
+    "home": "Stumptown Athletic",
+    "away": "Atlanta SC",
+    "result": [
+	3,
+	2
+    ]
+  },
+  {
+    "date": "2019-10-26T22:04:00-04:00",
+    "league": "nisaICF",
+    "home": "Miami FC",
+    "away": "Oakland Roots SC",
+    "result": null
+  },
+  {
+    "date": "2019-10-26T22:04:00-04:00",
+    "league": "nisaRegularW",
+    "home": "Los Angeles Force",
+    "away": "California United Strikers",
+    "result": null
+  },
+  {
+    "date": "2019-11-02T22:04:00-04:00",
+    "league": "nisaRegularW",
+    "home": "1904 San Diego FC",
+    "away": "Los Angeles Force",
+    "result": null
+  },
+  {
+    "date": "2019-08-10T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Milwaukee Torrent",
+    "away": "Napa Valley 1839 FC",
+    "result": [
+      2,
+      0
+    ]
+  },
+  {
+    "date": "2019-08-10T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Chattanooga FC",
+    "away": "New York Cosmos B",
+    "result": [
+      0,
+      1
+    ]
+  },
+  {
+    "date": "2019-08-17T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "New York Cosmos B",
+    "away": "Milwaukee Torrent",
+    "result": [
+      2,
+      2
+    ]
+  },
+  {
+    "date": "2019-08-17T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Detroit City FC",
+    "away": "Chattanooga FC",
+    "result": [
+      2,
+      1
+    ]
+  },
+  {
+    "date": "2019-08-24T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Napa Valley 1839 FC",
+    "away": "Detroit City FC",
+    "result": [
+      0,
+      4
+    ]
+  },
+  {
+    "date": "2019-08-24T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Chattanooga FC",
+    "away": "Michigan Stars FC",
+    "result": [
+      1,
+      1
+    ]
+  },
+  {
+    "date": "2019-08-31T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Michigan Stars FC",
+    "away": "New York Cosmos B",
+    "result": [
+      0,
+      2
+    ]
+  },
+  {
+    "date": "2019-09-01T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Napa Valley 1839 FC",
+    "away": "Chattanooga FC",
+    "result": [
+      0,
+      6
+    ]
+  },
+  {
+    "date": "2019-09-07T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Milwaukee Torrent",
+    "away": "Chattanooga FC",
+    "result": [
+      1,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-07T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "New York Cosmos B",
+    "away": "Napa Valley 1839 FC",
+    "result": [
+      1,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-14T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Chattanooga FC",
+    "away": "Napa Valley 1839 FC",
+    "result": [
+      3,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-14T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "New York Cosmos B",
+    "away": "Michigan Stars FC",
+    "result": [
+      2,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-14T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Milwaukee Torrent",
+    "away": "Detroit City FC",
+    "result": [
+      0,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-21T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Napa Valley 1839 FC",
+    "away": "Milwaukee Torrent",
+    "result": [
+      1,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-21T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Michigan Stars FC",
+    "away": "Chattanooga FC",
+    "result": [
+      1,
+      4
+    ]
+  },
+  {
+    "date": "2019-09-21T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Detroit City FC",
+    "away": "New York Cosmos B",
+    "result": [
+      1,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-26T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Michigan Stars FC",
+    "away": "Napa Valley 1839 FC",
+    "result": [
+      2,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-28T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "New York Cosmos B",
+    "away": "Chattanooga FC",
+    "result": [
+      3,
+      1
+    ]
+  },
+  {
+    "date": "2019-09-28T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Michigan Stars FC",
+    "away": "Milwaukee Torrent",
+    "result": [
+      1,
+      0
+    ]
+  },
+  {
+    "date": "2019-09-28T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Detroit City FC",
+    "away": "Napa Valley 1839 FC",
+    "result": [
+      3,
+      0
+    ]
+  },
+  {
+    "date": "2019-10-05T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Chattanooga FC",
+    "away": "Detroit City FC",
+    "result": [
+      0,
+      1
+    ]
+  },
+  {
+    "date": "2019-10-05T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "New York Cosmos B",
+    "away": "Milwaukee Torrent",
+    "result": [
+      2,
+      2
+    ]
+  },
+  {
+    "date": "2019-10-08T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Detroit City FC",
+    "away": "Michigan Stars FC",
+    "result": [
+      2,
+      0
+    ]
+  },
+  {
+    "date": "2019-10-12T19:00:00-04:00",
+    "league": "npslMC",
+    "home": "New York Cosmos B",
+    "away": "Detroit City FC",
+    "result": [
+      1,
+      2
+    ]
+  },
+  {
+    "date": "2019-10-12T19:00:00-04:00",
+    "league": "npslMC",
+    "home": "Milwaukee Torrent",
+    "away": "Michigan Stars FC",
+    "result": [
+      2,
+      1
+    ]
+  },
+  {
+    "date": "2019-10-16T19:00:00-04:00",
+    "league": "npslMC",
+    "home": "Michigan Stars FC",
+    "away": "Detroit City FC",
+    "result": [
+	    0,
+	    1
+    ]
+  },
+  {
+    "date": "2019-10-16T19:00:00-04:00",
+    "league": "npslMC",
+    "home": "Napa Valley 1839 FC",
+    "away": "New York Cosmos B",
+    "result": [
+      0,
+      7
+    ]
+  },
+  {
+    "date": "2019-10-19T19:30:00-04:00",
+    "league": "npslMC",
+    "home": "Detroit City FC",
+    "away": "Milwaukee Torrent",
+    "result": [
+      0,
+      1
+    ]
+  },
+  {
+    "date": "2019-10-26T18:00:00-04:00",
+    "league": "npslMC",
+    "home": "Chattanooga FC",
+    "away": "Milwaukee Torrent",
+    "result": null
+  },
+  {
+    "date": "2019-10-26T19:00:00-04:00",
+    "league": "npslMC",
+    "home": "Napa Valley 1839 FC",
+    "away": "Michigan Stars FC",
+    "result": null
+  }
+]

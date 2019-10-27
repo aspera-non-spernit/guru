@@ -2,10 +2,17 @@
 extern crate chrono;
 extern crate serde;
 extern crate serde_json;
+/// Contains example implemenations of input features.
+/// All Features impl ```From<T>``` as way to creating that feature
+/// from a data set.
 pub mod features;
+/// Generators can be used to create and combine input features.
 pub mod generators;
+/// A collection of football match related models.
 pub mod models;
+/// Contains a single Feedforward Network implementation.
 pub mod neural;
+/// A collection of useful helpers.
 pub mod utils;
 
 use chrono::{DateTime, FixedOffset};
@@ -17,17 +24,25 @@ use std::{
     fmt,
 };
 use utils::{normalize};
-
+/// This program. Stores the complete raw data set.
+/// Abstraction to the Network in use.
 #[derive(Clone, Debug)]
 pub struct Guru<'a> {
     data_set: &'a [Match],
 }
+/// Used to count the number of predicted entries in test sets it
+/// positive and negative test results.
+/// ```update``` must be invoked after each test.
+/// Guru.test() returns NetworkStats.
 #[derive(Debug)]
 pub struct NetworkStats {
     pub tested: usize,
     pub positive: usize,
     pub negative: usize,
 }
+
+/// A collection of functions that query a collection of Matches &[Match]
+/// and return useful information about the data set.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Stats {
     pub home_scores: Vec<u8>,
@@ -35,7 +50,7 @@ pub struct Stats {
     pub games_played: [u8; 2],
 }
 
-// A Prediction contains the results of a match predicted by the network.
+/// The result predicted by a network.
 #[derive(Debug)]
 pub struct Prediction {
     date: DateTime<FixedOffset>,
@@ -44,14 +59,18 @@ pub struct Prediction {
     predicted_scores: (u8, u8),
 }
 
-// A wrapper to store a vector of Prediction structs.
+/// A wrapper to store a vector of ```Prediction``` structs.
 #[derive(Debug)]
 pub struct Predictions(Vec<Prediction>);
 
+/// Trait to format anything into a Markdown formatted String.
 pub trait Markdown {
     fn to_table(&self) -> String;
 }
+/// Trait to implement the test process of a network.
 pub trait Testing {
+    /// Any implementation should create two instances of NetworkStats
+    /// and invole ```update``` after each test in the test set.
     fn test(
         &self,
         net: &mut NN,
@@ -59,6 +78,7 @@ pub trait Testing {
         matches: &[Match],
     ) -> ([NetworkStats; 2], Predictions);
 }
+/// Trait to implement the training process of a network. 
 pub trait Training {
     fn train(
         &self,
@@ -282,8 +302,8 @@ impl fmt::Display for Prediction {
         fmt::Result::Ok(())
     }
 }
-
 impl Markdown for Prediction {
+    /// Formats ```Prediction``` into a Markdown Table Row
     fn to_table(&self) -> String {
         format!(
             "|{}|{} : {}|{}|",
@@ -292,8 +312,8 @@ impl Markdown for Prediction {
     }
 }
 
-// A set of predictions display as a markdown table.
 impl fmt::Display for Predictions {
+    // Formats a set of predictions into a readble format
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "Home | Predicted result | Away")?;
         for elem in self.0.iter() {
@@ -302,6 +322,7 @@ impl fmt::Display for Predictions {
         fmt::Result::Ok(())
     }
 }
+/// Formats ```Predictions``` into a Markdown Table, including header.
 impl Markdown for Predictions {
     fn to_table(&self) -> String {
         let mut s = String::new();

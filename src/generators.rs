@@ -6,40 +6,47 @@ use crate::{
 };
 use std::collections::{HashMap};
 
-/***
+/**
 Example implementation
+
+    impl<'a> DefaultInputGenerator<'a> {
+        /***
+        Updates the Stats for the home and away team
+        Adds the respective goals in the result of the match to the home scores
+        for the home team and ...
+        Increments games_played[0] for the home team of the match and games_played[1]
+        for the away team of this match.
+        **/
+        fn update(&mut self, m: &Match) {
+            let mut h_stats = self.values.2.get_mut(&m.home).unwrap().clone();
+            let mut a_stats = self.values.2.get_mut(&m.away).unwrap().clone();
+            // no updating results, if prediction
+            if let Some(result) = m.result {
+                h_stats.home_scores.push(result[0]);
+                h_stats.games_played[0] += 1;
+                a_stats.away_scores.push(result[1]);
+                a_stats.games_played[1] += 1;
+            }
+
+            self.values.2.remove(&m.home);
+            self.values.2.insert(String::from(&m.home), h_stats.clone());
+            self.values.2.remove(&m.away);
+            self.values.2.insert(String::from(&m.away), a_stats.clone());
+        }
+    }
 **/
 #[derive(Clone, Debug)]
 pub struct DefaultInputGenerator<'a> {
     pub values: (Vec<Match>, &'a Clubs, HashMap<String, Stats>),
 }
-/**
-Implementing ```Generator``` allows to pass a custom set of input features to guru
-and the network.
-It is used by DataEntry::from to return a set of training matches
-Example:
-```rust
 
-#[derive(Clone, Debug)]
-struct MyInputGen<'a> {
-    values: (Vec<Match>, &'a Clubs, HashMap<String, Stats>),
-}
-
-impl<'a> MyInputGen<'a> {
-
-}
-let mut my_input_generator = MyInputGen {
-    values: (training_matches.clone(), &clubs, stats.clone()),
-};
-
-```
-**/
 pub trait Generator {
     fn generate(&mut self, m: &Match) -> Vec<f64>;
 }
 
+
 impl<'a> DefaultInputGenerator<'a> {
-    /***
+    /**
     Updates the Stats for the home and away team
     Adds the respective goals in the result of the match to the home scores
     for the home team and ...
@@ -65,7 +72,7 @@ impl<'a> DefaultInputGenerator<'a> {
 }
 
 impl Generator for DefaultInputGenerator<'_> {
-
+    // TODO: Activate Features by passing args
     // 0 training_matches, 1 &clubs, 2 &stats
     fn generate(&mut self, m: &Match) -> Vec<f64> {
         let mut inputs = vec![];
@@ -100,9 +107,9 @@ impl Generator for DefaultInputGenerator<'_> {
         // Adding 3 x 2 features: WDLFeature
         // Home and Away Wins
         inputs.extend_from_slice(&WDLFeature::from( (self.values.0.as_slice(), m, std::cmp::Ordering::Greater) ).data);
-        // Home and Away Draws
+        // // Home and Away Draws
         inputs.extend_from_slice(&WDLFeature::from( (self.values.0.as_slice(), m, std::cmp::Ordering::Equal) ).data);
-        // Home and Away Losses
+        // // Home and Away Losses
         inputs.extend_from_slice(&WDLFeature::from( (self.values.0.as_slice(), m, std::cmp::Ordering::Less) ).data);
 
         // Adding 2 features: MedianScore

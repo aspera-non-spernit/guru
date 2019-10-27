@@ -1,9 +1,3 @@
-/***
-    This module contains traits and features, that can be used to generate features from
-    a source.
-    All Feature implementations, return normalized values and for the most part,
-    calculated based on previous matchs until Match Day.
-**/
 use chrono::{DateTime, FixedOffset};
 use crate::{
     Stats,
@@ -14,17 +8,22 @@ use std::{
     collections::{HashSet},
 };
 
-/***
+/**
     Calculates the distance from the date of the match to the earliest and newest match date in data set.
     The match date is converted into a Unix Timestamp. The earliest and lates match dates as timestamp
     act as min and max for the normalization.
-    The Idea: More recent matches a valued higher than earlier matches
-    Example:
-        The earliest match in the data set is on 2019-05-12 Unix Timestamp 1557619200
-        Date of the current match is 2019-10-02 Unix Timestamp 1569974400
-        The last match in the data set is on 2019-11-02 Unix Timestamp 1572652800
-        The value for the game day factor is 0.8218 (a relative recent match)
-        Future matches (those without a result have values > 1.0)
+    
+    **Rationale**:
+
+    * More recent matches a valued higher than earlier matches.
+
+    **Example**:
+
+    * The earliest match in the data set is on 2019-05-12 Unix Timestamp 1557619200
+    * Date of the current match is 2019-10-02 Unix Timestamp 1569974400
+    * The last match in the data set is on 2019-11-02 Unix Timestamp 1572652800
+    * The value for the game day factor is 0.8218 (a relative recent match)
+    * Future matches (those without a result have values > 1.0)
 **/
 pub struct GameDayFeature { pub data: f64 }
 impl From<(&[Match], &DateTime<FixedOffset>)> for GameDayFeature {
@@ -40,21 +39,26 @@ impl From<(&[Match], &DateTime<FixedOffset>)> for GameDayFeature {
         GameDayFeature{ data }
     }
 }
-/***
-    TODO:
-        move to Stats::goal_diff
-        Return normalized Home + Away Goal Diff
+/**
     Returns goal difference a Club shot at home and away
     Note: Stats must be updated before ```from``` is invoked.
 
-    Example:
-        Team A played 4 matches at home, score [3, 0, 2, 1] = 6
-        Team A played 2 matches away, scored [1, 1] = 2
-        Scoring::Home = 3.0
-        Scoring::Away = 0.33
-    Intepretation:
-        Team A shot three times more goals at home than away
-        Team A shot 1/3 the goals away, it has shot a home.
+    **Example**:
+
+    * Team A played 4 matches at home, score [3, 0, 2, 1] = 6
+    * Team A played 2 matches away, scored [1, 1] = 2
+    * Scoring::Home = 3.0
+    * Scoring::Away = 0.33
+    
+    **Intepretation**:
+
+    * Team A shot three times more goals at home than away
+    * Team A shot 1/3 the goals away, it has shot a home.
+
+    TODO:
+    
+    * move to Stats::goal_diff
+    * Return normalized Home + Away Goal Diff
 **/
 pub struct GoalDiffFeature { pub data: f64 }
 impl From<(&mut Stats, Scoring)> for GoalDiffFeature {
@@ -82,7 +86,6 @@ impl From<(&mut Stats, Scoring)> for GoalDiffFeature {
                 }
             },
             Scoring::Away => {
-                println!("AWAY");
                 if h != 0 {
                     GoalDiffFeature { data: a as f64 / h as f64 }
                 } else {
@@ -93,7 +96,7 @@ impl From<(&mut Stats, Scoring)> for GoalDiffFeature {
         
     }
 } 
-/***
+/**
     Used if the data set contains matches from various leagues and inter league matches.
     Assigns a str_radix to designate each league.
 
@@ -101,19 +104,25 @@ impl From<(&mut Stats, Scoring)> for GoalDiffFeature {
     Rationale: Allows to add a non-judgmental feature that represents the overall strength
     of the league, which may be relevant in inter league matches (ie Open Cup) or in a Pro-Rel System.
     It also allows some separation between phases of a season, if the field league is used that way.
-    Example:
-        The data set consists of matches from the the German Bundesliga, UK Premier Leaguge, and NISA.
-        The matches of NISA show Team A to be very strong, however compared to other leagues in the
-        Data set, Team A may be less successful.
-        The String radix allows to add that feature without ranking the league by personal opinion.
-        A first Division league in Tibet may be weaker than a a 4th Division NPSL league.
+    
+    **Example**:
+
+    * The data set consists of matches from the the German Bundesliga, UK Premier Leaguge, and NISA.
+    * The matches of NISA show Team A to be very strong, however compared to other leagues in the
+    Data set, Team A may be less successful.
+
+    The String radix allows to add that feature without ranking the league by personal opinion.
+    A first Division league in Tibet may be weaker than a 4th Division NPSL league.
+    
     If matches in a regular season are marked differently than for instance play-offs, friendlies
     or off-season matches, it may allow the network to pick up patterns in the roster or changing the strategy
     of the teams throughout those phases.
-    Example:
-        Team A tries out new formations and a more offensive play in a pre-season or a friendly, than
-        in the play-offs. If there's a pattern. The network will pick that up and may be able
-        to produce better predictions knowing that a result of a friendly is less reliable than a play-off result.
+    
+    **Example**:
+    
+    * Team A tries out new formations and a more offensive play in a pre-season or a friendly, than
+    in the play-offs. If there's a pattern. The network will pick that up and may be able
+    to produce better predictions knowing that a result of a friendly is less reliable than a play-off result.
 **/
 pub struct LeagueFeature { pub data: f64 }
 impl From<(&[Match], &Match)> for LeagueFeature {
@@ -132,15 +141,17 @@ impl From<(&[Match], &Match)> for LeagueFeature {
         LeagueFeature { data }
     }   
 }
-/***
+/**
     Returns the Median Home Score for the home team at home and the away team away
     as normalized value pair.
-    Example:
-        Home team played 5 matches at home and scored: [2, 3, 4, 1, 4], sorted [1, 2, 3, 4, 4]
-        Away team played 4 matches away and scored: [2, 0, 1, 2], sorted [0, 1, 2, 2]
-        The Median Home score for the Home team is 3
-        The median Away Score for the Away Team is: 1.5 
-        Return MedianScoreFeature [ data: [0.6667, 0.3333]]
+
+    **Example**:
+
+    * Home team played 5 matches at home and scored: [2, 3, 4, 1, 4], sorted [1, 2, 3, 4, 4]
+    * Away team played 4 matches away and scored: [2, 0, 1, 2], sorted [0, 1, 2, 2]
+    * The Median Home score for the Home team is 3
+    * The median Away Score for the Away Team is: 1.5 
+    * Return MedianScoreFeature [ data: [0.6667, 0.3333] ]
 **/
 pub struct MedianScoreFeature { pub data: [f64; 2] }
 impl From<(&[Match], &Match)> for MedianScoreFeature {
@@ -198,19 +209,23 @@ impl From<(&[Match], &Match)> for MedianScoreFeature {
         MedianScoreFeature { data }
     }
 }
-/***
+/**
     Returns home wins, draws or losses for the home team and away wins, draws or losses
     for the away team. Values are normalized data[0] + data[1] = 1.ß
     and the away team away.
-    Note:
-        Ordering::Greater is for Wins
-        Ordering::Less for Losses
-        Ordering::Equal for Draws
-    Exanple:
-        Asking for Wins: Ordering::Greater
-        Home team won 5 match at home
-        Away team won 1 match away
-        WDLFeature {data: [0.8333, 0.1667]}
+
+    **Note**:
+
+    * Ordering::Greater is for Wins
+    * Ordering::Less for Losses
+    * Ordering::Equal for Draws
+    
+    **Exanple**:
+
+    * Asking for Wins: Ordering::Greater
+    * Home team won 5 match at home
+    * Away team won 1 match away
+    * WDLFeature { data: [0.8333, 0.1667] }
 **/
 pub struct WDLFeature { pub data: [f64; 2] }
 impl From< (&[Match], &Match, std::cmp::Ordering)> for WDLFeature {
