@@ -1,12 +1,14 @@
-#### Produce a set of predictions from different Models
+### Ensemble Models
 
-**Rationale**:
+Produce a set of predictions from different Models.
+
+#### Rationale
 
 I tested different features, error rates etc. to predict future match results.
 One model failed on almost any prediction, but one. This single correct prediction
 was incorrectly predicted by two other models.
 
-**Example**:
+**Example**
 
 Model 1: Miami FC 3 : 4 Oakland Roots
 Model 2: Miami FC 2 : 3 Oakland Roots
@@ -19,7 +21,7 @@ Miami FC 3 : 2 Oakland Roots
 All three models were wrong on the actual result, Model 3 however, that failed on all other
 predictions, could identify the correct winner Miami FC instead of Oakland Roots.
 
-**Methods**:
+#### Methods
 
 * **Averaging**: Take the average of different models. Can be used in regression problems (predict result), 
 or for classification problems (predict match outcome home win, draw, away win)
@@ -67,15 +69,23 @@ W.Avg   [2.3, 2.4]
 
 The Weighted Avergage would shift towards a draw, with slighly higher chance for Oakland Root to win.
 
-**Note**
+* **Bagging**:
+
+* **Boosting**:
+
+* **Stacking**:
+
+
+#### Note
 
 Note that the used models aren't really trained well and the average weights chosen randomly.
 
-**Summary**
+#### Summary
 
 None of the methods of for examples would have helped to identify Miami FC as the winner of the match, 
 but two methods would have shifted towards a less wrong result. 
 
-**References**:
+### References
 
 * [Ensemble Forecasting / Ensemble Models](https://en.wikipedia.org/wiki/Ensemble_forecasting)
+* [How to build Ensemble Models in machine learning? (with code in R)](https://www.analyticsvidhya.com/blog/2017/02/introduction-to-ensembling-along-with-implementation-in-r/)
