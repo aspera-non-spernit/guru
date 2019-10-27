@@ -80,3 +80,35 @@ pub fn filter_no_results(data_set: &[Match]) -> Vec<Match> {
       .cloned()
       .collect()
 }
+
+
+/**
+  Splits the data set D  &[Match] into k subsets D of equal size.
+  Does not check for Some(result), if you want sub sets with Some(result) only
+  pass a set with Some(result) only.
+  If you want to keep a reference to the original data set D for convenience,
+  pass original: true.
+  data[last] may have a different size than the previous.
+**/
+pub fn rand_k_split<'a>(data_set: &'a Vec<Match>, k: usize, original: bool) -> Sets<'a> {
+    let mut cloned = &mut data_set.clone();
+    let dsl = &cloned.len();
+    let mut k_sets: Vec<Vec<Match>> = vec![];
+    let mut iter = data_set.iter();
+    let mut rng = rand::thread_rng();
+
+    for i in 0..k {
+        k_sets.push(vec![]);
+        let mut n = 0;
+        while k_sets[i].len() != dsl / k {
+            n = rng.gen_range(0, cloned.len());
+            k_sets[i].push(cloned[n].clone());
+            cloned.remove(n);
+        }
+    }
+    if original {
+        Sets::new(Some(data_set), k_sets.clone())
+    } else {
+        Sets::new(None, k_sets.clone())
+    }
+}

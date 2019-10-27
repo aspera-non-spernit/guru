@@ -43,7 +43,7 @@ fn main() -> std::io::Result<()> {
     let stats = stats(&clubs);
     let guru = Guru::new(&sorted);
 
-    let mut ttraining_matchesm: Vec<Match> = filter_results(&sorted);
+    let mut training_matchesm: Vec<Match> = filter_results(&sorted);
 
     // taking n% from training_matches for testing.
     let split: f32 = if opts.is_present("split-data") {
