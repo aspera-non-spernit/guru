@@ -62,7 +62,6 @@ classification problems. The weights could be derived from the network error or 
 |Model 2|         [0.8, 1.2]|0.4|[2.0, 3.0]|
 |Model 3|         [0.6, 0.0]|0.3|[2.0, 0.0]|
 |Weighted Avg.   |[2.3, 2.4]|1.0|          |
-```
 
 The Weighted Avergage would shift towards a draw, with slighly higher chance for Oakland Root to win.
 
